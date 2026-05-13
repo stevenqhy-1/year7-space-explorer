@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { addStarfield, disposeScene } from '../utils.js';
+import { addStarfield, disposeScene, makeLabel } from '../utils.js';
 import { flyTo, viewpointFor } from '../cameraTween.js';
 
 export function buildRemnants({ camera, controls, onSelect }) {
@@ -40,7 +40,7 @@ export function buildRemnants({ camera, controls, onSelect }) {
 
     scene.add(g);
     objects['white-dwarf'] = { mesh: core, group: g, size: 2 };
-    addLabel(scene, 'White Dwarf', -90, -5, 0);
+    addLabel(scene, 'White Dwarf', -90, -8, 0);
   }
 
   // ───────────────────────── NEUTRON STAR ─────────────────────────
@@ -81,7 +81,7 @@ export function buildRemnants({ camera, controls, onSelect }) {
 
     scene.add(neutronGroup);
     objects['neutron-star'] = { mesh: core, group: neutronGroup, size: 2 };
-    addLabel(scene, 'Neutron Star', -45, -5, 0);
+    addLabel(scene, 'Neutron Star', -45, -8, 0);
   }
 
   // ───────────────────────── PULSAR ─────────────────────────
@@ -128,7 +128,7 @@ export function buildRemnants({ camera, controls, onSelect }) {
     pulsarGroup.rotation.z = 0.45;
     scene.add(pulsarGroup);
     objects.pulsar = { mesh: core, group: pulsarGroup, size: 2.5 };
-    addLabel(scene, 'Pulsar', 0, -5, 0);
+    addLabel(scene, 'Pulsar', 0, -10, 0);
   }
 
   // ───────────────────────── BLACK HOLE ─────────────────────────
@@ -205,7 +205,7 @@ export function buildRemnants({ camera, controls, onSelect }) {
 
     scene.add(bhGroup);
     objects['black-hole'] = { mesh: horizon, group: bhGroup, size: 6 };
-    addLabel(scene, 'Black Hole', 50, -11, 0);
+    addLabel(scene, 'Black Hole', 50, -16, 0);
   }
 
   // ───────────────────────── SUPERNOVA ─────────────────────────
@@ -294,7 +294,7 @@ export function buildRemnants({ camera, controls, onSelect }) {
 
     scene.add(snGroup);
     objects.supernova = { mesh: supernovaCore, group: snGroup, size: 7 };
-    addLabel(scene, 'Supernova', 105, -10, 0);
+    addLabel(scene, 'Supernova', 105, -15, 0);
   }
 
   camera.position.set(25, 25, 90);
@@ -377,16 +377,7 @@ export function buildRemnants({ camera, controls, onSelect }) {
 // ──────────── Helpers ────────────
 
 function addLabel(scene, text, x, y, z) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256; canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'white';
-  ctx.font = '22px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(text, 128, 40);
-  const tex = new THREE.CanvasTexture(canvas);
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
-  sprite.scale.set(10, 2.5, 1);
+  const sprite = makeLabel(text, { fontSize: 60, scale: 24 });
   sprite.position.set(x, y, z);
   scene.add(sprite);
 }

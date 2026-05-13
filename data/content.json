@@ -288,25 +288,79 @@
     }
   },
   "constellations": {
-    "hint": "Constellations are patterns of stars seen from Earth. Drag to rotate the night sky. Many of these are visible from Western Australia!",
+    "hint": "The 12 zodiac constellations — the patterns the Sun appears to pass through over the year. Click any to fly closer.",
     "objects": {
-      "southern-cross": {
-        "name": "Southern Cross (Crux)",
-        "type": "Constellation",
-        "caption": "The most famous constellation of the southern sky — it appears on the Australian flag. Used by sailors to find south.",
-        "facts": { "Best seen": "Southern Hemisphere", "Brightest star": "Acrux", "Cultural": "On flags of Australia, NZ, Brazil" }
+      "aries": {
+        "name": "Aries ♈ (The Ram)",
+        "type": "Zodiac constellation",
+        "caption": "A small, faint constellation. In Greek myth, this is the ram with the Golden Fleece. Brightest star is Hamal.",
+        "facts": { "Brightest star": "Hamal", "Zodiac dates": "21 Mar – 19 Apr", "Best from WA": "October–December" }
       },
-      "orion": {
-        "name": "Orion (The Hunter)",
-        "type": "Constellation",
-        "caption": "Visible worldwide. Look for the three bright 'belt' stars in a row. Contains the red supergiant Betelgeuse.",
-        "facts": { "Belt stars": "Alnitak, Alnilam, Mintaka", "Notable": "Betelgeuse (red giant), Rigel (blue giant)", "Visible from WA": "Summer" }
+      "taurus": {
+        "name": "Taurus ♉ (The Bull)",
+        "type": "Zodiac constellation",
+        "caption": "Easy to spot by its V-shaped face and the orange eye — Aldebaran, a red giant. Contains the Pleiades star cluster.",
+        "facts": { "Brightest star": "Aldebaran (red giant)", "Zodiac dates": "20 Apr – 20 May", "Best from WA": "November–March" }
+      },
+      "gemini": {
+        "name": "Gemini ♊ (The Twins)",
+        "type": "Zodiac constellation",
+        "caption": "Two long parallel lines of stars topped by Castor and Pollux — the heads of the mythological twins.",
+        "facts": { "Brightest stars": "Castor & Pollux", "Zodiac dates": "21 May – 20 Jun", "Best from WA": "December–April" }
+      },
+      "cancer": {
+        "name": "Cancer ♋ (The Crab)",
+        "type": "Zodiac constellation",
+        "caption": "The faintest zodiac constellation. Contains the Beehive Cluster (M44) — a nice binocular target.",
+        "facts": { "Notable": "Beehive Cluster (M44)", "Zodiac dates": "21 Jun – 22 Jul", "Best from WA": "February–May" }
+      },
+      "leo": {
+        "name": "Leo ♌ (The Lion)",
+        "type": "Zodiac constellation",
+        "caption": "One of the few constellations that actually looks like its namesake. The 'sickle' forms the lion's mane.",
+        "facts": { "Brightest star": "Regulus", "Zodiac dates": "23 Jul – 22 Aug", "Best from WA": "February–June" }
+      },
+      "virgo": {
+        "name": "Virgo ♍ (The Maiden)",
+        "type": "Zodiac constellation",
+        "caption": "The second-largest constellation. Brightest star is Spica, a hot blue-white giant.",
+        "facts": { "Brightest star": "Spica (blue giant)", "Zodiac dates": "23 Aug – 22 Sep", "Best from WA": "March–July" }
+      },
+      "libra": {
+        "name": "Libra ♎ (The Scales)",
+        "type": "Zodiac constellation",
+        "caption": "The only zodiac constellation that represents an object, not a person or animal. Was originally the claws of Scorpius.",
+        "facts": { "Brightest star": "Zubeneschamali", "Zodiac dates": "23 Sep – 22 Oct", "Best from WA": "April–August" }
       },
       "scorpius": {
-        "name": "Scorpius (The Scorpion)",
-        "type": "Constellation",
-        "caption": "A bright, scorpion-shaped pattern with the red star Antares as its heart. Best viewed from the Southern Hemisphere.",
-        "facts": { "Brightest star": "Antares (red supergiant)", "Shape": "Curved scorpion tail", "Visible from WA": "Winter" }
+        "name": "Scorpius ♏ (The Scorpion)",
+        "type": "Zodiac constellation",
+        "caption": "Bright, scorpion-shaped pattern with the red supergiant Antares as its heart. Excellent view from WA in winter.",
+        "facts": { "Brightest star": "Antares (red supergiant)", "Zodiac dates": "23 Oct – 21 Nov", "Best from WA": "May–September" }
+      },
+      "sagittarius": {
+        "name": "Sagittarius ♐ (The Archer)",
+        "type": "Zodiac constellation",
+        "caption": "Look for the 'teapot' asterism. The centre of our Milky Way galaxy lies in this direction.",
+        "facts": { "Asterism": "The Teapot", "Special": "Contains galactic centre", "Best from WA": "June–October" }
+      },
+      "capricorn": {
+        "name": "Capricorn ♑ (The Sea-goat)",
+        "type": "Zodiac constellation",
+        "caption": "A mythological creature with a goat's body and fish's tail. Faint but ancient — one of the oldest recognised patterns.",
+        "facts": { "Brightest star": "Deneb Algedi", "Zodiac dates": "22 Dec – 19 Jan", "Best from WA": "July–November" }
+      },
+      "aquarius": {
+        "name": "Aquarius ♒ (The Water-bearer)",
+        "type": "Zodiac constellation",
+        "caption": "A large but faint pattern showing a person pouring water. Best viewed under dark skies away from city lights.",
+        "facts": { "Brightest star": "Sadalsuud", "Zodiac dates": "20 Jan – 18 Feb", "Best from WA": "August–December" }
+      },
+      "pisces": {
+        "name": "Pisces ♓ (The Fish)",
+        "type": "Zodiac constellation",
+        "caption": "Two fish connected by a long cord — in myth, Aphrodite and her son tied together as they fled. Mostly faint stars.",
+        "facts": { "Brightest star": "Eta Piscium", "Zodiac dates": "19 Feb – 20 Mar", "Best from WA": "September–January" }
       }
     }
   },

@@ -33,7 +33,36 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.zoomSpeed = 4.0;
+controls.enableZoom = false; // we handle wheel/pinch manually below for proper magnitude scaling
+
+// Magnitude-aware wheel & trackpad-pinch zoom.
+// OrbitControls' default ignores deltaY magnitude — trackpad pinch fires many tiny events
+// that barely move the camera. This handler scales the dolly amount by deltaY itself
+// so both scroll wheel and pinch feel snappy.
+const _tmpDir = new THREE.Vector3();
+renderer.domElement.addEventListener('wheel', (e) => {
+  if (galleryContainer.classList.contains('hidden') === false) return;
+  if (stars2dContainer.classList.contains('hidden') === false) return;
+  e.preventDefault();
+  // Clamp per-event factor so single big wheel ticks don't fly through the scene
+  let exponent = e.deltaY * 0.02;
+  if (exponent > 0.7) exponent = 0.7;
+  if (exponent < -0.7) exponent = -0.7;
+  const factor = Math.exp(exponent); // >1 = zoom out, <1 = zoom in
+  _tmpDir.subVectors(camera.position, controls.target);
+  let newDist = _tmpDir.length() * factor;
+  newDist = Math.max(controls.minDistance, Math.min(controls.maxDistance, newDist));
+  camera.position.copy(controls.target).add(_tmpDir.normalize().multiplyScalar(newDist));
+}, { passive: false });
+
+// Inside the stars2d page, vertical wheel scrolls horizontally — so mouse-wheel users
+// can flip through panels just by scrolling normally.
+stars2dContainer.addEventListener('wheel', (e) => {
+  if (Math.abs(e.deltaY) > 0) {
+    e.preventDefault();
+    stars2dContainer.scrollLeft += e.deltaY * 2.5;
+  }
+}, { passive: false });
 
 let content = {};
 let currentScene = null;

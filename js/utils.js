@@ -4,7 +4,6 @@ export function addStarfield(scene, count = 3000, radius = 5000) {
   const geo = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    // random point on sphere
     const u = Math.random(), v = Math.random();
     const theta = 2 * Math.PI * u;
     const phi = Math.acos(2 * v - 1);
@@ -35,4 +34,45 @@ export function disposeScene(scene) {
       else obj.material.dispose();
     }
   });
+}
+
+// Larger, sharper text sprite labels.
+// scale is the world-space size of the sprite.
+export function makeLabel(text, options = {}) {
+  const {
+    fontSize = 56,
+    color = '#ffffff',
+    subtitle = null,
+    subtitleColor = '#88aaff',
+    scale = 22
+  } = options;
+  const canvas = document.createElement('canvas');
+  canvas.width = 768;
+  canvas.height = subtitle ? 256 : 160;
+  const ctx = canvas.getContext('2d');
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Soft shadow for readability against any background
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+  ctx.shadowBlur = 12;
+
+  ctx.fillStyle = color;
+  ctx.font = `600 ${fontSize}px -apple-system, "Helvetica Neue", sans-serif`;
+  const titleY = subtitle ? fontSize * 0.95 + 18 : canvas.height / 2;
+  ctx.fillText(text, canvas.width / 2, titleY);
+
+  if (subtitle) {
+    ctx.fillStyle = subtitleColor;
+    ctx.font = `400 ${Math.round(fontSize * 0.55)}px -apple-system, "Helvetica Neue", sans-serif`;
+    ctx.fillText(subtitle, canvas.width / 2, titleY + fontSize * 0.95);
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.anisotropy = 4;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  // Maintain aspect ratio so labels don't squish
+  const aspect = canvas.width / canvas.height;
+  sprite.scale.set(scale, scale / aspect, 1);
+  return sprite;
 }

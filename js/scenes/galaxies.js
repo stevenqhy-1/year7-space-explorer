@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { addStarfield, disposeScene } from '../utils.js';
+import { addStarfield, disposeScene, makeLabel } from '../utils.js';
 import { flyTo, viewpointFor } from '../cameraTween.js';
 
 export function buildGalaxies({ camera, controls, onSelect }) {
@@ -112,19 +112,19 @@ export function buildGalaxies({ camera, controls, onSelect }) {
   }
 
   const milkyway = makeSpiral(-60, 0, 0, 4, 25, 0xaabbff, 'milky-way', 0.3);
-  addLabel(scene, 'Milky Way', -60, -30, 0);
+  addLabel(scene, 'Milky Way', -60, -34, 0);
   objects['milky-way'] = { ...milkyway, size: 22 };
 
   const andromeda = makeSpiral(0, 0, 0, 2, 28, 0xddccaa, 'andromeda', 0.2);
-  addLabel(scene, 'Andromeda', 0, -32, 0);
+  addLabel(scene, 'Andromeda', 0, -36, 0);
   objects['andromeda'] = { ...andromeda, size: 25 };
 
   const elliptical = makeElliptical(60, 0, 0, 'elliptical');
-  addLabel(scene, 'Elliptical', 60, -24, 0);
+  addLabel(scene, 'Elliptical', 60, -28, 0);
   objects['elliptical'] = { ...elliptical, size: 18 };
 
   const irregular = makeIrregular(120, 0, 0, 'irregular');
-  addLabel(scene, 'Irregular', 120, -22, 0);
+  addLabel(scene, 'Irregular', 120, -26, 0);
   objects['irregular'] = { ...irregular, size: 15 };
 
   camera.position.set(30, 50, 130);
@@ -161,16 +161,7 @@ export function buildGalaxies({ camera, controls, onSelect }) {
 }
 
 function addLabel(scene, text, x, y, z) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256; canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'white';
-  ctx.font = '22px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(text, 128, 40);
-  const tex = new THREE.CanvasTexture(canvas);
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
-  sprite.scale.set(14, 3.5, 1);
+  const sprite = makeLabel(text, { fontSize: 64, scale: 26 });
   sprite.position.set(x, y, z);
   scene.add(sprite);
 }
