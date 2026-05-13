@@ -95,7 +95,7 @@ export function buildConstellations({ camera, controls, onSelect }) {
   controls.target.set(0, 0, 0);
   controls.minDistance = 10;
   controls.maxDistance = 300;
-  controls.zoomSpeed = 2.0;
+  controls.zoomSpeed = 4.0;
 
   function update(dt) {}
 

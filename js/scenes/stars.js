@@ -1,92 +1,119 @@
-import * as THREE from 'three';
-import { addStarfield, disposeScene } from '../utils.js';
-import { flyTo, viewpointFor } from '../cameraTween.js';
+// 2D DOM-based size-comparison scene. Not a Three.js scene.
+// Renders panels: each panel scales its objects relative to the panel's largest.
 
-const STARS = [
-  { key: 'red-dwarf',  color: 0xff5533, size: 3,   x: -30 },
-  { key: 'sun-like',   color: 0xffdd66, size: 6,   x: -10 },
-  { key: 'blue-giant', color: 0x88bbff, size: 12,  x:  18 },
-  { key: 'red-giant',  color: 0xff7744, size: 22,  x:  60 }
-];
+export function buildStars2D(container, data, sidebarList) {
+  container.innerHTML = '';
 
-export function buildStars({ camera, controls, onSelect }) {
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x000010);
-  addStarfield(scene, 3000, 1200);
-  scene.add(new THREE.AmbientLight(0x222244, 1));
+  const intro = document.createElement('p');
+  intro.className = 'stars2d-intro';
+  intro.textContent = data.hint;
+  container.appendChild(intro);
 
-  const objects = {};
-  for (const s of STARS) {
-    const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(s.size, 64, 48),
-      new THREE.MeshBasicMaterial({ color: s.color })
-    );
-    mesh.position.x = s.x;
-    mesh.userData.key = s.key;
-    scene.add(mesh);
+  sidebarList.innerHTML = '';
 
-    // Multi-layer glow
-    const glow1 = new THREE.Mesh(
-      new THREE.SphereGeometry(s.size * 1.15, 48, 48),
-      new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false })
-    );
-    const glow2 = new THREE.Mesh(
-      new THREE.SphereGeometry(s.size * 1.5, 48, 48),
-      new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.10, blending: THREE.AdditiveBlending, depthWrite: false })
-    );
-    mesh.add(glow1); mesh.add(glow2);
+  data.panels.forEach((panel, idx) => {
+    const section = document.createElement('section');
+    section.className = 'stars2d-panel';
+    section.id = `stars-panel-${idx}`;
 
-    addLabel(scene, labelFor(s.key), s.x, -s.size - 5, 0);
-    objects[s.key] = { mesh, size: s.size };
-  }
+    const titleEl = document.createElement('h2');
+    titleEl.textContent = panel.title;
+    section.appendChild(titleEl);
 
-  camera.position.set(15, 25, 100);
-  controls.target.set(15, 0, 0);
-  controls.minDistance = 2;
-  controls.maxDistance = 400;
-  controls.zoomSpeed = 2.0;
+    if (panel.subtitle) {
+      const sub = document.createElement('p');
+      sub.className = 'stars2d-subtitle';
+      sub.textContent = panel.subtitle;
+      section.appendChild(sub);
+    }
 
-  function update(dt) {
-    for (const k in objects) objects[k].mesh.rotation.y += dt * 0.08;
-  }
+    const row = document.createElement('div');
+    row.className = 'stars2d-row';
 
-  function focusOn(key) {
-    const o = objects[key];
-    if (!o) return;
-    const pos = o.mesh.position.clone();
-    flyTo(camera, controls, pos, viewpointFor(pos, o.size), 1.2);
-    onSelect(key);
-  }
+    const maxDia = Math.max(...panel.objects.map(o => o.diameter_km));
+    const minDia = Math.min(...panel.objects.map(o => o.diameter_km));
+    // Largest gets ~60% viewport height (capped). Tweak per panel: huge ratios
+    // mean smallest objects can be < 1 px, which is the pedagogical point.
+    const maxPx = Math.min(window.innerHeight * 0.58, 540);
 
-  function clearFollow() {}
+    panel.objects.forEach(obj => {
+      const ratio = obj.diameter_km / maxDia;
+      const size = Math.max(ratio * maxPx, 1);
 
-  function handleClick(pointer, cam, raycaster) {
-    raycaster.setFromCamera(pointer, cam);
-    const meshes = Object.values(objects).map(o => o.mesh);
-    const hits = raycaster.intersectObjects(meshes, false);
-    if (hits.length) focusOn(hits[0].object.userData.key);
-  }
+      const wrap = document.createElement('div');
+      wrap.className = 'stars2d-obj-wrap';
+      wrap.style.minWidth = `${Math.max(size, 90)}px`;
 
-  function dispose() { disposeScene(scene); }
+      const circle = document.createElement('div');
+      circle.className = 'stars2d-obj';
+      circle.style.width = `${size}px`;
+      circle.style.height = `${size}px`;
+      circle.style.background = obj.css;
+      if (obj.glow) {
+        const glowSize = Math.max(size * 0.5, 25);
+        circle.style.boxShadow = `0 0 ${glowSize}px ${obj.glow}77, 0 0 ${glowSize * 2}px ${obj.glow}33`;
+      }
+      // If too small to see, add a faint outline so it's not invisible
+      if (size < 4) {
+        circle.style.outline = '1px solid rgba(150,180,220,0.6)';
+        circle.style.outlineOffset = '2px';
+      }
 
-  return { scene, update, focusOn, clearFollow, handleClick, dispose };
+      const label = document.createElement('div');
+      label.className = 'stars2d-label';
+      label.innerHTML =
+        `<strong>${escapeHtml(obj.name)}</strong>` +
+        `<span class="stars2d-type">${escapeHtml(obj.type)}</span>` +
+        `<span class="stars2d-size">${formatDiameter(obj.diameter_km)}</span>`;
+
+      wrap.appendChild(circle);
+      wrap.appendChild(label);
+      row.appendChild(wrap);
+
+      wrap.addEventListener('click', () => showStarInfo(obj));
+    });
+
+    section.appendChild(row);
+    container.appendChild(section);
+
+    // Sidebar entry — scroll to panel
+    const li = document.createElement('li');
+    li.dataset.key = String(idx);
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.style.background = panel.objects[panel.objects.length - 1].color;
+    li.appendChild(dot);
+    li.appendChild(document.createTextNode(panel.title.replace(/^\d+\.\s*/, '')));
+    li.addEventListener('click', () => {
+      document.querySelectorAll('#object-list li').forEach(x => x.classList.remove('active'));
+      li.classList.add('active');
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    sidebarList.appendChild(li);
+  });
 }
 
-function labelFor(key) {
-  return { 'red-dwarf': 'Red Dwarf', 'sun-like': 'Sun-like', 'blue-giant': 'Blue Giant', 'red-giant': 'Red Giant' }[key] || key;
+function showStarInfo(obj) {
+  document.getElementById('info-title').textContent = obj.name;
+  document.getElementById('info-type').textContent = obj.type;
+  document.getElementById('info-caption').textContent = obj.caption || '';
+  const ul = document.getElementById('info-facts');
+  ul.innerHTML = '';
+  for (const [k, v] of Object.entries(obj.facts || {})) {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}`;
+    ul.appendChild(li);
+  }
+  document.getElementById('info-panel').classList.remove('hidden');
 }
 
-function addLabel(scene, text, x, y, z) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256; canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'white';
-  ctx.font = '24px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(text, 128, 40);
-  const tex = new THREE.CanvasTexture(canvas);
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
-  sprite.scale.set(12, 3, 1);
-  sprite.position.set(x, y, z);
-  scene.add(sprite);
+function formatDiameter(km) {
+  if (km >= 1e9) return `${(km / 1e9).toFixed(1)} billion km`;
+  if (km >= 1e6) return `${(km / 1e6).toFixed(1)} million km`;
+  if (km >= 1e3) return `${km.toLocaleString()} km`;
+  return `${km} km`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }

@@ -275,7 +275,7 @@ export function buildSolarSystem({ camera, controls, onSelect }) {
   controls.target.set(0, 0, 0);
   controls.minDistance = 1;
   controls.maxDistance = 800;
-  controls.zoomSpeed = 2.0;
+  controls.zoomSpeed = 4.0;
   controls.rotateSpeed = 0.9;
 
   // Animation

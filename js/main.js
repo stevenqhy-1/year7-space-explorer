@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { buildSolarSystem } from './scenes/solarSystem.js';
-import { buildStars } from './scenes/stars.js';
+import { buildStars2D } from './scenes/stars.js';
 import { buildRemnants } from './scenes/remnants.js';
 import { buildGalaxies } from './scenes/galaxies.js';
 import { buildConstellations } from './scenes/constellations.js';
 import { buildGallery } from './scenes/gallery.js';
 
 const container = document.getElementById('canvas-container');
+const stars2dContainer = document.getElementById('stars2d-container');
 const galleryContainer = document.getElementById('gallery-container');
 const infoPanel = document.getElementById('info-panel');
 const infoTitle = document.getElementById('info-title');
@@ -32,7 +33,7 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.zoomSpeed = 2.0;
+controls.zoomSpeed = 4.0;
 
 let content = {};
 let currentScene = null;
@@ -45,7 +46,6 @@ async function loadContent() {
 
 const sceneBuilders = {
   solar: buildSolarSystem,
-  stars: buildStars,
   remnants: buildRemnants,
   galaxies: buildGalaxies,
   constellations: buildConstellations
@@ -57,9 +57,10 @@ function loadScene(key) {
   if (currentScene && currentScene.dispose) currentScene.dispose();
   currentSceneKey = key;
 
-  // Gallery is a special DOM-only "scene"
+  // DOM-only scenes
   if (key === 'gallery') {
     container.style.display = 'none';
+    stars2dContainer.classList.add('hidden');
     galleryContainer.classList.remove('hidden');
     scaleToggle.classList.add('hidden');
     sidebarTitle.textContent = 'Categories';
@@ -69,9 +70,22 @@ function loadScene(key) {
     currentScene = null;
     return;
   }
+  if (key === 'stars') {
+    container.style.display = 'none';
+    galleryContainer.classList.add('hidden');
+    stars2dContainer.classList.remove('hidden');
+    scaleToggle.classList.add('hidden');
+    sidebarTitle.textContent = 'Scale Steps';
+    sceneHint.textContent = content.stars.hint || '';
+    buildStars2D(stars2dContainer, content.stars, objectList);
+    hideInfo();
+    currentScene = null;
+    return;
+  }
 
   container.style.display = 'block';
   galleryContainer.classList.add('hidden');
+  stars2dContainer.classList.add('hidden');
 
   const sceneData = content[key];
   sceneHint.textContent = sceneData.hint || '';
@@ -218,6 +232,11 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (currentScene && currentScene.handleClick) {
     currentScene.handleClick(pointer, camera, raycaster);
   }
+});
+
+// Double-click anywhere on the canvas resets the view
+renderer.domElement.addEventListener('dblclick', () => {
+  resetViewBtn.click();
 });
 
 // User drag = stop following

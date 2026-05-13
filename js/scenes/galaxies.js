@@ -131,7 +131,7 @@ export function buildGalaxies({ camera, controls, onSelect }) {
   controls.target.set(30, 0, 0);
   controls.minDistance = 8;
   controls.maxDistance = 500;
-  controls.zoomSpeed = 2.0;
+  controls.zoomSpeed = 4.0;
 
   function update(dt) {
     milkyway.group.rotation.y += dt * 0.05;
