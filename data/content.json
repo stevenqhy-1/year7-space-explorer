@@ -202,5 +202,91 @@
         "facts": { "Brightest star": "Antares (red supergiant)", "Shape": "Curved scorpion tail", "Visible from WA": "Winter" }
       }
     }
-  }
+  },
+  "gallery": [
+    {
+      "title": "Pillars of Creation",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2218a.jpg",
+      "caption": "Towers of gas and dust in the Eagle Nebula where new stars are being born. The Webb telescope's infrared view sees through dust the Hubble couldn't, revealing thousands of young stars."
+    },
+    {
+      "title": "Cosmic Cliffs in the Carina Nebula",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2205a.jpg",
+      "caption": "What looks like mountain peaks is actually the edge of a giant gas cloud about 7,600 light-years away. The 'peaks' are about 7 light-years tall."
+    },
+    {
+      "title": "Stephan's Quintet",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2208a.jpg",
+      "caption": "Five galaxies in a tight group — four of them are interacting and pulling each other out of shape as they slowly collide."
+    },
+    {
+      "title": "Southern Ring Nebula",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2207a.jpg",
+      "caption": "Clouds of gas and dust thrown off by a dying star. Two views from Webb's different cameras side-by-side reveal a previously hidden second star at the centre."
+    },
+    {
+      "title": "Rho Ophiuchi Cloud Complex",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2316a.jpg",
+      "caption": "The closest star-forming region to Earth, about 390 light-years away. The red jets are gas ejected by newborn stars slamming into surrounding clouds."
+    },
+    {
+      "title": "Uranus and its Rings",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2310a.jpg",
+      "caption": "Webb's infrared view shows Uranus's faint rings — almost invisible in normal photos — and the bright polar cap caused by sunlight hitting its sideways-tilted pole."
+    },
+    {
+      "title": "Andromeda Galaxy — Sharpest View",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1502a.jpg",
+      "caption": "The largest Hubble image ever — 1.5 billion pixels — showing our nearest large galactic neighbour, the Andromeda Galaxy (M31), in incredible detail."
+    },
+    {
+      "title": "Stellar Spire in the Eagle Nebula",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic0506b.jpg",
+      "caption": "A 9.5-light-year-tall tower of cold gas and dust being eroded by ultraviolet light from nearby young stars. New stars are forming inside the spire."
+    },
+    {
+      "title": "Lagoon Nebula",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1808a.jpg",
+      "caption": "A giant cloud where stars are being born, about 4,000 light-years from Earth. Hubble's 28th-anniversary image, showing turbulent gas lit up by a massive young star."
+    },
+    {
+      "title": "Sombrero Galaxy",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/opo0328a.jpg",
+      "caption": "An edge-on spiral galaxy 28 million light-years away. The dark band is a ring of dust circling the galaxy's bright central bulge."
+    },
+    {
+      "title": "Westerlund 2 — Hubble's 25th Anniversary",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1509a.jpg",
+      "caption": "A young star cluster, about 20,000 light-years away, blazing inside a vast cloud where new stars are still being formed."
+    },
+    {
+      "title": "Arp 273 — A Rose Made of Galaxies",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1107a.jpg",
+      "caption": "Two galaxies caught in a slow gravitational dance, pulled into a rose-like shape by the larger one's gravity."
+    }
+  ]
 }

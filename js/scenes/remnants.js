@@ -1,66 +1,72 @@
 import * as THREE from 'three';
-import { addStarfield, pickFromMeshes, disposeScene } from '../utils.js';
+import { addStarfield, disposeScene } from '../utils.js';
+import { flyTo, viewpointFor } from '../cameraTween.js';
 
 export function buildRemnants({ camera, controls, onSelect }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000005);
-  addStarfield(scene, 2500, 700);
+  addStarfield(scene, 3000, 1200);
   scene.add(new THREE.AmbientLight(0x222244, 1));
 
-  const meshes = [];
+  const objects = {};
 
-  // ---------- White Dwarf ----------
+  // White Dwarf
   {
-    const wd = new THREE.Mesh(
-      new THREE.SphereGeometry(1.8, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0xeeeeff })
+    const g = new THREE.Group();
+    g.position.set(-60, 0, 0);
+    const core = new THREE.Mesh(
+      new THREE.SphereGeometry(1.8, 48, 48),
+      new THREE.MeshBasicMaterial({ color: 0xeeffff })
     );
-    wd.position.set(-60, 0, 0);
-    wd.userData.key = 'white-dwarf';
-    wd.add(new THREE.Mesh(
-      new THREE.SphereGeometry(2.4, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.25 })
+    core.userData.key = 'white-dwarf';
+    g.add(core);
+    g.add(new THREE.Mesh(
+      new THREE.SphereGeometry(2.4, 48, 48),
+      new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false })
     ));
-    scene.add(wd);
-    meshes.push(wd);
+    g.add(new THREE.Mesh(
+      new THREE.SphereGeometry(3.2, 48, 48),
+      new THREE.MeshBasicMaterial({ color: 0x6699ff, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false })
+    ));
+    scene.add(g);
+    objects['white-dwarf'] = { mesh: core, group: g, size: 2 };
     addLabel(scene, 'White Dwarf', -60, -5, 0);
   }
 
-  // ---------- Neutron Star ----------
+  // Neutron Star
   {
-    const ns = new THREE.Mesh(
-      new THREE.SphereGeometry(1.5, 32, 32),
+    const g = new THREE.Group();
+    g.position.set(-30, 0, 0);
+    const core = new THREE.Mesh(
+      new THREE.SphereGeometry(1.4, 48, 48),
       new THREE.MeshBasicMaterial({ color: 0xffffff })
     );
-    ns.position.set(-30, 0, 0);
-    ns.userData.key = 'neutron-star';
-    ns.add(new THREE.Mesh(
-      new THREE.SphereGeometry(2.0, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0x88ffff, transparent: true, opacity: 0.3 })
+    core.userData.key = 'neutron-star';
+    g.add(core);
+    g.add(new THREE.Mesh(
+      new THREE.SphereGeometry(2.0, 48, 48),
+      new THREE.MeshBasicMaterial({ color: 0x88ffff, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false })
     ));
-    scene.add(ns);
-    meshes.push(ns);
+    scene.add(g);
+    objects['neutron-star'] = { mesh: core, group: g, size: 1.5 };
     addLabel(scene, 'Neutron Star', -30, -5, 0);
   }
 
-  // ---------- Pulsar ----------
+  // Pulsar
   let pulsarGroup;
   {
     pulsarGroup = new THREE.Group();
     pulsarGroup.position.set(0, 0, 0);
     const core = new THREE.Mesh(
-      new THREE.SphereGeometry(1.5, 32, 32),
+      new THREE.SphereGeometry(1.5, 48, 48),
       new THREE.MeshBasicMaterial({ color: 0xccddff })
     );
     core.userData.key = 'pulsar';
     pulsarGroup.add(core);
-    meshes.push(core);
-
-    // Two beams (cones)
     for (const dir of [1, -1]) {
       const beam = new THREE.Mesh(
-        new THREE.ConeGeometry(2.5, 18, 24, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0x66ccff, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
+        new THREE.ConeGeometry(2.5, 18, 32, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0x66ccff, transparent: true, opacity: 0.4, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
       );
       beam.position.y = dir * 9;
       if (dir === -1) beam.rotation.x = Math.PI;
@@ -68,80 +74,77 @@ export function buildRemnants({ camera, controls, onSelect }) {
     }
     pulsarGroup.rotation.z = 0.4;
     scene.add(pulsarGroup);
+    objects.pulsar = { mesh: core, group: pulsarGroup, size: 2 };
     addLabel(scene, 'Pulsar', 0, -5, 0);
   }
 
-  // ---------- Black Hole ----------
+  // Black Hole — fancier accretion disk
   let blackHoleDisk;
   {
     const bhGroup = new THREE.Group();
-    bhGroup.position.set(35, 0, 0);
+    bhGroup.position.set(38, 0, 0);
 
-    // Event horizon
     const horizon = new THREE.Mesh(
-      new THREE.SphereGeometry(2.2, 48, 48),
+      new THREE.SphereGeometry(2.2, 64, 48),
       new THREE.MeshBasicMaterial({ color: 0x000000 })
     );
     horizon.userData.key = 'black-hole';
     bhGroup.add(horizon);
-    meshes.push(horizon);
 
-    // Accretion disk — multi-ring with color gradient
     blackHoleDisk = new THREE.Group();
-    for (let i = 0; i < 6; i++) {
-      const inner = 2.8 + i * 0.5;
-      const outer = inner + 0.45;
-      const hue = 0.08 - i * 0.012;
-      const col = new THREE.Color().setHSL(hue, 1, 0.55 - i * 0.04);
+    for (let i = 0; i < 10; i++) {
+      const inner = 2.6 + i * 0.45;
+      const outer = inner + 0.4;
+      const hue = 0.10 - i * 0.008;
+      const col = new THREE.Color().setHSL(hue, 1, 0.6 - i * 0.04);
       const disk = new THREE.Mesh(
-        new THREE.RingGeometry(inner, outer, 96),
-        new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide, transparent: true, opacity: 0.85 - i * 0.07 })
+        new THREE.RingGeometry(inner, outer, 128),
+        new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide, transparent: true, opacity: 0.9 - i * 0.06, blending: THREE.AdditiveBlending, depthWrite: false })
       );
-      disk.rotation.x = Math.PI / 2.1;
+      disk.rotation.x = Math.PI / 2.15;
       blackHoleDisk.add(disk);
     }
     bhGroup.add(blackHoleDisk);
 
-    // Outer glow halo
-    const halo = new THREE.Mesh(
-      new THREE.RingGeometry(2.2, 2.7, 96),
-      new THREE.MeshBasicMaterial({ color: 0xffaa55, side: THREE.DoubleSide, transparent: true, opacity: 0.6 })
+    // Bright photon ring
+    const photonRing = new THREE.Mesh(
+      new THREE.RingGeometry(2.3, 2.55, 128),
+      new THREE.MeshBasicMaterial({ color: 0xffeecc, side: THREE.DoubleSide, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false })
     );
-    halo.rotation.x = Math.PI / 2.1;
-    bhGroup.add(halo);
+    photonRing.rotation.x = Math.PI / 2.15;
+    bhGroup.add(photonRing);
 
     scene.add(bhGroup);
-    addLabel(scene, 'Black Hole', 35, -5, 0);
+    objects['black-hole'] = { mesh: horizon, group: bhGroup, size: 5 };
+    addLabel(scene, 'Black Hole', 38, -7, 0);
   }
 
-  // ---------- Supernova ----------
+  // Supernova
   let supernovaCore, supernovaShell;
   {
     const snGroup = new THREE.Group();
-    snGroup.position.set(75, 0, 0);
-
+    snGroup.position.set(80, 0, 0);
     supernovaCore = new THREE.Mesh(
-      new THREE.SphereGeometry(2.0, 32, 32),
+      new THREE.SphereGeometry(2.0, 48, 48),
       new THREE.MeshBasicMaterial({ color: 0xffffaa })
     );
     supernovaCore.userData.key = 'supernova';
     snGroup.add(supernovaCore);
-    meshes.push(supernovaCore);
-
     supernovaShell = new THREE.Mesh(
-      new THREE.SphereGeometry(3.0, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0xff8844, transparent: true, opacity: 0.4 })
+      new THREE.SphereGeometry(3.0, 48, 48),
+      new THREE.MeshBasicMaterial({ color: 0xff8844, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false })
     );
     snGroup.add(supernovaShell);
-
     scene.add(snGroup);
-    addLabel(scene, 'Supernova', 75, -8, 0);
+    objects.supernova = { mesh: supernovaCore, group: snGroup, size: 4 };
+    addLabel(scene, 'Supernova', 80, -8, 0);
   }
 
-  camera.position.set(15, 15, 70);
-  controls.target.set(15, 0, 0);
-  controls.minDistance = 5;
-  controls.maxDistance = 300;
+  camera.position.set(20, 20, 80);
+  controls.target.set(20, 0, 0);
+  controls.minDistance = 2;
+  controls.maxDistance = 400;
+  controls.zoomSpeed = 2.0;
 
   let t = 0;
   function update(dt) {
@@ -159,14 +162,27 @@ export function buildRemnants({ camera, controls, onSelect }) {
     }
   }
 
+  function focusOn(key) {
+    const o = objects[key];
+    if (!o) return;
+    const pos = new THREE.Vector3();
+    o.group.getWorldPosition(pos);
+    flyTo(camera, controls, pos, viewpointFor(pos, o.size), 1.2);
+    onSelect(key);
+  }
+
+  function clearFollow() {}
+
   function handleClick(pointer, cam, raycaster) {
-    const key = pickFromMeshes(pointer, cam, raycaster, meshes);
-    if (key) onSelect(key);
+    raycaster.setFromCamera(pointer, cam);
+    const meshes = Object.values(objects).map(o => o.mesh);
+    const hits = raycaster.intersectObjects(meshes, false);
+    if (hits.length) focusOn(hits[0].object.userData.key);
   }
 
   function dispose() { disposeScene(scene); }
 
-  return { scene, update, handleClick, dispose };
+  return { scene, update, focusOn, clearFollow, handleClick, dispose };
 }
 
 function addLabel(scene, text, x, y, z) {

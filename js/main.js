@@ -5,8 +5,10 @@ import { buildStars } from './scenes/stars.js';
 import { buildRemnants } from './scenes/remnants.js';
 import { buildGalaxies } from './scenes/galaxies.js';
 import { buildConstellations } from './scenes/constellations.js';
+import { buildGallery } from './scenes/gallery.js';
 
 const container = document.getElementById('canvas-container');
+const galleryContainer = document.getElementById('gallery-container');
 const infoPanel = document.getElementById('info-panel');
 const infoTitle = document.getElementById('info-title');
 const infoType = document.getElementById('info-type');
@@ -16,17 +18,21 @@ const sceneHint = document.getElementById('scene-hint');
 const scaleToggle = document.getElementById('scale-toggle');
 const scaleSlider = document.getElementById('scale-slider');
 const scaleLabel = document.getElementById('scale-label');
+const objectList = document.getElementById('object-list');
+const sidebarTitle = document.getElementById('sidebar-title');
+const resetViewBtn = document.getElementById('reset-view');
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100000);
-
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+controls.zoomSpeed = 2.0;
 
 let content = {};
 let currentScene = null;
@@ -45,9 +51,28 @@ const sceneBuilders = {
   constellations: buildConstellations
 };
 
+const initialCameraStates = {};
+
 function loadScene(key) {
   if (currentScene && currentScene.dispose) currentScene.dispose();
   currentSceneKey = key;
+
+  // Gallery is a special DOM-only "scene"
+  if (key === 'gallery') {
+    container.style.display = 'none';
+    galleryContainer.classList.remove('hidden');
+    scaleToggle.classList.add('hidden');
+    sidebarTitle.textContent = 'Categories';
+    sceneHint.textContent = '';
+    buildGallery(galleryContainer, content.gallery, objectList);
+    hideInfo();
+    currentScene = null;
+    return;
+  }
+
+  container.style.display = 'block';
+  galleryContainer.classList.add('hidden');
+
   const sceneData = content[key];
   sceneHint.textContent = sceneData.hint || '';
 
@@ -58,6 +83,12 @@ function loadScene(key) {
     onSelect: showInfo
   });
 
+  // Cache initial camera state for reset
+  initialCameraStates[key] = {
+    pos: camera.position.clone(),
+    target: controls.target.clone()
+  };
+
   if (key === 'solar') {
     scaleToggle.classList.remove('hidden');
     scaleSlider.value = 0;
@@ -66,7 +97,62 @@ function loadScene(key) {
     scaleToggle.classList.add('hidden');
   }
 
+  populateSidebar(key);
   hideInfo();
+}
+
+function populateSidebar(key) {
+  const sceneData = content[key];
+  if (!sceneData || !sceneData.objects) {
+    objectList.innerHTML = '';
+    return;
+  }
+  sidebarTitle.textContent = sceneTitle(key);
+  objectList.innerHTML = '';
+  for (const [objKey, obj] of Object.entries(sceneData.objects)) {
+    const li = document.createElement('li');
+    li.dataset.key = objKey;
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.style.background = objectColor(key, objKey);
+    li.appendChild(dot);
+    li.appendChild(document.createTextNode(obj.name));
+    li.addEventListener('click', () => {
+      document.querySelectorAll('#object-list li').forEach(x => x.classList.remove('active'));
+      li.classList.add('active');
+      if (currentScene && currentScene.focusOn) {
+        currentScene.focusOn(objKey);
+      } else {
+        showInfo(objKey);
+      }
+    });
+    objectList.appendChild(li);
+  }
+}
+
+function sceneTitle(key) {
+  return {
+    solar: 'Solar System',
+    stars: 'Star Types',
+    remnants: 'Stellar Remnants',
+    galaxies: 'Galaxies',
+    constellations: 'Constellations'
+  }[key] || 'Objects';
+}
+
+function objectColor(scene, key) {
+  const map = {
+    sun: '#ffcc55', mercury: '#aaaaaa', venus: '#e5b87a', earth: '#4a8fe7',
+    moon: '#cccccc', mars: '#c1602e', asteroid: '#888', jupiter: '#d4a373',
+    saturn: '#e6cf99', uranus: '#9fd8e0', neptune: '#4166f5',
+    comet: '#bbccff', meteor: '#ffaa66',
+    'red-dwarf': '#ff5533', 'sun-like': '#ffdd66', 'blue-giant': '#88bbff', 'red-giant': '#ff7744',
+    'white-dwarf': '#eeeeff', 'neutron-star': '#ffffff', pulsar: '#aaccff',
+    'black-hole': '#222', supernova: '#ffaa44',
+    'milky-way': '#aabbff', andromeda: '#ddccaa', elliptical: '#ffccaa', irregular: '#aaccff',
+    'southern-cross': '#aaccff', orion: '#ffffff', scorpius: '#ff8844'
+  };
+  return map[key] || '#888';
 }
 
 function showInfo(objectKey) {
@@ -82,6 +168,10 @@ function showInfo(objectKey) {
     infoFacts.appendChild(li);
   }
   infoPanel.classList.remove('hidden');
+  // Highlight in sidebar too
+  document.querySelectorAll('#object-list li').forEach(x => {
+    x.classList.toggle('active', x.dataset.key === objectKey);
+  });
 }
 
 function hideInfo() {
@@ -104,6 +194,16 @@ scaleSlider.addEventListener('input', (e) => {
   if (currentScene && currentScene.setScale) currentScene.setScale(t);
 });
 
+resetViewBtn.addEventListener('click', () => {
+  if (currentScene && currentScene.clearFollow) currentScene.clearFollow();
+  const cached = initialCameraStates[currentSceneKey];
+  if (cached) {
+    camera.position.copy(cached.pos);
+    controls.target.copy(cached.target);
+  }
+  document.querySelectorAll('#object-list li').forEach(x => x.classList.remove('active'));
+});
+
 // Click handling
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -117,6 +217,17 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
   if (currentScene && currentScene.handleClick) {
     currentScene.handleClick(pointer, camera, raycaster);
+  }
+});
+
+// User drag = stop following
+controls.addEventListener('start', () => {
+  // Don't break the tween animation, only stop follow when user drags
+});
+renderer.domElement.addEventListener('pointerdown', () => {
+  if (currentScene && currentScene.clearFollow) {
+    // Only clear follow on right-click / middle drag (panning), not just any drag
+    // Actually: keep follow until user clicks reset. Simpler.
   }
 });
 

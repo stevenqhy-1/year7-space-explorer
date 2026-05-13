@@ -1,30 +1,20 @@
 import * as THREE from 'three';
-import { addStarfield, pickFromMeshes, disposeScene } from '../utils.js';
+import { addStarfield, disposeScene } from '../utils.js';
+import { flyTo, viewpointFor } from '../cameraTween.js';
 
-// Each constellation has named stars (positioned in 3D) and edges connecting them.
 const CONSTELLATIONS = {
   'southern-cross': {
     label: 'Southern Cross',
     center: [-60, 20, 0],
-    stars: [
-      [0, 8, 0],   // top
-      [0, -8, 0],  // bottom (Acrux)
-      [-6, 0, 0],  // left
-      [6, 0, 0]    // right
-    ],
+    stars: [ [0, 8, 0], [0, -8, 0], [-6, 0, 0], [6, 0, 0] ],
     edges: [[0,1],[2,3]]
   },
   orion: {
     label: 'Orion',
     center: [0, 0, 0],
     stars: [
-      [-8, 8, 0],   // Betelgeuse
-      [8, 8, 0],    // Bellatrix
-      [-2, 0, 0],   // belt L (Alnitak)
-      [0, 0, 0],    // belt M (Alnilam)
-      [2, 0, 0],    // belt R (Mintaka)
-      [-8, -10, 0], // Saiph
-      [8, -10, 0]   // Rigel
+      [-8, 8, 0], [8, 8, 0], [-2, 0, 0], [0, 0, 0], [2, 0, 0],
+      [-8, -10, 0], [8, -10, 0]
     ],
     edges: [[0,1],[0,2],[1,4],[2,3],[3,4],[2,5],[4,6],[5,6]]
   },
@@ -49,51 +39,41 @@ const STAR_COLORS = {
 export function buildConstellations({ camera, controls, onSelect }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000005);
-  addStarfield(scene, 4000, 500);
+  addStarfield(scene, 5000, 600);
   scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-  const clickMeshes = [];
+  const objects = {};
 
   for (const [key, c] of Object.entries(CONSTELLATIONS)) {
     const group = new THREE.Group();
     group.position.set(...c.center);
-
-    // Stars
-    const starPositions = c.stars;
-    for (const [x, y, z] of starPositions) {
+    for (const [x, y, z] of c.stars) {
       const star = new THREE.Mesh(
-        new THREE.SphereGeometry(0.6, 16, 16),
+        new THREE.SphereGeometry(0.6, 24, 24),
         new THREE.MeshBasicMaterial({ color: STAR_COLORS[key] })
       );
       star.position.set(x, y, z);
-      // Glow
       star.add(new THREE.Mesh(
-        new THREE.SphereGeometry(1.2, 16, 16),
-        new THREE.MeshBasicMaterial({ color: STAR_COLORS[key], transparent: true, opacity: 0.25 })
+        new THREE.SphereGeometry(1.4, 24, 24),
+        new THREE.MeshBasicMaterial({ color: STAR_COLORS[key], transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false })
       ));
       group.add(star);
     }
-
-    // Edges
-    const lineMat = new THREE.LineBasicMaterial({ color: 0x4477aa, transparent: true, opacity: 0.5 });
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x4477aa, transparent: true, opacity: 0.55 });
     for (const [a, b] of c.edges) {
       const geo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(...starPositions[a]),
-        new THREE.Vector3(...starPositions[b])
+        new THREE.Vector3(...c.stars[a]),
+        new THREE.Vector3(...c.stars[b])
       ]);
       group.add(new THREE.Line(geo, lineMat));
     }
-
-    // Large invisible click sphere covering the constellation
     const clickSphere = new THREE.Mesh(
       new THREE.SphereGeometry(14, 12, 12),
       new THREE.MeshBasicMaterial({ visible: false })
     );
     clickSphere.userData.key = key;
     group.add(clickSphere);
-    clickMeshes.push(clickSphere);
 
-    // Label
     const canvas = document.createElement('canvas');
     canvas.width = 256; canvas.height = 64;
     const ctx = canvas.getContext('2d');
@@ -108,23 +88,35 @@ export function buildConstellations({ camera, controls, onSelect }) {
     group.add(sprite);
 
     scene.add(group);
+    objects[key] = { clickSphere, group, size: 18 };
   }
 
-  camera.position.set(0, 10, 100);
+  camera.position.set(0, 10, 110);
   controls.target.set(0, 0, 0);
-  controls.minDistance = 30;
-  controls.maxDistance = 250;
+  controls.minDistance = 10;
+  controls.maxDistance = 300;
+  controls.zoomSpeed = 2.0;
 
   function update(dt) {}
 
+  function focusOn(key) {
+    const o = objects[key];
+    if (!o) return;
+    const pos = o.group.position.clone();
+    flyTo(camera, controls, pos, viewpointFor(pos, o.size, new THREE.Vector3(0, 0, 1)), 1.2);
+    onSelect(key);
+  }
+
+  function clearFollow() {}
+
   function handleClick(pointer, cam, raycaster) {
     raycaster.setFromCamera(pointer, cam);
-    const hits = raycaster.intersectObjects(clickMeshes, false);
-    if (hits.length === 0) return;
-    onSelect(hits[0].object.userData.key);
+    const meshes = Object.values(objects).map(o => o.clickSphere);
+    const hits = raycaster.intersectObjects(meshes, false);
+    if (hits.length) focusOn(hits[0].object.userData.key);
   }
 
   function dispose() { disposeScene(scene); }
 
-  return { scene, update, handleClick, dispose };
+  return { scene, update, focusOn, clearFollow, handleClick, dispose };
 }

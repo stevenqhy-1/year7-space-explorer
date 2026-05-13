@@ -23,11 +23,19 @@
       <button data-scene="remnants">Stellar Remnants</button>
       <button data-scene="galaxies">Galaxies</button>
       <button data-scene="constellations">Constellations</button>
+      <button data-scene="gallery">Gallery</button>
     </nav>
   </header>
 
   <main>
+    <aside id="sidebar">
+      <h3 id="sidebar-title">Objects</h3>
+      <ul id="object-list"></ul>
+      <button id="reset-view" class="reset-btn">⟲ Reset view</button>
+    </aside>
+
     <div id="canvas-container"></div>
+    <div id="gallery-container" class="hidden"></div>
 
     <aside id="info-panel" class="hidden">
       <button id="close-info" aria-label="Close">×</button>
@@ -50,7 +58,7 @@
   </main>
 
   <footer id="bottom-hint">
-    <span>🖱 Drag to rotate · Scroll to zoom · Click an object for info</span>
+    <span>🖱 Drag to rotate · Scroll to zoom · Click an object (or its name in the sidebar) for a close-up</span>
   </footer>
 
   <script type="module" src="js/main.js"></script>
