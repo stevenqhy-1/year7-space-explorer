@@ -6,9 +6,12 @@ import { buildRemnants } from './scenes/remnants.js';
 import { buildGalaxies } from './scenes/galaxies.js';
 import { buildConstellations } from './scenes/constellations.js';
 import { buildGallery } from './scenes/gallery.js';
+import { flyTo } from './cameraTween.js';
 
 const container = document.getElementById('canvas-container');
 const stars2dContainer = document.getElementById('stars2d-container');
+const stars2dPrev = document.getElementById('stars2d-prev');
+const stars2dNext = document.getElementById('stars2d-next');
 const galleryContainer = document.getElementById('gallery-container');
 const infoPanel = document.getElementById('info-panel');
 const infoTitle = document.getElementById('info-title');
@@ -35,24 +38,60 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.enableZoom = false; // we handle wheel/pinch manually below for proper magnitude scaling
 
-// Magnitude-aware wheel & trackpad-pinch zoom.
-// OrbitControls' default ignores deltaY magnitude — trackpad pinch fires many tiny events
-// that barely move the camera. This handler scales the dolly amount by deltaY itself
-// so both scroll wheel and pinch feel snappy.
-const _tmpDir = new THREE.Vector3();
+// Magnitude-aware wheel & trackpad-pinch zoom, with zoom-to-cursor.
+// We pivot the dolly around the world point under the cursor, so mouse position drives
+// where the camera ends up — not just the scene origin.
+const _camOffset = new THREE.Vector3();
+const _tgtOffset = new THREE.Vector3();
+const _viewDir = new THREE.Vector3();
+const _ndc = new THREE.Vector3();
+const _pivot = new THREE.Vector3();
+const _plane = new THREE.Plane();
+const _ray = new THREE.Ray();
+
+function getCursorPivot(clientX, clientY) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  const mx = ((clientX - rect.left) / rect.width) * 2 - 1;
+  const my = -((clientY - rect.top) / rect.height) * 2 + 1;
+  // Plane through controls.target, perpendicular to view direction
+  camera.getWorldDirection(_viewDir);
+  _plane.setFromNormalAndCoplanarPoint(_viewDir, controls.target);
+  // Ray from camera through cursor
+  _ndc.set(mx, my, 0.5).unproject(camera);
+  _ray.origin.copy(camera.position);
+  _ray.direction.copy(_ndc.sub(camera.position).normalize());
+  if (_ray.intersectPlane(_plane, _pivot)) return _pivot;
+  return controls.target.clone();
+}
+
 renderer.domElement.addEventListener('wheel', (e) => {
   if (galleryContainer.classList.contains('hidden') === false) return;
   if (stars2dContainer.classList.contains('hidden') === false) return;
   e.preventDefault();
-  // Clamp per-event factor so single big wheel ticks don't fly through the scene
   let exponent = e.deltaY * 0.02;
   if (exponent > 0.7) exponent = 0.7;
   if (exponent < -0.7) exponent = -0.7;
   const factor = Math.exp(exponent); // >1 = zoom out, <1 = zoom in
-  _tmpDir.subVectors(camera.position, controls.target);
-  let newDist = _tmpDir.length() * factor;
-  newDist = Math.max(controls.minDistance, Math.min(controls.maxDistance, newDist));
-  camera.position.copy(controls.target).add(_tmpDir.normalize().multiplyScalar(newDist));
+
+  const pivot = getCursorPivot(e.clientX, e.clientY);
+
+  // Move camera and target so that the pivot point stays under the cursor.
+  // cam' = pivot + factor * (cam - pivot)
+  // tgt' = pivot + factor * (tgt - pivot)
+  _camOffset.subVectors(camera.position, pivot).multiplyScalar(factor);
+  _tgtOffset.subVectors(controls.target, pivot).multiplyScalar(factor);
+  camera.position.copy(pivot).add(_camOffset);
+  controls.target.copy(pivot).add(_tgtOffset);
+
+  // Clamp camera distance from target to [min, max]
+  const dist = camera.position.distanceTo(controls.target);
+  if (dist < controls.minDistance) {
+    const d = camera.position.clone().sub(controls.target).normalize().multiplyScalar(controls.minDistance);
+    camera.position.copy(controls.target).add(d);
+  } else if (dist > controls.maxDistance) {
+    const d = camera.position.clone().sub(controls.target).normalize().multiplyScalar(controls.maxDistance);
+    camera.position.copy(controls.target).add(d);
+  }
 }, { passive: false });
 
 // Inside the stars2d page, vertical wheel scrolls horizontally — so mouse-wheel users
@@ -63,6 +102,13 @@ stars2dContainer.addEventListener('wheel', (e) => {
     stars2dContainer.scrollLeft += e.deltaY * 2.5;
   }
 }, { passive: false });
+
+stars2dPrev.addEventListener('click', () => {
+  stars2dContainer.scrollBy({ left: -stars2dContainer.clientWidth, behavior: 'smooth' });
+});
+stars2dNext.addEventListener('click', () => {
+  stars2dContainer.scrollBy({ left: stars2dContainer.clientWidth, behavior: 'smooth' });
+});
 
 let content = {};
 let currentScene = null;
@@ -90,6 +136,8 @@ function loadScene(key) {
   if (key === 'gallery') {
     container.style.display = 'none';
     stars2dContainer.classList.add('hidden');
+    stars2dPrev.classList.add('hidden');
+    stars2dNext.classList.add('hidden');
     galleryContainer.classList.remove('hidden');
     scaleToggle.classList.add('hidden');
     sidebarTitle.textContent = 'Categories';
@@ -103,6 +151,8 @@ function loadScene(key) {
     container.style.display = 'none';
     galleryContainer.classList.add('hidden');
     stars2dContainer.classList.remove('hidden');
+    stars2dPrev.classList.remove('hidden');
+    stars2dNext.classList.remove('hidden');
     scaleToggle.classList.add('hidden');
     sidebarTitle.textContent = 'Scale Steps';
     sceneHint.textContent = content.stars.hint || '';
@@ -115,6 +165,8 @@ function loadScene(key) {
   container.style.display = 'block';
   galleryContainer.classList.add('hidden');
   stars2dContainer.classList.add('hidden');
+  stars2dPrev.classList.add('hidden');
+  stars2dNext.classList.add('hidden');
 
   const sceneData = content[key];
   sceneHint.textContent = sceneData.hint || '';
@@ -210,8 +262,20 @@ function showInfo(objectKey) {
     li.innerHTML = `<strong>${k}:</strong> ${v}`;
     infoFacts.appendChild(li);
   }
+  // If the scene has a formation animation for this object, show a Play button
+  const existing = document.getElementById('play-formation-btn');
+  if (existing) existing.remove();
+  if (currentScene && currentScene.hasFormation && currentScene.hasFormation(objectKey)) {
+    const btn = document.createElement('button');
+    btn.id = 'play-formation-btn';
+    btn.className = 'play-formation-btn';
+    btn.innerHTML = '▶ Play formation animation';
+    btn.addEventListener('click', () => {
+      currentScene.playFormation(objectKey);
+    });
+    infoFacts.parentElement.appendChild(btn);
+  }
   infoPanel.classList.remove('hidden');
-  // Highlight in sidebar too
   document.querySelectorAll('#object-list li').forEach(x => {
     x.classList.toggle('active', x.dataset.key === objectKey);
   });
@@ -237,15 +301,15 @@ scaleSlider.addEventListener('input', (e) => {
   if (currentScene && currentScene.setScale) currentScene.setScale(t);
 });
 
-resetViewBtn.addEventListener('click', () => {
+function smoothResetView() {
   if (currentScene && currentScene.clearFollow) currentScene.clearFollow();
   const cached = initialCameraStates[currentSceneKey];
   if (cached) {
-    camera.position.copy(cached.pos);
-    controls.target.copy(cached.target);
+    flyTo(camera, controls, cached.target, cached.pos, 1.4);
   }
   document.querySelectorAll('#object-list li').forEach(x => x.classList.remove('active'));
-});
+}
+resetViewBtn.addEventListener('click', smoothResetView);
 
 // Click handling
 const raycaster = new THREE.Raycaster();
@@ -263,10 +327,8 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   }
 });
 
-// Double-click anywhere on the canvas resets the view
-renderer.domElement.addEventListener('dblclick', () => {
-  resetViewBtn.click();
-});
+// Double-click anywhere on the canvas smoothly resets the view
+renderer.domElement.addEventListener('dblclick', smoothResetView);
 
 // User drag = stop following
 controls.addEventListener('start', () => {

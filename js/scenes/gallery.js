@@ -21,7 +21,8 @@ export function buildGallery(container, items, sidebarList) {
     card.className = 'gallery-card';
     card.dataset.idx = idx;
     card.innerHTML = `
-      <img src="${item.image}" alt="${escapeHtml(item.title)}" loading="lazy">
+      <img src="${item.image}" alt="${escapeHtml(item.title)}" loading="lazy"
+           onerror="this.outerHTML='<div class=\\'img-fallback\\'>Image unavailable</div>'">
       <div class="gallery-card-body">
         <div class="meta">${escapeHtml(item.source)}</div>
         <h4>${escapeHtml(item.title)}</h4>

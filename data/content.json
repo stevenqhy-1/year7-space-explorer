@@ -448,6 +448,90 @@
       "credit": "NASA / ESA",
       "image": "https://cdn.esahubble.org/archives/images/screen/heic1107a.jpg",
       "caption": "Two galaxies caught in a slow gravitational dance, pulled into a rose-like shape by the larger one's gravity."
+    },
+    {
+      "title": "Cartwheel Galaxy",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2306a.jpg",
+      "caption": "A wheel-shaped galaxy 500 million light-years away, created when a smaller galaxy punched straight through its centre, sending shockwaves outward."
+    },
+    {
+      "title": "NGC 604 — Star-forming Region",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2401a.jpg",
+      "caption": "An immense star-forming region in a nearby galaxy, lit up by more than 200 massive young stars hidden inside the gas clouds."
+    },
+    {
+      "title": "Horsehead Nebula",
+      "source": "JWST",
+      "credit": "NASA / ESA / CSA / STScI",
+      "image": "https://cdn.esawebb.org/archives/images/screen/weic2403a.jpg",
+      "caption": "One of the most recognisable shapes in the sky — a column of cold gas about 1,300 light-years away, sculpted by radiation from nearby young stars."
+    },
+    {
+      "title": "Bubble Nebula",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1608a.jpg",
+      "caption": "Hubble's 26th-anniversary image — a giant bubble of gas seven light-years across, being blown into space by a hot massive star at its centre."
+    },
+    {
+      "title": "Crab Nebula",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic0515a.jpg",
+      "caption": "The shattered remains of a star that Chinese astronomers saw explode in 1054 AD. A pulsar spins at its centre 30 times every second."
+    },
+    {
+      "title": "Whirlpool Galaxy (M51)",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic0506a.jpg",
+      "caption": "A grand spiral galaxy 23 million light-years away, locked in a slow gravitational dance with a smaller companion at its side."
+    },
+    {
+      "title": "Tarantula Nebula",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1402a.jpg",
+      "caption": "The largest known star-forming region in our cosmic neighbourhood, in the Large Magellanic Cloud — visible to the naked eye from the Southern Hemisphere."
+    },
+    {
+      "title": "Cosmic Reef (NGC 2014 + NGC 2020)",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic2007a.jpg",
+      "caption": "Hubble's 30th-anniversary image. Two glowing nebulae in the Large Magellanic Cloud, dramatically lit by hot young stars."
+    },
+    {
+      "title": "Mystic Mountain (Carina Nebula)",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1007a.jpg",
+      "caption": "A three-light-year-tall pillar of gas and dust being eroded by ultraviolet light from nearby young stars. Released for Hubble's 20th anniversary."
+    },
+    {
+      "title": "Veil Nebula",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1520a.jpg",
+      "caption": "The expanding shell of a star that exploded around 8,000 years ago. Glowing wisps span six full Moon widths across our sky."
+    },
+    {
+      "title": "Hubble Deep Field",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic1417a.jpg",
+      "caption": "A patch of sky no bigger than a grain of sand held at arm's length — yet filled with thousands of galaxies, each containing billions of stars."
+    },
+    {
+      "title": "NGC 1300 — Barred Spiral Galaxy",
+      "source": "Hubble",
+      "credit": "NASA / ESA",
+      "image": "https://cdn.esahubble.org/archives/images/screen/heic0501a.jpg",
+      "caption": "A classic barred spiral galaxy 61 million light-years away, with a straight 'bar' of stars across its centre. Our own Milky Way has a similar bar."
     }
   ]
 }

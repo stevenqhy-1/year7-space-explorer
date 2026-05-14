@@ -9,126 +9,274 @@ export function buildRemnants({ camera, controls, onSelect }) {
   scene.add(new THREE.AmbientLight(0x222244, 1));
 
   const objects = {};
+  // Each formation: { play(), update(now), playing, mainMeshes }
+  const formations = {};
+
+  // Build the parent-star + ejected-shell meshes that play during formation.
+  // mainMeshes are the regular remnant elements — hidden while formation plays.
+  function buildFormation(group, opts, mainMeshes) {
+    const { parentColor, parentRadius, shellColor, shellMaxScale, duration = 5,
+            parentBands = false } = opts;
+    const parent = new THREE.Mesh(
+      new THREE.SphereGeometry(parentRadius, 48, 48),
+      new THREE.MeshBasicMaterial({ color: parentColor, transparent: true, opacity: 0 })
+    );
+    parent.visible = false;
+    group.add(parent);
+
+    const parentGlow = new THREE.Mesh(
+      new THREE.SphereGeometry(parentRadius * 1.3, 48, 48),
+      new THREE.MeshBasicMaterial({
+        color: parentColor, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      })
+    );
+    parentGlow.visible = false;
+    group.add(parentGlow);
+
+    const shell = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 48, 48),
+      new THREE.MeshBasicMaterial({
+        color: shellColor, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+      })
+    );
+    shell.visible = false;
+    group.add(shell);
+
+    // Bright flash (used for supernova step)
+    const flash = new THREE.Mesh(
+      new THREE.SphereGeometry(parentRadius * 0.6, 32, 32),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffee, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      })
+    );
+    flash.visible = false;
+    group.add(flash);
+
+    let playing = false;
+    let startTime = 0;
+
+    function setMainOpacity(o) {
+      for (const m of mainMeshes) {
+        if (!m) continue;
+        if (m.material) {
+          m.material.transparent = true;
+          m.material.opacity = (m._baseOpacity ?? 1) * o;
+        }
+        m.visible = o > 0.01;
+      }
+    }
+
+    function play() {
+      // Stash baseline opacities first time we play
+      if (!mainMeshes[0]._baseOpacity) {
+        for (const m of mainMeshes) {
+          if (m && m.material && m.material.opacity !== undefined) {
+            m._baseOpacity = m.material.opacity;
+          } else if (m) {
+            m._baseOpacity = 1;
+          }
+        }
+      }
+      playing = true;
+      startTime = performance.now();
+      parent.visible = true;
+      parentGlow.visible = true;
+      shell.visible = false;
+      flash.visible = false;
+      shell.scale.setScalar(1);
+      setMainOpacity(0);
+    }
+
+    function update(now) {
+      if (!playing) return;
+      const tSec = (now - startTime) / 1000;
+      const t = tSec / duration;
+      if (t >= 1) {
+        playing = false;
+        parent.visible = false;
+        parentGlow.visible = false;
+        shell.visible = false;
+        flash.visible = false;
+        setMainOpacity(1);
+        return;
+      }
+      // Three phases: parent (0..0.35), explosion/shell (0.35..0.65), remnant emerges (0.65..1)
+      if (t < 0.35) {
+        const p = t / 0.35;
+        parent.material.opacity = Math.min(1, p * 1.4);
+        parentGlow.material.opacity = Math.min(0.45, p);
+        // Pulse a bit before collapse
+        const pulse = 1 + Math.sin(tSec * 8) * 0.04;
+        parent.scale.setScalar(pulse);
+        parentGlow.scale.setScalar(pulse);
+        setMainOpacity(0);
+      } else if (t < 0.65) {
+        const p = (t - 0.35) / 0.30;
+        // Collapse parent
+        const scale = 1 - p * 0.85;
+        parent.scale.setScalar(Math.max(0.05, scale));
+        parentGlow.scale.setScalar(Math.max(0.05, scale * 1.1));
+        parent.material.opacity = 1 - p;
+        parentGlow.material.opacity = 0.45 * (1 - p);
+        // Flash near the midpoint
+        if (p < 0.4) {
+          flash.visible = true;
+          flash.material.opacity = p / 0.4;
+          flash.scale.setScalar(1 + p * 6);
+        } else {
+          flash.material.opacity = Math.max(0, 1 - (p - 0.4) * 2.5);
+          flash.scale.setScalar(1 + p * 12);
+        }
+        // Shell expands
+        shell.visible = true;
+        shell.scale.setScalar(0.5 + p * shellMaxScale);
+        shell.material.opacity = 0.9 * (1 - Math.pow(p, 0.4));
+        setMainOpacity(0);
+      } else {
+        const p = (t - 0.65) / 0.35;
+        parent.material.opacity = 0;
+        parentGlow.material.opacity = 0;
+        flash.material.opacity = 0;
+        shell.scale.setScalar(0.5 + shellMaxScale + p * 4);
+        shell.material.opacity = Math.max(0, 0.35 * (1 - p));
+        setMainOpacity(Math.min(1, p * 1.3));
+      }
+    }
+
+    return { play, update, get playing() { return playing; } };
+  }
 
   // ───────────────────────── WHITE DWARF ─────────────────────────
   // Brilliantly hot core with diffraction spikes (telescope-style)
   {
     const g = new THREE.Group();
     g.position.set(-90, 0, 0);
+    const mainMeshes = [];
 
     const core = new THREE.Mesh(
       new THREE.SphereGeometry(1.5, 64, 64),
       new THREE.MeshBasicMaterial({ color: 0xffffff })
     );
     core.userData.key = 'white-dwarf';
-    g.add(core);
+    g.add(core); mainMeshes.push(core);
 
-    // Multi-layer glow
     [
       [2.0, 0x88ccff, 0.45],
       [3.0, 0x6699ff, 0.18],
       [4.5, 0x4466cc, 0.08]
     ].forEach(([r, c, op]) => {
-      g.add(new THREE.Mesh(
+      const m = new THREE.Mesh(
         new THREE.SphereGeometry(r, 48, 48),
         new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false })
-      ));
+      );
+      g.add(m); mainMeshes.push(m);
     });
 
-    // Diffraction spikes — 4 thin elongated planes
-    g.add(makeDiffractionSpikes(8, 0xeaf2ff));
+    const spikes = makeDiffractionSpikes(8, 0xeaf2ff);
+    g.add(spikes); spikes.traverse(c => { if (c.isMesh) mainMeshes.push(c); });
 
     scene.add(g);
     objects['white-dwarf'] = { mesh: core, group: g, size: 2 };
     addLabel(scene, 'White Dwarf', -90, -8, 0);
+    formations['white-dwarf'] = buildFormation(g, {
+      parentColor: 0xff5530, parentRadius: 4,
+      shellColor: 0xffaa55, shellMaxScale: 7, duration: 5
+    }, mainMeshes);
   }
 
   // ───────────────────────── NEUTRON STAR ─────────────────────────
-  // Tiny intense core with magnetic field torus loops
   let neutronGroup;
   {
     neutronGroup = new THREE.Group();
     neutronGroup.position.set(-45, 0, 0);
+    const mainMeshes = [];
 
     const core = new THREE.Mesh(
       new THREE.SphereGeometry(1.0, 64, 64),
       new THREE.MeshBasicMaterial({ color: 0xeaffff })
     );
     core.userData.key = 'neutron-star';
-    neutronGroup.add(core);
+    neutronGroup.add(core); mainMeshes.push(core);
 
-    // Inner halo
-    neutronGroup.add(new THREE.Mesh(
+    const halo1 = new THREE.Mesh(
       new THREE.SphereGeometry(1.6, 48, 48),
       new THREE.MeshBasicMaterial({ color: 0x66ffff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false })
-    ));
-    neutronGroup.add(new THREE.Mesh(
+    );
+    neutronGroup.add(halo1); mainMeshes.push(halo1);
+    const halo2 = new THREE.Mesh(
       new THREE.SphereGeometry(2.6, 48, 48),
       new THREE.MeshBasicMaterial({ color: 0x3399cc, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false })
-    ));
+    );
+    neutronGroup.add(halo2); mainMeshes.push(halo2);
 
-    // Magnetic field — three off-axis torus loops
     const fieldMat = new THREE.MeshBasicMaterial({ color: 0x88ddff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
     for (let i = 0; i < 3; i++) {
       const tube = new THREE.Mesh(
         new THREE.TorusGeometry(3.5 + i * 0.4, 0.05, 8, 96),
-        fieldMat
+        new THREE.MeshBasicMaterial({ color: 0x88ddff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false })
       );
       tube.rotation.x = Math.PI / 2;
       tube.rotation.z = (i / 3) * Math.PI;
-      neutronGroup.add(tube);
+      neutronGroup.add(tube); mainMeshes.push(tube);
     }
 
     scene.add(neutronGroup);
     objects['neutron-star'] = { mesh: core, group: neutronGroup, size: 2 };
     addLabel(scene, 'Neutron Star', -45, -8, 0);
+    formations['neutron-star'] = buildFormation(neutronGroup, {
+      parentColor: 0x88aaff, parentRadius: 6,
+      shellColor: 0xffaa66, shellMaxScale: 12, duration: 5
+    }, mainMeshes);
   }
 
   // ───────────────────────── PULSAR ─────────────────────────
-  // Rotating neutron star with bright sweeping beams + accretion glow
   let pulsarGroup;
   {
     pulsarGroup = new THREE.Group();
     pulsarGroup.position.set(0, 0, 0);
+    const mainMeshes = [];
 
     const core = new THREE.Mesh(
       new THREE.SphereGeometry(1.2, 48, 48),
       new THREE.MeshBasicMaterial({ color: 0xccddff })
     );
     core.userData.key = 'pulsar';
-    pulsarGroup.add(core);
+    pulsarGroup.add(core); mainMeshes.push(core);
 
-    // Halo
-    pulsarGroup.add(new THREE.Mesh(
+    const haloMesh = new THREE.Mesh(
       new THREE.SphereGeometry(2.0, 48, 48),
       new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false })
-    ));
+    );
+    pulsarGroup.add(haloMesh); mainMeshes.push(haloMesh);
 
-    // Beam cones — wider, brighter, with intense tip
     for (const dir of [1, -1]) {
-      // Outer wide cone
       const beamOuter = new THREE.Mesh(
         new THREE.ConeGeometry(4.5, 22, 32, 1, true),
         new THREE.MeshBasicMaterial({ color: 0x66ccff, transparent: true, opacity: 0.18, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
       );
-      // Inner intense core
       const beamInner = new THREE.Mesh(
         new THREE.ConeGeometry(1.6, 22, 24, 1, true),
         new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.55, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
       );
       const beamGroup = new THREE.Group();
-      beamGroup.add(beamOuter);
-      beamGroup.add(beamInner);
+      beamGroup.add(beamOuter); beamGroup.add(beamInner);
+      mainMeshes.push(beamOuter, beamInner);
       beamGroup.position.y = dir * 11;
       if (dir === -1) beamGroup.rotation.x = Math.PI;
       pulsarGroup.add(beamGroup);
     }
 
-    // Tilt the rotation axis (real pulsars are tilted)
     pulsarGroup.rotation.z = 0.45;
     scene.add(pulsarGroup);
     objects.pulsar = { mesh: core, group: pulsarGroup, size: 2.5 };
     addLabel(scene, 'Pulsar', 0, -10, 0);
+    formations.pulsar = buildFormation(pulsarGroup, {
+      parentColor: 0x77aaff, parentRadius: 6,
+      shellColor: 0xffaa66, shellMaxScale: 12, duration: 5.5
+    }, mainMeshes);
   }
 
   // ───────────────────────── BLACK HOLE ─────────────────────────
@@ -206,6 +354,14 @@ export function buildRemnants({ camera, controls, onSelect }) {
     scene.add(bhGroup);
     objects['black-hole'] = { mesh: horizon, group: bhGroup, size: 6 };
     addLabel(scene, 'Black Hole', 50, -16, 0);
+
+    // Collect main meshes — every mesh in the BH group except (which there are none yet) formation extras
+    const mainMeshes = [];
+    bhGroup.traverse(c => { if (c.isMesh) mainMeshes.push(c); });
+    formations['black-hole'] = buildFormation(bhGroup, {
+      parentColor: 0x3366cc, parentRadius: 7,   // massive blue supergiant
+      shellColor: 0xff9944, shellMaxScale: 14, duration: 6
+    }, mainMeshes);
   }
 
   // ───────────────────────── SUPERNOVA ─────────────────────────
@@ -295,6 +451,13 @@ export function buildRemnants({ camera, controls, onSelect }) {
     scene.add(snGroup);
     objects.supernova = { mesh: supernovaCore, group: snGroup, size: 7 };
     addLabel(scene, 'Supernova', 105, -15, 0);
+    // Supernova "formation" = the precursor star and the explosion itself
+    const snMain = [];
+    snGroup.traverse(c => { if (c.isMesh || c.isPoints) snMain.push(c); });
+    formations.supernova = buildFormation(snGroup, {
+      parentColor: 0xaaccff, parentRadius: 6,
+      shellColor: 0xffcc66, shellMaxScale: 16, duration: 5.5
+    }, snMain);
   }
 
   camera.position.set(25, 25, 90);
@@ -306,6 +469,9 @@ export function buildRemnants({ camera, controls, onSelect }) {
   let t = 0;
   function update(dt) {
     t += dt;
+    // Advance any in-flight formation animations
+    const now = performance.now();
+    for (const k in formations) formations[k].update(now);
     // Neutron star magnetic loops slowly precess
     if (neutronGroup) neutronGroup.rotation.y += dt * 0.4;
     // Pulsar rotates
@@ -371,7 +537,18 @@ export function buildRemnants({ camera, controls, onSelect }) {
 
   function dispose() { disposeScene(scene); }
 
-  return { scene, update, focusOn, clearFollow, handleClick, dispose };
+  function playFormation(key) {
+    const f = formations[key];
+    if (!f) return false;
+    // Fly camera to the remnant first if it's not already focused, then play
+    focusOn(key);
+    setTimeout(() => f.play(), 1100); // give the camera time to arrive
+    return true;
+  }
+
+  function hasFormation(key) { return !!formations[key]; }
+
+  return { scene, update, focusOn, clearFollow, handleClick, dispose, playFormation, hasFormation };
 }
 
 // ──────────── Helpers ────────────

@@ -34,7 +34,15 @@ const ORBIT_SPEEDS = {
 export function buildSolarSystem({ camera, controls, onSelect }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000005);
-  addStarfield(scene, 4000, 1500);
+  // Layered starfields: a dense nearby field at moderate radius +
+  // a volumetric field of stars throughout space, so when you zoom out
+  // they stream past the camera and feel like real travel.
+  addStarfield(scene, 3500, 1200);
+  const volStars = addVolumetricStars(scene, 18000, 4500);
+
+  // Milky Way galactic context — fades in as you zoom out.
+  const milkyWay = buildMilkyWayContext();
+  scene.add(milkyWay.group);
 
   // Lighting — soft ambient + bright point at the Sun
   scene.add(new THREE.AmbientLight(0x223344, 1.4));
@@ -274,24 +282,26 @@ export function buildSolarSystem({ camera, controls, onSelect }) {
   camera.position.set(0, 70, 160);
   controls.target.set(0, 0, 0);
   controls.minDistance = 1;
-  controls.maxDistance = 800;
+  controls.maxDistance = 5000; // allow zooming out far enough to see the galaxy
   controls.zoomSpeed = 4.0;
   controls.rotateSpeed = 0.9;
 
   // Animation
   let t = 0;
   let followKey = null;
+  let distScale = 1;   // 1 = illustrative, increases toward "true scale"
+  let sizeFactor = 1;  // planets shrink at higher scale
   const tmpVec = new THREE.Vector3();
 
   function update(dt) {
     t += dt;
-    // Orbit planets around the Sun
+    // Orbit planets around the Sun — use distScale so the scale slider sticks
     for (const key of Object.keys(objects)) {
       const o = objects[key];
       if (!o.body || !o.body.illDist || key === 'moon') continue;
       const speed = ORBIT_SPEEDS[key] ?? 0;
       const angle = t * speed * 0.15;
-      const r = o.body.illDist;
+      const r = o.body.illDist * distScale;
       const target = o.orbitGroup || o.mesh;
       if (target && key !== 'asteroid') {
         target.position.x = Math.cos(angle) * r;
@@ -316,6 +326,13 @@ export function buildSolarSystem({ camera, controls, onSelect }) {
         controls.target.copy(tmpVec);
       }
     }
+    // Milky Way fades in as camera distance grows
+    const camDist = camera.position.distanceTo(controls.target);
+    const galaxyT = THREE.MathUtils.clamp((camDist - 300) / 1500, 0, 1);
+    milkyWay.setOpacity(galaxyT);
+    milkyWay.rotate(dt * 0.003);
+    // Volumetric stars stay visible always (they ARE the stars passing by)
+    volStars.material.opacity = 0.55 + 0.45 * galaxyT;
   }
 
   function getObjectPosition(key) {
@@ -358,21 +375,175 @@ export function buildSolarSystem({ camera, controls, onSelect }) {
   }
 
   function setScale(tScale) {
-    // Mostly a placeholder; subtle stretch of orbit distances
+    // tScale: 0 = illustrative (current), 1 = closer to true scale
+    // - distScale stretches the orbit radii (used by update() every frame)
+    // - sizeFactor shrinks the planets/sun — at "true scale" the planets would
+    //   be vanishingly small dots, which is exactly the pedagogical point.
+    distScale = 1 + 3 * tScale;          // up to 4x further apart
+    sizeFactor = 1 - 0.85 * tScale;      // shrink planets up to 85%
     for (const key of Object.keys(objects)) {
       const o = objects[key];
-      if (!o.body || !o.body.illDist) continue;
-      const factor = 1 + 2 * tScale;
-      if (key === 'moon') continue;
-      // Keep angles but stretch radius
-      const node = o.orbitGroup || o.mesh;
-      const a = Math.atan2(node.position.z, node.position.x);
-      node.position.x = Math.cos(a) * o.body.illDist * factor;
-      node.position.z = Math.sin(a) * o.body.illDist * factor;
+      if (!o.mesh) continue;
+      o.mesh.scale.setScalar(sizeFactor);
+      if (o.extras) {
+        o.extras.forEach(e => e.scale && e.scale.setScalar(sizeFactor));
+      }
     }
   }
 
   function dispose() { disposeScene(scene); }
 
   return { scene, update, focusOn, getObjectPosition, listObjects, clearFollow, handleClick, setScale, dispose };
+}
+
+// ─────────── Galactic context (Milky Way) ───────────
+
+// Volumetric star field — particles distributed throughout a sphere of given radius
+// so that as the camera moves, stars at different depths parallax past at different
+// rates. Returns the Points object (caller can tweak material).
+function addVolumetricStars(scene, count, maxRadius) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    // Cube root distribution = roughly uniform in volume
+    const r = Math.pow(Math.random(), 1 / 3) * maxRadius;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i*3+2] = r * Math.cos(phi);
+    // Slight color variation — yellow-white to blue-white
+    const c = 0.7 + Math.random() * 0.3;
+    const b = 0.85 + Math.random() * 0.15;
+    colors[i*3] = c;
+    colors[i*3+1] = c;
+    colors[i*3+2] = b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size: 1.6,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.55,
+    sizeAttenuation: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+  return pts;
+}
+
+// Builds a face-on spiral galaxy at large scale with the solar system positioned
+// in one of the arms. The whole thing fades in opacity as the camera zooms out.
+function buildMilkyWayContext() {
+  const group = new THREE.Group();
+  // Galactic center placed offset from origin — solar system (at 0,0,0) lives
+  // in an outer spiral arm.
+  const centerOffset = new THREE.Vector3(-900, 0, 0);
+  group.position.copy(centerOffset);
+
+  // Spiral arm stars
+  const armCount = 4;
+  const totalStars = 70000;
+  const positions = new Float32Array(totalStars * 3);
+  const colors = new Float32Array(totalStars * 3);
+  const radius = 1400;
+  for (let i = 0; i < totalStars; i++) {
+    const arm = i % armCount;
+    const distNorm = Math.pow(Math.random(), 0.55);
+    const dist = distNorm * radius + 60;
+    const armAngle = (arm / armCount) * Math.PI * 2;
+    // Logarithmic spiral twist
+    const twist = Math.log(dist + 1) * 0.85;
+    const a = armAngle + twist + (Math.random() - 0.5) * 0.55;
+    positions[i*3]   = Math.cos(a) * dist;
+    positions[i*3+1] = (Math.random() - 0.5) * 50 * (1 - distNorm * 0.7);
+    positions[i*3+2] = Math.sin(a) * dist;
+    // Color: cooler/redder near edges, hotter/bluer toward center
+    const tNorm = 1 - distNorm;
+    colors[i*3]   = 0.85 + tNorm * 0.15;
+    colors[i*3+1] = 0.75 + tNorm * 0.2;
+    colors[i*3+2] = 0.9 + tNorm * 0.1;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const armMat = new THREE.PointsMaterial({
+    size: 4,
+    vertexColors: true,
+    transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+    sizeAttenuation: true
+  });
+  const armPoints = new THREE.Points(geo, armMat);
+  group.add(armPoints);
+
+  // Bulge — a bright central glow
+  const bulge = new THREE.Mesh(
+    new THREE.SphereGeometry(180, 48, 48),
+    new THREE.MeshBasicMaterial({
+      color: 0xffeebb, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    })
+  );
+  group.add(bulge);
+
+  const bulgeOuter = new THREE.Mesh(
+    new THREE.SphereGeometry(320, 48, 48),
+    new THREE.MeshBasicMaterial({
+      color: 0xffcc88, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    })
+  );
+  group.add(bulgeOuter);
+
+  // Faint disk halo
+  const disk = new THREE.Mesh(
+    new THREE.CircleGeometry(radius * 0.95, 96),
+    new THREE.MeshBasicMaterial({
+      color: 0x445588, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+    })
+  );
+  disk.rotation.x = Math.PI / 2;
+  group.add(disk);
+
+  // "Solar System is here" marker — bright pinpoint at the world origin
+  // (after the group offset, that's local position +900,0,0).
+  const marker = new THREE.Mesh(
+    new THREE.SphereGeometry(3.5, 24, 24),
+    new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0 })
+  );
+  marker.position.copy(centerOffset).negate(); // back to (0,0,0) in world
+  group.add(marker);
+
+  const markerGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(9, 24, 24),
+    new THREE.MeshBasicMaterial({
+      color: 0xffff66, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    })
+  );
+  markerGlow.position.copy(marker.position);
+  group.add(markerGlow);
+
+  return {
+    group,
+    setOpacity(o) {
+      armMat.opacity = o * 0.9;
+      bulge.material.opacity = o * 0.55;
+      bulgeOuter.material.opacity = o * 0.30;
+      disk.material.opacity = o * 0.12;
+      // Marker becomes visible only when galaxy is visible (mid-far zoom)
+      const m = Math.max(0, Math.min(1, (o - 0.1) * 1.6));
+      marker.material.opacity = m;
+      markerGlow.material.opacity = m * 0.7;
+    },
+    rotate(da) {
+      group.rotation.y += da;
+    }
+  };
 }
