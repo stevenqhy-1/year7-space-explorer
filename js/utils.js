@@ -36,6 +36,25 @@ export function disposeScene(scene) {
   });
 }
 
+// Soft circular alpha texture for "fuzzy" particles — makes Points look like
+// glowing dust instead of hard pixels. Shared across scenes.
+let _softPointTex = null;
+export function softPointTexture() {
+  if (_softPointTex) return _softPointTex;
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0.0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.25, 'rgba(255,255,255,0.55)');
+  grad.addColorStop(0.6, 'rgba(255,255,255,0.12)');
+  grad.addColorStop(1.0, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+  _softPointTex = new THREE.CanvasTexture(c);
+  return _softPointTex;
+}
+
 // Larger, sharper text sprite labels.
 // scale is the world-space size of the sprite.
 export function makeLabel(text, options = {}) {

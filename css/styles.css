@@ -446,6 +446,42 @@ main {
 }
 .play-formation-btn:active { transform: translateY(0); }
 
+#formation-caption {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8, 12, 24, 0.92);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  padding: 18px 32px;
+  border-radius: 12px;
+  font-size: 18px;
+  line-height: 1.45;
+  text-align: center;
+  max-width: 620px;
+  z-index: 20;
+  border: 1px solid #3a5080;
+  box-shadow: 0 6px 28px rgba(80, 140, 255, 0.35);
+  opacity: 1;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+#formation-caption.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -8px);
+}
+.formation-step {
+  display: block;
+  font-size: 11px;
+  color: #6af;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+#formation-text { display: block; }
+
 /* Scene controls */
 #scene-controls {
   position: fixed;

@@ -64,26 +64,51 @@ function getCursorPivot(clientX, clientY) {
   return controls.target.clone();
 }
 
+// Classify wheel events:
+//   - ctrlKey true        => trackpad pinch     => zoom
+//   - large |deltaY| (>50) and no deltaX => mouse scroll wheel => zoom
+//   - everything else (small magnitudes, possibly with deltaX) => trackpad 2-finger swipe => pan
+const _right = new THREE.Vector3();
+const _up = new THREE.Vector3();
+const _panOffset = new THREE.Vector3();
+
 renderer.domElement.addEventListener('wheel', (e) => {
   if (galleryContainer.classList.contains('hidden') === false) return;
   if (stars2dContainer.classList.contains('hidden') === false) return;
   e.preventDefault();
-  let exponent = e.deltaY * 0.02;
+
+  const isPinch = e.ctrlKey === true;
+  const isMouseWheel = !e.ctrlKey && Math.abs(e.deltaY) > 50 && Math.abs(e.deltaX) < 1;
+  const isSwipe = !isPinch && !isMouseWheel;
+
+  if (isSwipe) {
+    // Pan: move both camera and target along the screen-plane axes.
+    // Pan speed scales with distance so it feels consistent at any zoom.
+    const dist = camera.position.distanceTo(controls.target);
+    const panSpeed = dist * 0.0018;
+    camera.getWorldDirection(_viewDir);
+    _right.crossVectors(_viewDir, camera.up).normalize();
+    _up.crossVectors(_right, _viewDir).normalize();
+    _panOffset.set(0, 0, 0)
+      .addScaledVector(_right, -e.deltaX * panSpeed)
+      .addScaledVector(_up, e.deltaY * panSpeed);
+    camera.position.add(_panOffset);
+    controls.target.add(_panOffset);
+    return;
+  }
+
+  // Zoom path — pivot around the world point under the cursor
+  let exponent = e.deltaY * (isPinch ? 0.02 : 0.012);
   if (exponent > 0.7) exponent = 0.7;
   if (exponent < -0.7) exponent = -0.7;
-  const factor = Math.exp(exponent); // >1 = zoom out, <1 = zoom in
+  const factor = Math.exp(exponent);
 
   const pivot = getCursorPivot(e.clientX, e.clientY);
-
-  // Move camera and target so that the pivot point stays under the cursor.
-  // cam' = pivot + factor * (cam - pivot)
-  // tgt' = pivot + factor * (tgt - pivot)
   _camOffset.subVectors(camera.position, pivot).multiplyScalar(factor);
   _tgtOffset.subVectors(controls.target, pivot).multiplyScalar(factor);
   camera.position.copy(pivot).add(_camOffset);
   controls.target.copy(pivot).add(_tgtOffset);
 
-  // Clamp camera distance from target to [min, max]
   const dist = camera.position.distanceTo(controls.target);
   if (dist < controls.minDistance) {
     const d = camera.position.clone().sub(controls.target).normalize().multiplyScalar(controls.minDistance);
@@ -130,6 +155,9 @@ const initialCameraStates = {};
 
 function loadScene(key) {
   if (currentScene && currentScene.dispose) currentScene.dispose();
+  // Hide any leftover formation caption from a previous scene
+  const cap = document.getElementById('formation-caption');
+  if (cap) cap.classList.add('hidden');
   currentSceneKey = key;
 
   // DOM-only scenes
