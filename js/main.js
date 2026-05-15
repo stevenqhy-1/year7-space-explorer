@@ -179,10 +179,10 @@ function loadScene(key) {
     container.style.display = 'none';
     galleryContainer.classList.add('hidden');
     stars2dContainer.classList.remove('hidden');
-    stars2dPrev.classList.remove('hidden');
-    stars2dNext.classList.remove('hidden');
+    stars2dPrev.classList.add('hidden');  // single-page now — no arrows needed
+    stars2dNext.classList.add('hidden');
     scaleToggle.classList.add('hidden');
-    sidebarTitle.textContent = 'Scale Steps';
+    sidebarTitle.textContent = 'Bodies';
     sceneHint.textContent = content.stars.hint || '';
     buildStars2D(stars2dContainer, content.stars, objectList);
     hideInfo();

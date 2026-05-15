@@ -17,209 +17,270 @@
         "name": "Mercury",
         "type": "Terrestrial planet",
         "caption": "The smallest planet and the closest to the Sun. It has almost no atmosphere, so it bakes by day and freezes at night.",
-        "facts": { "Diameter": "4,879 km", "Day length": "59 Earth days", "Year length": "88 Earth days", "Moons": "0" }
+        "facts": {
+          "Diameter": "4,879 km",
+          "Day length": "59 Earth days",
+          "Year length": "88 Earth days",
+          "Moons": "0"
+        }
       },
       "venus": {
         "name": "Venus",
         "type": "Terrestrial planet",
         "caption": "Earth's 'evil twin'. A thick CO₂ atmosphere traps heat, making it the hottest planet — even hotter than Mercury.",
-        "facts": { "Diameter": "12,104 km", "Surface temp": "465 °C", "Year length": "225 Earth days", "Moons": "0" }
+        "facts": {
+          "Diameter": "12,104 km",
+          "Surface temp": "465 °C",
+          "Year length": "225 Earth days",
+          "Moons": "0"
+        }
       },
       "earth": {
         "name": "Earth",
         "type": "Terrestrial planet",
         "caption": "The only planet known to have life. Liquid water, a protective atmosphere and a magnetic field make it special.",
-        "facts": { "Diameter": "12,742 km", "Day length": "24 hours", "Year length": "365.25 days", "Moons": "1 (Luna)" }
+        "facts": {
+          "Diameter": "12,742 km",
+          "Day length": "24 hours",
+          "Year length": "365.25 days",
+          "Moons": "1 (Luna)"
+        }
       },
       "moon": {
         "name": "The Moon (Luna)",
         "type": "Moon",
         "caption": "Earth's only natural satellite. Its gravity causes our ocean tides. The same side always faces Earth.",
-        "facts": { "Diameter": "3,474 km", "Distance from Earth": "384,400 km", "Orbit period": "27.3 days" }
+        "facts": {
+          "Diameter": "3,474 km",
+          "Distance from Earth": "384,400 km",
+          "Orbit period": "27.3 days"
+        }
       },
       "mars": {
         "name": "Mars",
         "type": "Terrestrial planet",
         "caption": "The 'Red Planet'. Its colour comes from iron oxide (rust) on the surface. Has the tallest volcano in the Solar System.",
-        "facts": { "Diameter": "6,779 km", "Day length": "24.6 hours", "Year length": "687 Earth days", "Moons": "2 (Phobos, Deimos)" }
+        "facts": {
+          "Diameter": "6,779 km",
+          "Day length": "24.6 hours",
+          "Year length": "687 Earth days",
+          "Moons": "2 (Phobos, Deimos)"
+        }
       },
       "jupiter": {
         "name": "Jupiter",
         "type": "Gas giant",
         "caption": "The biggest planet — a giant ball of gas with a storm (the Great Red Spot) larger than Earth that has lasted centuries.",
-        "facts": { "Diameter": "139,820 km", "Moons": "95+", "Year length": "12 Earth years", "Made of": "Hydrogen & helium" }
+        "facts": {
+          "Diameter": "139,820 km",
+          "Moons": "95+",
+          "Year length": "12 Earth years",
+          "Made of": "Hydrogen & helium"
+        }
       },
       "saturn": {
         "name": "Saturn",
         "type": "Gas giant",
         "caption": "Famous for its spectacular rings made of ice and rock. Saturn is so light it would float in water!",
-        "facts": { "Diameter": "116,460 km", "Moons": "146+", "Year length": "29 Earth years", "Rings": "Ice + rock chunks" }
+        "facts": {
+          "Diameter": "116,460 km",
+          "Moons": "146+",
+          "Year length": "29 Earth years",
+          "Rings": "Ice + rock chunks"
+        }
       },
       "uranus": {
         "name": "Uranus",
         "type": "Ice giant",
         "caption": "An 'ice giant' that rotates on its side. A long-ago collision is thought to have knocked it over.",
-        "facts": { "Diameter": "50,724 km", "Tilt": "98°", "Year length": "84 Earth years", "Moons": "27" }
+        "facts": {
+          "Diameter": "50,724 km",
+          "Tilt": "98°",
+          "Year length": "84 Earth years",
+          "Moons": "27"
+        }
       },
       "neptune": {
         "name": "Neptune",
         "type": "Ice giant",
         "caption": "The windiest planet — supersonic winds rip through its blue atmosphere at over 2,000 km/h.",
-        "facts": { "Diameter": "49,244 km", "Wind speed": "Up to 2,100 km/h", "Year length": "165 Earth years", "Moons": "14" }
+        "facts": {
+          "Diameter": "49,244 km",
+          "Wind speed": "Up to 2,100 km/h",
+          "Year length": "165 Earth years",
+          "Moons": "14"
+        }
       },
       "asteroid": {
         "name": "Asteroid Belt",
         "type": "Asteroids",
         "caption": "Rocky leftovers from the Solar System's formation, mostly between Mars and Jupiter. Smaller pieces that fly through space are called meteoroids.",
-        "facts": { "Location": "Between Mars & Jupiter", "Largest": "Ceres (940 km)", "Total mass": "Less than our Moon" }
+        "facts": {
+          "Location": "Between Mars & Jupiter",
+          "Largest": "Ceres (940 km)",
+          "Total mass": "Less than our Moon"
+        }
       },
       "comet": {
         "name": "Comet",
         "type": "Comet",
         "caption": "A 'dirty snowball' of ice, dust and rock. When it nears the Sun, it heats up and grows a glowing tail that always points away from the Sun.",
-        "facts": { "Made of": "Ice, dust, rock", "Tail": "Up to millions of km long", "Famous example": "Halley's Comet (returns every 76 years)" }
+        "facts": {
+          "Made of": "Ice, dust, rock",
+          "Tail": "Up to millions of km long",
+          "Famous example": "Halley's Comet (returns every 76 years)"
+        }
       },
       "meteor": {
         "name": "Meteor (Shooting Star)",
         "type": "Meteor",
         "caption": "A meteoroid burning up in Earth's atmosphere from friction. If a piece reaches the ground it's called a meteorite.",
-        "facts": { "Meteoroid": "In space", "Meteor": "Burning in atmosphere", "Meteorite": "Hits the ground", "Speed": "Up to 70 km/s" }
+        "facts": {
+          "Meteoroid": "In space",
+          "Meteor": "Burning in atmosphere",
+          "Meteorite": "Hits the ground",
+          "Speed": "Up to 70 km/s"
+        }
       }
     }
   },
   "stars": {
-    "hint": "Scroll down through the size comparisons — from our Moon all the way up to the largest known stars. Click any object for more info.",
-    "panels": [
+    "hint": "The Sun and all 8 planets, side by side at relative size. Click any for facts.",
+    "bodies": [
       {
-        "title": "1. Moons & small rocky worlds",
-        "subtitle": "Starting point: smaller than Earth",
-        "objects": [
-          { "key": "moon", "name": "The Moon", "type": "Moon", "diameter_km": 3474,
-            "css": "radial-gradient(circle at 32% 28%, #ddd6c4 0%, #8b8275 45%, #3a3528 100%)",
-            "color": "#aaa", "caption": "Earth's only natural satellite. Its gravity causes ocean tides.",
-            "facts": { "Diameter": "3,474 km", "Distance from Earth": "384,400 km", "Made of": "Rock & dust" } },
-          { "key": "mercury", "name": "Mercury", "type": "Terrestrial planet", "diameter_km": 4879,
-            "css": "radial-gradient(circle at 32% 28%, #c8b8a0 0%, #80695a 50%, #3a2d20 100%)",
-            "color": "#aaa", "caption": "Smallest planet, closest to the Sun. No real atmosphere.",
-            "facts": { "Diameter": "4,879 km", "Day": "59 Earth days", "Year": "88 Earth days" } },
-          { "key": "mars", "name": "Mars", "type": "Terrestrial planet", "diameter_km": 6779,
-            "css": "radial-gradient(circle at 32% 28%, #f0a06e 0%, #b04a20 50%, #3a1408 100%)",
-            "color": "#c1602e", "caption": "The 'Red Planet'. Rust-coloured soil and the tallest volcano in the Solar System.",
-            "facts": { "Diameter": "6,779 km", "Day": "24.6 hours", "Moons": "2" } },
-          { "key": "earth", "name": "Earth", "type": "Terrestrial planet", "diameter_km": 12742,
-            "css": "radial-gradient(circle at 28% 25%, #9bd0ff 0%, #4a8fe7 30%, #1e3a6e 75%, #060f24 100%)",
-            "color": "#4a8fe7", "caption": "Our home. The only planet known to have life.",
-            "facts": { "Diameter": "12,742 km", "Distance from Sun": "150 million km" } }
-        ]
+        "key": "sun",
+        "name": "Sun",
+        "type": "Yellow dwarf star",
+        "diameter_km": 1391000,
+        "css": "radial-gradient(circle at 30% 28%, #fff8cc 0%, #ffdd55 25%, #ee8822 75%, #4a1500 100%)",
+        "color": "#ffcc55",
+        "glow": "#ff9933",
+        "caption": "Our star. About 109 Earths could fit across its diameter.",
+        "facts": {
+          "Diameter": "1,391,000 km",
+          "Mass": "333,000 × Earth",
+          "Surface temp": "5,500 °C"
+        }
       },
       {
-        "title": "2. Earth vs the gas giants",
-        "subtitle": "Now Earth becomes the small one",
-        "objects": [
-          { "key": "earth", "name": "Earth", "type": "Terrestrial planet", "diameter_km": 12742,
-            "css": "radial-gradient(circle at 28% 25%, #9bd0ff 0%, #4a8fe7 30%, #1e3a6e 75%, #060f24 100%)",
-            "color": "#4a8fe7", "caption": "Our home planet, dwarfed by gas giants.",
-            "facts": { "Diameter": "12,742 km" } },
-          { "key": "neptune", "name": "Neptune", "type": "Ice giant", "diameter_km": 49244,
-            "css": "radial-gradient(circle at 28% 25%, #7faaff 0%, #2244cc 50%, #0a1a4a 100%)",
-            "color": "#4166f5", "caption": "Roughly 4× wider than Earth. The windiest planet.",
-            "facts": { "Diameter": "49,244 km", "Earths across": "≈4" } },
-          { "key": "saturn", "name": "Saturn", "type": "Gas giant", "diameter_km": 116460,
-            "css": "radial-gradient(circle at 28% 25%, #f3dca6 0%, #c4a060 45%, #6b4a18 100%)",
-            "color": "#e6cf99", "caption": "A gas giant ~9× wider than Earth. Famously ringed.",
-            "facts": { "Diameter": "116,460 km", "Earths across": "≈9" } },
-          { "key": "jupiter", "name": "Jupiter", "type": "Gas giant", "diameter_km": 139820,
-            "css": "radial-gradient(circle at 28% 25%, #f0d4a8 0%, #b48050 45%, #5a3018 100%)",
-            "color": "#d4a373", "caption": "The biggest planet — about 11× Earth's diameter.",
-            "facts": { "Diameter": "139,820 km", "Earths across": "≈11" } }
-        ]
+        "key": "mercury",
+        "name": "Mercury",
+        "type": "Terrestrial planet",
+        "diameter_km": 4879,
+        "css": "radial-gradient(circle at 32% 28%, #c8b8a0 0%, #80695a 50%, #3a2d20 100%)",
+        "color": "#aaa",
+        "caption": "Smallest planet, closest to the Sun. Almost no atmosphere.",
+        "facts": {
+          "Diameter": "4,879 km",
+          "Day length": "59 Earth days",
+          "Year length": "88 Earth days",
+          "Moons": "0"
+        }
       },
       {
-        "title": "3. The Sun dwarfs everything",
-        "subtitle": "Now even Jupiter is tiny",
-        "objects": [
-          { "key": "earth-tiny", "name": "Earth", "type": "Terrestrial planet", "diameter_km": 12742,
-            "css": "radial-gradient(circle at 28% 25%, #9bd0ff 0%, #4a8fe7 60%, #060f24 100%)",
-            "color": "#4a8fe7", "caption": "Our planet. The Sun is about 109× wider.",
-            "facts": { "Diameter": "12,742 km" } },
-          { "key": "jupiter", "name": "Jupiter", "type": "Gas giant", "diameter_km": 139820,
-            "css": "radial-gradient(circle at 28% 25%, #f0d4a8 0%, #b48050 45%, #5a3018 100%)",
-            "color": "#d4a373", "caption": "Largest planet — the Sun is still ~10× wider.",
-            "facts": { "Diameter": "139,820 km" } },
-          { "key": "sun", "name": "The Sun", "type": "Yellow dwarf star", "diameter_km": 1391000,
-            "css": "radial-gradient(circle at 30% 28%, #fff8cc 0%, #ffdd55 25%, #ee8822 75%, #4a1500 100%)",
-            "color": "#ffcc55", "glow": "#ff9933",
-            "caption": "Our star. 1.39 million km wide — about 109 Earths could fit across it.",
-            "facts": { "Diameter": "1,391,000 km", "Type": "G-type main sequence (yellow dwarf)", "Earths across": "109" } }
-        ]
+        "key": "venus",
+        "name": "Venus",
+        "type": "Terrestrial planet",
+        "diameter_km": 12104,
+        "css": "radial-gradient(circle at 32% 28%, #f0c98c 0%, #b07a44 50%, #5a3018 100%)",
+        "color": "#e5b87a",
+        "caption": "Earth's 'evil twin' — hottest planet, thick CO₂ atmosphere traps heat.",
+        "facts": {
+          "Diameter": "12,104 km",
+          "Surface temp": "465 °C",
+          "Year length": "225 Earth days",
+          "Moons": "0"
+        }
       },
       {
-        "title": "4. The Sun vs main-sequence stars",
-        "subtitle": "Most stars are similar size to the Sun — but some are bigger",
-        "objects": [
-          { "key": "sun", "name": "The Sun", "type": "Yellow dwarf star", "diameter_km": 1391000,
-            "css": "radial-gradient(circle at 30% 28%, #fff8cc 0%, #ffdd55 25%, #ee8822 75%, #4a1500 100%)",
-            "color": "#ffcc55", "glow": "#ff9933",
-            "caption": "Our Sun, the reference point.",
-            "facts": { "Diameter": "1.39 million km" } },
-          { "key": "sirius", "name": "Sirius A", "type": "Main sequence star", "diameter_km": 2380000,
-            "css": "radial-gradient(circle at 30% 28%, #ffffff 0%, #cce4ff 30%, #4a78cc 75%, #0a1830 100%)",
-            "color": "#bbddff", "glow": "#88bbff",
-            "caption": "The brightest star in Earth's night sky. 1.7× the Sun's diameter.",
-            "facts": { "Diameter": "2.4 million km", "Distance": "8.6 light-years" } },
-          { "key": "arcturus", "name": "Arcturus", "type": "Red giant", "diameter_km": 35700000,
-            "css": "radial-gradient(circle at 30% 28%, #ffe28a 0%, #ff8a3a 35%, #c83a18 80%, #4a0800 100%)",
-            "color": "#ff8844", "glow": "#ff5522",
-            "caption": "A red giant — what the Sun will become in about 5 billion years. ~26× the Sun's diameter.",
-            "facts": { "Diameter": "≈36 million km", "Stage": "End-of-life red giant" } }
-        ]
+        "key": "earth",
+        "name": "Earth",
+        "type": "Terrestrial planet",
+        "diameter_km": 12742,
+        "css": "radial-gradient(circle at 28% 25%, #9bd0ff 0%, #4a8fe7 30%, #1e3a6e 75%, #060f24 100%)",
+        "color": "#4a8fe7",
+        "caption": "Our home. The only planet known to have life.",
+        "facts": {
+          "Diameter": "12,742 km",
+          "Day length": "24 hours",
+          "Year length": "365.25 days",
+          "Moons": "1 (Luna)"
+        }
       },
       {
-        "title": "5. Red giants and supergiants",
-        "subtitle": "Now the Sun would be a single pixel",
-        "objects": [
-          { "key": "arcturus", "name": "Arcturus", "type": "Red giant", "diameter_km": 35700000,
-            "css": "radial-gradient(circle at 30% 28%, #ffe28a 0%, #ff8a3a 35%, #c83a18 80%, #4a0800 100%)",
-            "color": "#ff8844", "glow": "#ff5522",
-            "caption": "A red giant (~26× the Sun).",
-            "facts": { "Diameter": "≈36 million km" } },
-          { "key": "rigel", "name": "Rigel", "type": "Blue supergiant", "diameter_km": 110000000,
-            "css": "radial-gradient(circle at 30% 28%, #f0faff 0%, #aaccff 30%, #4a78cc 75%, #0a1830 100%)",
-            "color": "#aaccff", "glow": "#6688ff",
-            "caption": "Bright foot of Orion. A blue supergiant ~79× the Sun's diameter and 120,000× as luminous.",
-            "facts": { "Diameter": "≈110 million km", "Luminosity": "120,000× the Sun" } },
-          { "key": "antares", "name": "Antares", "type": "Red supergiant", "diameter_km": 960000000,
-            "css": "radial-gradient(circle at 30% 28%, #ffaa66 0%, #d44820 40%, #6a0c00 85%, #1a0000 100%)",
-            "color": "#ff5522", "glow": "#cc3311",
-            "caption": "Heart of Scorpius. A red supergiant ~700× the Sun's diameter.",
-            "facts": { "Diameter": "≈960 million km", "If swapped with Sun": "Would extend past Mars" } }
-        ]
+        "key": "mars",
+        "name": "Mars",
+        "type": "Terrestrial planet",
+        "diameter_km": 6779,
+        "css": "radial-gradient(circle at 32% 28%, #f0a06e 0%, #b04a20 50%, #3a1408 100%)",
+        "color": "#c1602e",
+        "caption": "The 'Red Planet'. Rust-coloured soil, tallest volcano in the Solar System.",
+        "facts": {
+          "Diameter": "6,779 km",
+          "Day length": "24.6 hours",
+          "Year length": "687 Earth days",
+          "Moons": "2"
+        }
       },
       {
-        "title": "6. The largest known stars",
-        "subtitle": "Hypergiants — barely comprehensible scale",
-        "objects": [
-          { "key": "antares", "name": "Antares", "type": "Red supergiant", "diameter_km": 960000000,
-            "css": "radial-gradient(circle at 30% 28%, #ffaa66 0%, #d44820 40%, #6a0c00 85%, #1a0000 100%)",
-            "color": "#ff5522", "glow": "#cc3311",
-            "caption": "Red supergiant ~700× the Sun.",
-            "facts": { "Diameter": "≈960 million km" } },
-          { "key": "betelgeuse", "name": "Betelgeuse", "type": "Red supergiant", "diameter_km": 1180000000,
-            "css": "radial-gradient(circle at 30% 28%, #ffbb70 0%, #d83820 40%, #6a0800 85%, #1a0000 100%)",
-            "color": "#ff4422", "glow": "#cc2200",
-            "caption": "Shoulder of Orion. ~850× the Sun. If placed where the Sun is, it would swallow Mars.",
-            "facts": { "Diameter": "≈1.2 billion km", "Distance": "≈550 light-years" } },
-          { "key": "uy-scuti", "name": "UY Scuti", "type": "Hypergiant", "diameter_km": 2400000000,
-            "css": "radial-gradient(circle at 30% 28%, #ff9866 0%, #c02810 40%, #500400 90%, #100000 100%)",
-            "color": "#cc2200", "glow": "#aa1100",
-            "caption": "A red hypergiant. Light would take ~7 hours to travel across it.",
-            "facts": { "Diameter": "≈2.4 billion km", "Sun-equivalents": "≈1,700" } },
-          { "key": "stephenson", "name": "Stephenson 2-18", "type": "Hypergiant", "diameter_km": 3000000000,
-            "css": "radial-gradient(circle at 30% 28%, #ff7755 0%, #aa1800 45%, #3a0200 90%, #050000 100%)",
-            "color": "#990800", "glow": "#770000",
-            "caption": "One of the largest stars ever measured — about 2,150× the Sun's diameter. Would extend past Saturn.",
-            "facts": { "Diameter": "≈3 billion km", "Sun-equivalents": "≈2,150" } }
-        ]
+        "key": "jupiter",
+        "name": "Jupiter",
+        "type": "Gas giant",
+        "diameter_km": 139820,
+        "css": "radial-gradient(circle at 28% 25%, #f0d4a8 0%, #b48050 45%, #5a3018 100%)",
+        "color": "#d4a373",
+        "caption": "Biggest planet — about 11× Earth's diameter. Storm bigger than Earth has raged for centuries.",
+        "facts": {
+          "Diameter": "139,820 km",
+          "Moons": "95+",
+          "Year length": "12 Earth years",
+          "Earths across": "≈11"
+        }
+      },
+      {
+        "key": "saturn",
+        "name": "Saturn",
+        "type": "Gas giant",
+        "diameter_km": 116460,
+        "css": "radial-gradient(circle at 28% 25%, #f3dca6 0%, #c4a060 45%, #6b4a18 100%)",
+        "color": "#e6cf99",
+        "caption": "Famous for its rings of ice and rock. So light it would float in water!",
+        "facts": {
+          "Diameter": "116,460 km",
+          "Moons": "146+",
+          "Year length": "29 Earth years",
+          "Earths across": "≈9"
+        }
+      },
+      {
+        "key": "uranus",
+        "name": "Uranus",
+        "type": "Ice giant",
+        "diameter_km": 50724,
+        "css": "radial-gradient(circle at 28% 25%, #bce4e6 0%, #6cb8c4 50%, #1c3e4c 100%)",
+        "color": "#9fd8e0",
+        "caption": "An ice giant that rotates on its side. Pale blue-green from methane in its atmosphere.",
+        "facts": {
+          "Diameter": "50,724 km",
+          "Tilt": "98°",
+          "Year length": "84 Earth years",
+          "Moons": "27"
+        }
+      },
+      {
+        "key": "neptune",
+        "name": "Neptune",
+        "type": "Ice giant",
+        "diameter_km": 49244,
+        "css": "radial-gradient(circle at 28% 25%, #7faaff 0%, #2244cc 50%, #0a1a4a 100%)",
+        "color": "#4166f5",
+        "caption": "The windiest planet — supersonic winds up to 2,100 km/h.",
+        "facts": {
+          "Diameter": "49,244 km",
+          "Wind speed": "Up to 2,100 km/h",
+          "Year length": "165 Earth years",
+          "Moons": "14"
+        }
       }
     ]
   },
@@ -230,31 +291,51 @@
         "name": "White Dwarf",
         "type": "Stellar Remnant",
         "caption": "The hot, dense core left behind when a Sun-like star dies. Earth-sized but as heavy as the Sun.",
-        "facts": { "Size": "Earth-sized", "Density": "A teaspoon weighs ≈1 tonne", "Made of": "Carbon & oxygen" }
+        "facts": {
+          "Size": "Earth-sized",
+          "Density": "A teaspoon weighs ≈1 tonne",
+          "Made of": "Carbon & oxygen"
+        }
       },
       "neutron-star": {
         "name": "Neutron Star",
         "type": "Stellar Remnant",
         "caption": "What's left after a massive star explodes. A city-sized ball so dense that one teaspoon would weigh as much as a mountain.",
-        "facts": { "Size": "≈20 km across", "Mass": "1.4–2× the Sun", "Density": "Extreme" }
+        "facts": {
+          "Size": "≈20 km across",
+          "Mass": "1.4–2× the Sun",
+          "Density": "Extreme"
+        }
       },
       "pulsar": {
         "name": "Pulsar",
         "type": "Stellar Remnant",
         "caption": "A spinning neutron star that beams radio waves out of its poles. Like a cosmic lighthouse, we see a pulse every time the beam sweeps past Earth.",
-        "facts": { "Spin rate": "Up to 700× per second", "Beam": "Radio waves", "Discovered": "1967" }
+        "facts": {
+          "Spin rate": "Up to 700× per second",
+          "Beam": "Radio waves",
+          "Discovered": "1967"
+        }
       },
       "black-hole": {
         "name": "Black Hole",
         "type": "Stellar Remnant",
         "caption": "An object with gravity so strong that not even light can escape. The bright ring around it is an accretion disk — superheated gas spiralling in.",
-        "facts": { "Event horizon": "Point of no return", "Made by": "Very massive stars collapsing", "First imaged": "2019 (M87*)" }
+        "facts": {
+          "Event horizon": "Point of no return",
+          "Made by": "Very massive stars collapsing",
+          "First imaged": "2019 (M87*)"
+        }
       },
       "supernova": {
         "name": "Supernova",
         "type": "Stellar Event",
         "caption": "The gigantic explosion of a dying massive star. Briefly outshines an entire galaxy and scatters elements like iron and gold across space.",
-        "facts": { "Brightness": "Outshines a galaxy", "Duration": "Visible for weeks", "Leaves behind": "Neutron star or black hole" }
+        "facts": {
+          "Brightness": "Outshines a galaxy",
+          "Duration": "Visible for weeks",
+          "Leaves behind": "Neutron star or black hole"
+        }
       }
     }
   },
@@ -265,25 +346,41 @@
         "name": "Milky Way",
         "type": "Spiral Galaxy",
         "caption": "Our home galaxy. A barred spiral containing 100–400 billion stars. Our Sun is on one of the spiral arms.",
-        "facts": { "Type": "Barred spiral", "Stars": "100–400 billion", "Diameter": "≈100,000 light-years" }
+        "facts": {
+          "Type": "Barred spiral",
+          "Stars": "100–400 billion",
+          "Diameter": "≈100,000 light-years"
+        }
       },
       "andromeda": {
         "name": "Andromeda",
         "type": "Spiral Galaxy",
         "caption": "Our closest large galactic neighbour. It's heading toward us — in about 4.5 billion years it will collide with the Milky Way.",
-        "facts": { "Distance": "2.5 million light-years", "Stars": "≈1 trillion", "Fate": "Will merge with Milky Way" }
+        "facts": {
+          "Distance": "2.5 million light-years",
+          "Stars": "≈1 trillion",
+          "Fate": "Will merge with Milky Way"
+        }
       },
       "elliptical": {
         "name": "Elliptical Galaxy",
         "type": "Galaxy",
         "caption": "Football-shaped galaxies made of mostly older stars, with little gas left to form new ones. Often the largest galaxies in the universe.",
-        "facts": { "Shape": "Oval / spherical", "Stars": "Mostly old, red", "Example": "M87" }
+        "facts": {
+          "Shape": "Oval / spherical",
+          "Stars": "Mostly old, red",
+          "Example": "M87"
+        }
       },
       "irregular": {
         "name": "Irregular Galaxy",
         "type": "Galaxy",
         "caption": "Galaxies with no clear shape, often warped by collisions with other galaxies. Many small galaxies are irregular.",
-        "facts": { "Shape": "No clear pattern", "Cause": "Often gravitational interactions", "Example": "Magellanic Clouds" }
+        "facts": {
+          "Shape": "No clear pattern",
+          "Cause": "Often gravitational interactions",
+          "Example": "Magellanic Clouds"
+        }
       }
     }
   },
@@ -294,73 +391,121 @@
         "name": "Aries ♈ (The Ram)",
         "type": "Zodiac constellation",
         "caption": "A small, faint constellation. In Greek myth, this is the ram with the Golden Fleece. Brightest star is Hamal.",
-        "facts": { "Brightest star": "Hamal", "Zodiac dates": "21 Mar – 19 Apr", "Best from WA": "October–December" }
+        "facts": {
+          "Brightest star": "Hamal",
+          "Zodiac dates": "21 Mar – 19 Apr",
+          "Best from WA": "October–December"
+        }
       },
       "taurus": {
         "name": "Taurus ♉ (The Bull)",
         "type": "Zodiac constellation",
         "caption": "Easy to spot by its V-shaped face and the orange eye — Aldebaran, a red giant. Contains the Pleiades star cluster.",
-        "facts": { "Brightest star": "Aldebaran (red giant)", "Zodiac dates": "20 Apr – 20 May", "Best from WA": "November–March" }
+        "facts": {
+          "Brightest star": "Aldebaran (red giant)",
+          "Zodiac dates": "20 Apr – 20 May",
+          "Best from WA": "November–March"
+        }
       },
       "gemini": {
         "name": "Gemini ♊ (The Twins)",
         "type": "Zodiac constellation",
         "caption": "Two long parallel lines of stars topped by Castor and Pollux — the heads of the mythological twins.",
-        "facts": { "Brightest stars": "Castor & Pollux", "Zodiac dates": "21 May – 20 Jun", "Best from WA": "December–April" }
+        "facts": {
+          "Brightest stars": "Castor & Pollux",
+          "Zodiac dates": "21 May – 20 Jun",
+          "Best from WA": "December–April"
+        }
       },
       "cancer": {
         "name": "Cancer ♋ (The Crab)",
         "type": "Zodiac constellation",
         "caption": "The faintest zodiac constellation. Contains the Beehive Cluster (M44) — a nice binocular target.",
-        "facts": { "Notable": "Beehive Cluster (M44)", "Zodiac dates": "21 Jun – 22 Jul", "Best from WA": "February–May" }
+        "facts": {
+          "Notable": "Beehive Cluster (M44)",
+          "Zodiac dates": "21 Jun – 22 Jul",
+          "Best from WA": "February–May"
+        }
       },
       "leo": {
         "name": "Leo ♌ (The Lion)",
         "type": "Zodiac constellation",
         "caption": "One of the few constellations that actually looks like its namesake. The 'sickle' forms the lion's mane.",
-        "facts": { "Brightest star": "Regulus", "Zodiac dates": "23 Jul – 22 Aug", "Best from WA": "February–June" }
+        "facts": {
+          "Brightest star": "Regulus",
+          "Zodiac dates": "23 Jul – 22 Aug",
+          "Best from WA": "February–June"
+        }
       },
       "virgo": {
         "name": "Virgo ♍ (The Maiden)",
         "type": "Zodiac constellation",
         "caption": "The second-largest constellation. Brightest star is Spica, a hot blue-white giant.",
-        "facts": { "Brightest star": "Spica (blue giant)", "Zodiac dates": "23 Aug – 22 Sep", "Best from WA": "March–July" }
+        "facts": {
+          "Brightest star": "Spica (blue giant)",
+          "Zodiac dates": "23 Aug – 22 Sep",
+          "Best from WA": "March–July"
+        }
       },
       "libra": {
         "name": "Libra ♎ (The Scales)",
         "type": "Zodiac constellation",
         "caption": "The only zodiac constellation that represents an object, not a person or animal. Was originally the claws of Scorpius.",
-        "facts": { "Brightest star": "Zubeneschamali", "Zodiac dates": "23 Sep – 22 Oct", "Best from WA": "April–August" }
+        "facts": {
+          "Brightest star": "Zubeneschamali",
+          "Zodiac dates": "23 Sep – 22 Oct",
+          "Best from WA": "April–August"
+        }
       },
       "scorpius": {
         "name": "Scorpius ♏ (The Scorpion)",
         "type": "Zodiac constellation",
         "caption": "Bright, scorpion-shaped pattern with the red supergiant Antares as its heart. Excellent view from WA in winter.",
-        "facts": { "Brightest star": "Antares (red supergiant)", "Zodiac dates": "23 Oct – 21 Nov", "Best from WA": "May–September" }
+        "facts": {
+          "Brightest star": "Antares (red supergiant)",
+          "Zodiac dates": "23 Oct – 21 Nov",
+          "Best from WA": "May–September"
+        }
       },
       "sagittarius": {
         "name": "Sagittarius ♐ (The Archer)",
         "type": "Zodiac constellation",
         "caption": "Look for the 'teapot' asterism. The centre of our Milky Way galaxy lies in this direction.",
-        "facts": { "Asterism": "The Teapot", "Special": "Contains galactic centre", "Best from WA": "June–October" }
+        "facts": {
+          "Asterism": "The Teapot",
+          "Special": "Contains galactic centre",
+          "Best from WA": "June–October"
+        }
       },
       "capricorn": {
         "name": "Capricorn ♑ (The Sea-goat)",
         "type": "Zodiac constellation",
         "caption": "A mythological creature with a goat's body and fish's tail. Faint but ancient — one of the oldest recognised patterns.",
-        "facts": { "Brightest star": "Deneb Algedi", "Zodiac dates": "22 Dec – 19 Jan", "Best from WA": "July–November" }
+        "facts": {
+          "Brightest star": "Deneb Algedi",
+          "Zodiac dates": "22 Dec – 19 Jan",
+          "Best from WA": "July–November"
+        }
       },
       "aquarius": {
         "name": "Aquarius ♒ (The Water-bearer)",
         "type": "Zodiac constellation",
         "caption": "A large but faint pattern showing a person pouring water. Best viewed under dark skies away from city lights.",
-        "facts": { "Brightest star": "Sadalsuud", "Zodiac dates": "20 Jan – 18 Feb", "Best from WA": "August–December" }
+        "facts": {
+          "Brightest star": "Sadalsuud",
+          "Zodiac dates": "20 Jan – 18 Feb",
+          "Best from WA": "August–December"
+        }
       },
       "pisces": {
         "name": "Pisces ♓ (The Fish)",
         "type": "Zodiac constellation",
         "caption": "Two fish connected by a long cord — in myth, Aphrodite and her son tied together as they fled. Mostly faint stars.",
-        "facts": { "Brightest star": "Eta Piscium", "Zodiac dates": "19 Feb – 20 Mar", "Best from WA": "September–January" }
+        "facts": {
+          "Brightest star": "Eta Piscium",
+          "Zodiac dates": "19 Feb – 20 Mar",
+          "Best from WA": "September–January"
+        }
       }
     }
   },

@@ -150,42 +150,35 @@ main {
 #stars2d-prev { left: 240px; }
 #stars2d-next { right: 24px; }
 
-/* Stars 2D size-comparison — horizontal scroll */
+/* Stars 2D — single-page solar system size comparison */
 #stars2d-container {
   position: absolute;
   top: 60px;
   left: 220px;
   right: 0;
   bottom: 38px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: radial-gradient(ellipse at center, #0a1024 0%, #000005 80%);
-  scroll-behavior: smooth;
-  scroll-snap-type: x proximity;
-  display: flex;
-  flex-direction: row;
-  white-space: nowrap;
+  padding: 20px 30px;
 }
 #stars2d-container.hidden { display: none; }
 .stars2d-intro {
-  display: none;  /* shown as sidebar hint instead, to save horizontal space */
+  text-align: center;
+  color: #aab;
+  font-size: 14px;
+  line-height: 1.55;
+  margin-bottom: 20px;
 }
-.stars2d-panel {
-  flex-shrink: 0;
-  width: 100%;
-  height: 100%;
-  scroll-snap-align: start;
-  padding: 30px 60px 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  border-right: 1px solid #0f1424;
-  white-space: normal;
+.stars2d-section {
+  margin-bottom: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid #0f1424;
 }
-.stars2d-panel h2 {
+.stars2d-section:last-child { border-bottom: none; }
+.stars2d-section h2 {
   color: #9cf;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
   margin-bottom: 4px;
   text-align: center;
@@ -193,18 +186,17 @@ main {
 .stars2d-subtitle {
   color: #6680a8;
   font-size: 13px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   font-style: italic;
+  text-align: center;
 }
 .stars2d-row {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 50px;
-  flex-wrap: nowrap;
+  gap: 32px;
+  flex-wrap: wrap;
   width: 100%;
-  flex: 1;
-  min-height: 60vh;
 }
 .stars2d-obj-wrap {
   display: flex;
@@ -213,9 +205,18 @@ main {
   justify-content: flex-end;
   cursor: pointer;
   transition: transform 0.2s;
-  padding: 0 8px;
+  padding: 0 6px;
+  position: relative;
 }
 .stars2d-obj-wrap:hover { transform: translateY(-4px); }
+.stars2d-obj-wrap.pulse .stars2d-obj {
+  animation: pulse-glow 1.2s ease-out;
+}
+@keyframes pulse-glow {
+  0%   { box-shadow: 0 0 0 0 rgba(120, 180, 255, 0.7); }
+  60%  { box-shadow: 0 0 0 18px rgba(120, 180, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(120, 180, 255, 0); }
+}
 .stars2d-obj {
   border-radius: 50%;
   min-width: 2px;

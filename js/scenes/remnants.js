@@ -487,7 +487,14 @@ function makeFormationRunner(phases, mainMeshes, hideCaption) {
 }
 
 // Spherical particle explosion — particles fly outward from origin with given velocities.
+// speedScale lets us tune how far debris flies; smaller = stays on screen longer.
+function makeExplosionParticlesScaled(group, count, speedScale = 1.0, colorFn = null) {
+  return _makeExplosionParticles(group, count, speedScale, colorFn);
+}
 function makeExplosionParticles(group, count, colorFn = null) {
+  return _makeExplosionParticles(group, count, 1.0, colorFn);
+}
+function _makeExplosionParticles(group, count, speedScale, colorFn) {
   const positions = new Float32Array(count * 3);
   const velocities = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
@@ -499,7 +506,7 @@ function makeExplosionParticles(group, count, colorFn = null) {
     const dirX = Math.sin(phi) * Math.cos(theta);
     const dirY = Math.sin(phi) * Math.sin(theta);
     const dirZ = Math.cos(phi);
-    const speed = 6 + Math.random() * 22;
+    const speed = (6 + Math.random() * 22) * speedScale;
     velocities[i*3]   = dirX * speed;
     velocities[i*3+1] = dirY * speed;
     velocities[i*3+2] = dirZ * speed;
@@ -539,20 +546,19 @@ function setExplosionTime(particles, tSec, drag = 0.0) {
 
 // ───────── WHITE DWARF: Sun-like star → red giant → planetary nebula → white dwarf
 function makeWhiteDwarfFormation(group, mainMeshes, setCaption, hideCaption) {
-  // Parent star: Sun-like → red giant
+  // Smaller meshes so the full animation fits the default camera view.
   const star = new THREE.Mesh(
-    new THREE.SphereGeometry(1.4, 48, 48),
+    new THREE.SphereGeometry(0.7, 48, 48),
     new THREE.MeshBasicMaterial({ color: 0xffdd66 })
   );
   star.visible = false;
   group.add(star);
   const starGlow = new THREE.Mesh(
-    new THREE.SphereGeometry(2.2, 48, 48),
+    new THREE.SphereGeometry(1.1, 48, 48),
     new THREE.MeshBasicMaterial({ color: 0xffaa44, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })
   );
   starGlow.visible = false;
   group.add(starGlow);
-  // Planetary nebula shell — multi-layer with concentric rings
   const shell = new THREE.Mesh(
     new THREE.SphereGeometry(1, 48, 48),
     new THREE.MeshBasicMaterial({
@@ -574,7 +580,7 @@ function makeWhiteDwarfFormation(group, mainMeshes, setCaption, hideCaption) {
 
   const phases = [
     {
-      duration: 2.2,
+      duration: 4.0,
       onEnter: () => {
         setCaption('Step 1 of 4', 'A Sun-like star burns hydrogen in its core for about 10 billion years.');
         star.visible = true; starGlow.visible = true;
@@ -592,13 +598,13 @@ function makeWhiteDwarfFormation(group, mainMeshes, setCaption, hideCaption) {
       }
     },
     {
-      duration: 2.5,
+      duration: 5.0,
       onEnter: () => {
         setCaption('Step 2 of 4', 'After billions of years, the core runs out of hydrogen. The star swells into a red giant.');
       },
       update: (t) => {
-        // Star inflates and reddens
-        const scale = 1 + t * 2.4;
+        // Star inflates and reddens — but caps at a smaller max scale so it fits view
+        const scale = 1 + t * 1.6;
         star.scale.setScalar(scale);
         starGlow.scale.setScalar(scale * 1.3);
         const r = 1.0, g = 0.85 - t * 0.6, b = 0.4 - t * 0.35;
@@ -608,20 +614,19 @@ function makeWhiteDwarfFormation(group, mainMeshes, setCaption, hideCaption) {
       }
     },
     {
-      duration: 2.5,
+      duration: 5.0,
       onEnter: () => {
         setCaption('Step 3 of 4', 'The red giant gently sheds its outer layers — forming a glowing planetary nebula.');
         shell.visible = true; shell2.visible = true;
         shell.scale.setScalar(1); shell2.scale.setScalar(0.8);
       },
       update: (t) => {
-        // Star shrinks while shell expands outward
-        const sScale = Math.max(0.4, 3.4 - t * 3);
+        const sScale = Math.max(0.4, 2.6 - t * 2.2);
         star.scale.setScalar(sScale);
         starGlow.scale.setScalar(sScale * 1.3);
         star.material.opacity = Math.max(0.2, 1 - t * 0.7);
-        // Shells expand
-        const sh = 1 + t * 9;
+        // Shells expand — smaller max so they stay on screen
+        const sh = 1 + t * 5;
         shell.scale.setScalar(sh);
         shell2.scale.setScalar(sh * 0.85);
         shell.material.opacity = 0.7 * (1 - Math.pow(t, 0.7));
@@ -629,7 +634,7 @@ function makeWhiteDwarfFormation(group, mainMeshes, setCaption, hideCaption) {
       }
     },
     {
-      duration: 2.8,
+      duration: 4.5,
       onEnter: () => {
         setCaption('Step 4 of 4', 'What remains: a white dwarf — Earth-sized but as heavy as the Sun.');
       },
@@ -660,37 +665,36 @@ function makeWhiteDwarfFormation(group, mainMeshes, setCaption, hideCaption) {
 }
 
 // ───────── SUPERNOVA → REMNANT (used for neutron star, pulsar)
-// Different remnantLabel/description per call.
 function makeSupernovaCollapseFormation(group, mainMeshes, setCaption, hideCaption, opts) {
-  const { parentColor, parentRadius, remnantLabel, remnantDescription } = opts;
+  // Parent star scaled smaller so the full sequence fits the default view
+  const baseRadius = (opts.parentRadius || 6) * 0.5;   // halved
+  const { parentColor, remnantLabel, remnantDescription } = opts;
   const star = new THREE.Mesh(
-    new THREE.SphereGeometry(parentRadius, 48, 48),
+    new THREE.SphereGeometry(baseRadius, 48, 48),
     new THREE.MeshBasicMaterial({ color: parentColor })
   );
   star.visible = false;
   group.add(star);
   const starGlow = new THREE.Mesh(
-    new THREE.SphereGeometry(parentRadius * 1.35, 48, 48),
+    new THREE.SphereGeometry(baseRadius * 1.35, 48, 48),
     new THREE.MeshBasicMaterial({ color: parentColor, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })
   );
   starGlow.visible = false;
   group.add(starGlow);
-  // Bright supernova flash
   const flash = new THREE.Mesh(
     new THREE.SphereGeometry(1, 32, 32),
     new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })
   );
   flash.visible = false;
   group.add(flash);
-  // Particle explosion debris
-  const debris = makeExplosionParticles(group, 1200, (c, r) => {
-    // Color: yellow-hot at low r, orange/red at high r
+  // Smaller, slower debris so it stays on screen
+  const debris = makeExplosionParticlesScaled(group, 1200, 0.4, (c, r) => {
     c.setHSL(0.08 - r * 0.05, 0.95, 0.4 + r * 0.25);
   });
 
   const phases = [
     {
-      duration: 2.0,
+      duration: 4.0,
       onEnter: () => {
         setCaption('Step 1 of 5', 'A massive blue supergiant, 10+ times heavier than our Sun.');
         star.visible = true; starGlow.visible = true;
@@ -703,18 +707,15 @@ function makeSupernovaCollapseFormation(group, mainMeshes, setCaption, hideCapti
         const s = 0.4 + t * 0.6;
         star.scale.setScalar(s);
         starGlow.scale.setScalar(s * 1.2);
-        star.material.opacity = Math.min(1, t * 2);
-        starGlow.material.opacity = Math.min(0.55, t * 1.2);
+        star.material.opacity = Math.min(1, t * 1.8);
+        starGlow.material.opacity = Math.min(0.55, t * 1.0);
       }
     },
     {
-      duration: 1.8,
-      onEnter: () => {
-        setCaption('Step 2 of 5', 'After only a few million years, it burns through its fuel — the core can\'t hold itself up anymore.');
-      },
+      duration: 4.5,
+      onEnter: () => setCaption('Step 2 of 5', 'After only a few million years it burns through its fuel — the core can\'t hold itself up anymore.'),
       update: (t) => {
-        // Slight inflation + dimming + colour-shift towards yellow-red
-        const s = 1 + t * 0.3;
+        const s = 1 + t * 0.25;
         star.scale.setScalar(s);
         starGlow.scale.setScalar(s * 1.25);
         const r = 0.55 + t * 0.45;
@@ -722,19 +723,16 @@ function makeSupernovaCollapseFormation(group, mainMeshes, setCaption, hideCapti
         const b = 1.0 - t * 0.6;
         star.material.color.setRGB(r, g, b);
         starGlow.material.opacity = 0.55 + t * 0.25;
-        // Pulse warning
-        const pulse = 1 + Math.sin(t * 14) * 0.04;
+        const pulse = 1 + Math.sin(t * 10) * 0.04;
         star.scale.setScalar(s * pulse);
       }
     },
     {
-      duration: 0.9,
-      onEnter: () => {
-        setCaption('Step 3 of 5', 'Gravity wins. The core collapses inward in less than a second.');
-      },
+      duration: 2.0,
+      onEnter: () => setCaption('Step 3 of 5', 'Gravity wins. The core collapses inward in less than a second.'),
       update: (t) => {
         const ease = t * t;
-        const s = 1.3 - ease * 1.2;
+        const s = 1.25 - ease * 1.2;
         star.scale.setScalar(Math.max(0.05, s));
         starGlow.scale.setScalar(Math.max(0.05, s * 1.2));
         star.material.opacity = Math.max(0.3, 1 - ease * 0.8);
@@ -742,7 +740,7 @@ function makeSupernovaCollapseFormation(group, mainMeshes, setCaption, hideCapti
       }
     },
     {
-      duration: 2.2,
+      duration: 4.0,
       onEnter: () => {
         setCaption('Step 4 of 5', 'SUPERNOVA! The outer layers are blown into space at thousands of kilometres per second.');
         flash.visible = true;
@@ -753,32 +751,28 @@ function makeSupernovaCollapseFormation(group, mainMeshes, setCaption, hideCapti
         starGlow.material.opacity = 0;
       },
       update: (t) => {
-        // Bright flash that peaks at t~0.15 and fades
-        if (t < 0.15) {
-          flash.material.opacity = t / 0.15;
-          flash.scale.setScalar(1 + t * 80);
+        // Smaller flash so it stays on screen
+        if (t < 0.18) {
+          flash.material.opacity = t / 0.18;
+          flash.scale.setScalar(1 + t * 30);
         } else {
-          flash.scale.setScalar(13 + (t - 0.15) * 40);
-          flash.material.opacity = Math.max(0, 1.0 - (t - 0.15) * 1.8);
+          flash.scale.setScalar(6.4 + (t - 0.18) * 18);
+          flash.material.opacity = Math.max(0, 1.0 - (t - 0.18) * 1.6);
         }
-        // Debris flies outward (real momentum, scaled by elapsed time within this phase)
-        const tSec = t * 2.2;
+        // Debris drifts outward at scaled velocities
+        const tSec = t * 4.0;
         setExplosionTime(debris, tSec, 0.0);
-        debris.pts.material.opacity = Math.min(1, t * 4) * (1 - Math.max(0, t - 0.7) * 1.5);
+        debris.pts.material.opacity = Math.min(1, t * 3) * (1 - Math.max(0, t - 0.75) * 1.4);
       }
     },
     {
-      duration: 2.2,
-      onEnter: () => {
-        setCaption('Step 5 of 5', `What's left of the core: ${remnantLabel} — ${remnantDescription}.`);
-      },
+      duration: 4.5,
+      onEnter: () => setCaption('Step 5 of 5', `What's left of the core: ${remnantLabel} — ${remnantDescription}.`),
       update: (t) => {
-        // Debris continues outward but fades
-        const tSec = 2.2 + t * 2.2;
+        const tSec = 4.0 + t * 4.5;
         setExplosionTime(debris, tSec, 0.0);
-        debris.pts.material.opacity = Math.max(0, 0.45 * (1 - t * 1.3));
+        debris.pts.material.opacity = Math.max(0, 0.4 * (1 - t * 1.2));
         flash.material.opacity = 0;
-        // Remnant fades in
         setMainOpacity(mainMeshes, Math.min(1, t * 1.4));
       },
       onExit: () => {
@@ -791,9 +785,10 @@ function makeSupernovaCollapseFormation(group, mainMeshes, setCaption, hideCapti
   return makeFormationRunner(phases, mainMeshes, hideCaption);
 }
 
-// ───────── BLACK HOLE — bigger parent, slower collapse, accretion-disk reveal
+// ───────── BLACK HOLE
 function makeBlackHoleFormation(group, mainMeshes, setCaption, hideCaption) {
-  const parentRadius = 9;
+  // Smaller parent so it fits the default viewpoint
+  const parentRadius = 4;
   const star = new THREE.Mesh(
     new THREE.SphereGeometry(parentRadius, 48, 48),
     new THREE.MeshBasicMaterial({ color: 0x88aaff })
@@ -812,13 +807,14 @@ function makeBlackHoleFormation(group, mainMeshes, setCaption, hideCaption) {
   );
   flash.visible = false;
   group.add(flash);
-  const debris = makeExplosionParticles(group, 1500, (c, r) => {
+  // Smaller, slower debris
+  const debris = makeExplosionParticlesScaled(group, 1500, 0.45, (c, r) => {
     c.setHSL(0.08 - r * 0.07, 0.95, 0.4 + r * 0.25);
   });
 
   const phases = [
     {
-      duration: 2.0,
+      duration: 4.0,
       onEnter: () => {
         setCaption('Step 1 of 6', 'An incredibly massive star — 20 to 50 times the Sun\'s mass.');
         star.visible = true; starGlow.visible = true;
@@ -830,23 +826,23 @@ function makeBlackHoleFormation(group, mainMeshes, setCaption, hideCaption) {
         const s = 0.4 + t * 0.6;
         star.scale.setScalar(s);
         starGlow.scale.setScalar(s * 1.2);
-        star.material.opacity = Math.min(1, t * 2);
-        starGlow.material.opacity = Math.min(0.55, t * 1.2);
+        star.material.opacity = Math.min(1, t * 1.8);
+        starGlow.material.opacity = Math.min(0.55, t * 1.0);
       }
     },
     {
-      duration: 1.8,
+      duration: 4.0,
       onEnter: () => setCaption('Step 2 of 6', 'It burns through its fuel in just a few million years and becomes unstable.'),
       update: (t) => {
         const r = 0.55 + t * 0.45, g = 0.7 - t * 0.2, b = 1.0 - t * 0.55;
         star.material.color.setRGB(r, g, b);
-        const pulse = 1 + Math.sin(t * 14) * 0.05;
+        const pulse = 1 + Math.sin(t * 10) * 0.05;
         star.scale.setScalar(1 * pulse);
         starGlow.material.opacity = 0.55 + t * 0.25;
       }
     },
     {
-      duration: 1.0,
+      duration: 2.0,
       onEnter: () => setCaption('Step 3 of 6', 'The core collapses faster than the speed of sound through the star.'),
       update: (t) => {
         const ease = t * t;
@@ -857,7 +853,7 @@ function makeBlackHoleFormation(group, mainMeshes, setCaption, hideCaption) {
       }
     },
     {
-      duration: 2.2,
+      duration: 4.0,
       onEnter: () => {
         setCaption('Step 4 of 6', 'SUPERNOVA! The outer star explodes outward.');
         flash.visible = true;
@@ -867,26 +863,27 @@ function makeBlackHoleFormation(group, mainMeshes, setCaption, hideCaption) {
         starGlow.material.opacity = 0;
       },
       update: (t) => {
-        if (t < 0.15) {
-          flash.material.opacity = t / 0.15;
-          flash.scale.setScalar(1 + t * 90);
+        // Smaller flash
+        if (t < 0.18) {
+          flash.material.opacity = t / 0.18;
+          flash.scale.setScalar(1 + t * 30);
         } else {
-          flash.scale.setScalar(14 + (t - 0.15) * 45);
-          flash.material.opacity = Math.max(0, 1.0 - (t - 0.15) * 1.8);
+          flash.scale.setScalar(6.4 + (t - 0.18) * 20);
+          flash.material.opacity = Math.max(0, 1.0 - (t - 0.18) * 1.6);
         }
-        const tSec = t * 2.2;
+        const tSec = t * 4.0;
         setExplosionTime(debris, tSec, 0.0);
-        debris.pts.material.opacity = Math.min(1, t * 4) * (1 - Math.max(0, t - 0.7) * 1.5);
+        debris.pts.material.opacity = Math.min(1, t * 3) * (1 - Math.max(0, t - 0.75) * 1.4);
       }
     },
     {
-      duration: 1.8,
+      duration: 3.5,
       onEnter: () => setCaption('Step 5 of 6', 'But this star is too massive — the core keeps collapsing, past neutron-star density…'),
       update: (t) => {
-        const tSec = 2.2 + t * 1.8;
+        const tSec = 4.0 + t * 3.5;
         setExplosionTime(debris, tSec, 0.0);
-        debris.pts.material.opacity = Math.max(0, 0.4 * (1 - t * 1.0));
-        // Show a tiny dim core hint that gets darker
+        debris.pts.material.opacity = Math.max(0, 0.4 * (1 - t * 0.9));
+        // A tiny dimming core hint
         star.visible = true;
         star.scale.setScalar(0.05 * Math.max(0.1, 1 - t));
         star.material.color.setRGB(0.3 * (1 - t), 0.15 * (1 - t), 0.3 * (1 - t));
@@ -894,13 +891,13 @@ function makeBlackHoleFormation(group, mainMeshes, setCaption, hideCaption) {
       }
     },
     {
-      duration: 2.2,
+      duration: 4.5,
       onEnter: () => setCaption('Step 6 of 6', '…until nothing can escape, not even light. A black hole has formed.'),
       update: (t) => {
-        const tSec = 4.0 + t * 2.2;
+        const tSec = 7.5 + t * 4.5;
         setExplosionTime(debris, tSec, 0.0);
-        debris.pts.material.opacity = Math.max(0, 0.25 * (1 - t * 1.3));
-        setMainOpacity(mainMeshes, Math.min(1, t * 1.5));
+        debris.pts.material.opacity = Math.max(0, 0.25 * (1 - t * 1.2));
+        setMainOpacity(mainMeshes, Math.min(1, t * 1.4));
       },
       onExit: () => {
         star.visible = false; starGlow.visible = false;
@@ -912,16 +909,16 @@ function makeBlackHoleFormation(group, mainMeshes, setCaption, hideCaption) {
   return makeFormationRunner(phases, mainMeshes, hideCaption);
 }
 
-// ───────── SUPERNOVA showcase — the explosion itself is the final state
+// ───────── SUPERNOVA showcase
 function makeSupernovaShowcaseFormation(group, mainMeshes, setCaption, hideCaption) {
   const star = new THREE.Mesh(
-    new THREE.SphereGeometry(5, 48, 48),
+    new THREE.SphereGeometry(2.5, 48, 48),
     new THREE.MeshBasicMaterial({ color: 0xaaccff })
   );
   star.visible = false;
   group.add(star);
   const starGlow = new THREE.Mesh(
-    new THREE.SphereGeometry(6.5, 48, 48),
+    new THREE.SphereGeometry(3.3, 48, 48),
     new THREE.MeshBasicMaterial({ color: 0x88aadd, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })
   );
   starGlow.visible = false;
@@ -935,7 +932,7 @@ function makeSupernovaShowcaseFormation(group, mainMeshes, setCaption, hideCapti
 
   const phases = [
     {
-      duration: 1.8,
+      duration: 3.5,
       onEnter: () => {
         setCaption('Step 1 of 4', 'A massive star — 8+ times heavier than our Sun, near the end of its life.');
         star.visible = true; starGlow.visible = true;
@@ -947,22 +944,22 @@ function makeSupernovaShowcaseFormation(group, mainMeshes, setCaption, hideCapti
         const s = 0.5 + t * 0.5;
         star.scale.setScalar(s);
         starGlow.scale.setScalar(s * 1.25);
-        star.material.opacity = Math.min(1, t * 2);
-        starGlow.material.opacity = Math.min(0.55, t * 1.2);
+        star.material.opacity = Math.min(1, t * 1.8);
+        starGlow.material.opacity = Math.min(0.55, t * 1.0);
       }
     },
     {
-      duration: 1.6,
+      duration: 3.5,
       onEnter: () => setCaption('Step 2 of 4', 'Iron builds up in the core. Fusion stops, and there\'s nothing to hold gravity back.'),
       update: (t) => {
         const r = 0.65 + t * 0.35, g = 0.8 - t * 0.15, b = 1.0 - t * 0.4;
         star.material.color.setRGB(r, g, b);
-        const pulse = 1 + Math.sin(t * 14) * 0.05;
+        const pulse = 1 + Math.sin(t * 10) * 0.05;
         star.scale.setScalar(pulse);
       }
     },
     {
-      duration: 0.6,
+      duration: 1.5,
       onEnter: () => setCaption('Step 3 of 4', 'The core collapses. A shockwave bounces back outward — the star is doomed.'),
       update: (t) => {
         const ease = t * t;
@@ -972,7 +969,7 @@ function makeSupernovaShowcaseFormation(group, mainMeshes, setCaption, hideCapti
       }
     },
     {
-      duration: 3.0,
+      duration: 5.0,
       onEnter: () => {
         setCaption('Step 4 of 4', 'A supernova! In one moment, the star outshines an entire galaxy of 100 billion stars.');
         flash.visible = true;
@@ -980,14 +977,14 @@ function makeSupernovaShowcaseFormation(group, mainMeshes, setCaption, hideCapti
         starGlow.material.opacity = 0;
       },
       update: (t) => {
-        if (t < 0.12) {
-          flash.material.opacity = t / 0.12;
-          flash.scale.setScalar(1 + t * 100);
+        if (t < 0.14) {
+          flash.material.opacity = t / 0.14;
+          flash.scale.setScalar(1 + t * 35);
         } else {
-          flash.scale.setScalar(12 + (t - 0.12) * 35);
-          flash.material.opacity = Math.max(0, 0.95 - (t - 0.12) * 1.4);
+          flash.scale.setScalar(5.9 + (t - 0.14) * 18);
+          flash.material.opacity = Math.max(0, 0.95 - (t - 0.14) * 1.3);
         }
-        // After the flash dies down, reveal the ongoing supernova visuals
+        // After flash, reveal the ongoing supernova visuals
         setMainOpacity(mainMeshes, Math.min(1, Math.max(0, (t - 0.3) * 2)));
       },
       onExit: () => {
