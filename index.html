@@ -58,6 +58,23 @@
       </div>
       <div id="scene-hint"></div>
     </div>
+
+    <div id="time-controls" class="hidden">
+      <div class="time-readout">
+        <span class="time-icon">📅</span>
+        <strong id="virtual-date">—</strong>
+        <button id="real-now-btn" title="Snap to today's real positions">Today</button>
+      </div>
+      <div class="time-speeds">
+        <button class="time-speed-btn" data-rate="0" title="Pause">⏸</button>
+        <button class="time-speed-btn" data-rate="3600" title="1 hour per second">1 hr/s</button>
+        <button class="time-speed-btn" data-rate="86400" title="1 day per second">1 day/s</button>
+        <button class="time-speed-btn active" data-rate="604800" title="1 week per second">1 wk/s</button>
+        <button class="time-speed-btn" data-rate="2592000" title="1 month per second">1 mo/s</button>
+        <button class="time-speed-btn" data-rate="31536000" title="1 year per second">1 yr/s</button>
+        <button class="time-speed-btn" data-rate="315360000" title="10 years per second">10 yr/s</button>
+      </div>
+    </div>
   </main>
 
   <div id="formation-caption" class="hidden">

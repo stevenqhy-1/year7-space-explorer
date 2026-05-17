@@ -31,6 +31,23 @@ const ORBIT_SPEEDS = {
   comet: 0.55, meteor: 1.1
 };
 
+// Real orbital elements — mean longitudes at J2000 + sidereal periods (days).
+// Used to place each planet at its true position for any given virtual date.
+const J2000_MS = Date.UTC(2000, 0, 1, 12, 0, 0);
+const ORBITAL = {
+  mercury: { period: 87.969,   lambda0: 252.25 },
+  venus:   { period: 224.701,  lambda0: 181.98 },
+  earth:   { period: 365.256,  lambda0: 100.46 },
+  mars:    { period: 686.971,  lambda0: 355.43 },
+  jupiter: { period: 4332.589, lambda0: 34.40  },
+  saturn:  { period: 10759.22, lambda0: 49.94  },
+  uranus:  { period: 30688.5,  lambda0: 313.23 },
+  neptune: { period: 60182.0,  lambda0: 304.88 }
+};
+// Moon — orbits Earth (synodic ~29.5 days, sidereal ~27.32; we use sidereal for clean math)
+const MOON_PERIOD = 27.32166;
+const MOON_LAMBDA0 = 218.32;
+
 export function buildSolarSystem({ camera, controls, onSelect }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000005);
@@ -293,26 +310,56 @@ export function buildSolarSystem({ camera, controls, onSelect }) {
   let sizeFactor = 1;  // planets shrink at higher scale
   const tmpVec = new THREE.Vector3();
 
+  // Virtual clock — drives real planet positions.
+  // virtualMs = milliseconds since epoch (Unix time) for the "in-simulation date".
+  // timeScale = how many seconds of virtual time pass per second of real time.
+  //   0       => paused
+  //   86400   => 1 day per real second
+  //   604800  => 1 week per real second (default)
+  //   31536000=> 1 year per real second
+  let virtualMs = Date.now();
+  let timeScale = 604800; // 1 virtual week per real second by default
+  // Comet/meteor positions use a separate internal accumulator so they look
+  // alive at any time scale without depending on virtual date.
+  let cometT = 0;
+
+  function planetAngle(key, daysSinceJ2000) {
+    const orb = ORBITAL[key];
+    if (!orb) return 0;
+    return ((orb.lambda0 + daysSinceJ2000 * 360 / orb.period) % 360) * Math.PI / 180;
+  }
+
   function update(dt) {
     t += dt;
-    // Orbit planets around the Sun — use distScale so the scale slider sticks
+    virtualMs += dt * 1000 * timeScale;
+    cometT += dt;
+    const daysSinceJ2000 = (virtualMs - J2000_MS) / 86400000;
+
+    // Real-position orbits for Mercury → Neptune
     for (const key of Object.keys(objects)) {
       const o = objects[key];
       if (!o.body || !o.body.illDist || key === 'moon') continue;
-      const speed = ORBIT_SPEEDS[key] ?? 0;
-      const angle = t * speed * 0.15;
-      const r = o.body.illDist * distScale;
       const target = o.orbitGroup || o.mesh;
-      if (target && key !== 'asteroid') {
-        target.position.x = Math.cos(angle) * r;
-        target.position.z = Math.sin(angle) * r;
-        if (o.mesh && o.mesh.rotation) o.mesh.rotation.y += dt * 0.4;
+      if (!target || key === 'asteroid') continue;
+      const r = o.body.illDist * distScale;
+      let angle;
+      if (ORBITAL[key]) {
+        angle = planetAngle(key, daysSinceJ2000);
+      } else {
+        // Comet & meteor — use the internal accumulator so they stay lively
+        const speed = ORBIT_SPEEDS[key] ?? 0;
+        angle = cometT * speed * 0.15;
       }
+      target.position.x = Math.cos(angle) * r;
+      target.position.z = Math.sin(angle) * r;
+      // Visual spin — fixed rate, doesn't scale with time so it looks sensible
+      if (o.mesh && o.mesh.rotation) o.mesh.rotation.y += dt * 0.4;
     }
-    // Moon orbits earth
+
+    // Moon orbits Earth at its true phase
     const earth = objects.earth, moon = objects.moon;
     if (earth && moon) {
-      const ma = t * 1.5;
+      const ma = ((MOON_LAMBDA0 + daysSinceJ2000 * 360 / MOON_PERIOD) % 360) * Math.PI / 180;
       const moonR = 2.6;
       moon.orbitGroup.position.x = earth.orbitGroup.position.x + Math.cos(ma) * moonR;
       moon.orbitGroup.position.z = earth.orbitGroup.position.z + Math.sin(ma) * moonR;
@@ -393,7 +440,19 @@ export function buildSolarSystem({ camera, controls, onSelect }) {
 
   function dispose() { disposeScene(scene); }
 
-  return { scene, update, focusOn, getObjectPosition, listObjects, clearFollow, handleClick, setScale, dispose };
+  // ── Time-control API ──
+  function setTimeScale(secsPerSec) {
+    timeScale = Math.max(0, Number(secsPerSec) || 0);
+  }
+  function getTimeScale() { return timeScale; }
+  function jumpToNow() { virtualMs = Date.now(); }
+  function getVirtualDate() { return new Date(virtualMs); }
+
+  return {
+    scene, update, focusOn, getObjectPosition, listObjects, clearFollow,
+    handleClick, setScale, dispose,
+    setTimeScale, getTimeScale, jumpToNow, getVirtualDate
+  };
 }
 
 // ─────────── Galactic context (Milky Way) ───────────

@@ -22,6 +22,10 @@ const sceneHint = document.getElementById('scene-hint');
 const scaleToggle = document.getElementById('scale-toggle');
 const scaleSlider = document.getElementById('scale-slider');
 const scaleLabel = document.getElementById('scale-label');
+const timeControls = document.getElementById('time-controls');
+const virtualDateEl = document.getElementById('virtual-date');
+const realNowBtn = document.getElementById('real-now-btn');
+const timeSpeedBtns = document.querySelectorAll('.time-speed-btn');
 const objectList = document.getElementById('object-list');
 const sidebarTitle = document.getElementById('sidebar-title');
 const resetViewBtn = document.getElementById('reset-view');
@@ -168,6 +172,7 @@ function loadScene(key) {
     stars2dNext.classList.add('hidden');
     galleryContainer.classList.remove('hidden');
     scaleToggle.classList.add('hidden');
+    timeControls.classList.add('hidden');
     sidebarTitle.textContent = 'Categories';
     sceneHint.textContent = '';
     buildGallery(galleryContainer, content.gallery, objectList);
@@ -182,6 +187,7 @@ function loadScene(key) {
     stars2dPrev.classList.add('hidden');  // single-page now — no arrows needed
     stars2dNext.classList.add('hidden');
     scaleToggle.classList.add('hidden');
+    timeControls.classList.add('hidden');
     sidebarTitle.textContent = 'Bodies';
     sceneHint.textContent = content.stars.hint || '';
     buildStars2D(stars2dContainer, content.stars, objectList);
@@ -216,8 +222,10 @@ function loadScene(key) {
     scaleToggle.classList.remove('hidden');
     scaleSlider.value = 0;
     scaleLabel.textContent = 'Illustrative';
+    timeControls.classList.remove('hidden');
   } else {
     scaleToggle.classList.add('hidden');
+    timeControls.classList.add('hidden');
   }
 
   populateSidebar(key);
@@ -329,6 +337,27 @@ scaleSlider.addEventListener('input', (e) => {
   if (currentScene && currentScene.setScale) currentScene.setScale(t);
 });
 
+// Time-control buttons (Solar System only)
+timeSpeedBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    timeSpeedBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const rate = Number(btn.dataset.rate);
+    if (currentScene && currentScene.setTimeScale) currentScene.setTimeScale(rate);
+  });
+});
+realNowBtn.addEventListener('click', () => {
+  if (currentScene && currentScene.jumpToNow) currentScene.jumpToNow();
+});
+
+// Live virtual-date readout — formatted as "18 May 2026"
+const dateFmt = new Intl.DateTimeFormat('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
+function updateVirtualDate() {
+  if (!currentScene || !currentScene.getVirtualDate || timeControls.classList.contains('hidden')) return;
+  const d = currentScene.getVirtualDate();
+  virtualDateEl.textContent = dateFmt.format(d);
+}
+
 function smoothResetView() {
   if (currentScene && currentScene.clearFollow) currentScene.clearFollow();
   const cached = initialCameraStates[currentSceneKey];
@@ -376,6 +405,7 @@ window.addEventListener('resize', () => {
 });
 
 const clock = new THREE.Clock();
+let _dateTickMs = 0;
 function animate() {
   const dt = clock.getDelta();
   controls.update();
@@ -383,6 +413,9 @@ function animate() {
     if (currentScene.update) currentScene.update(dt);
     renderer.render(currentScene.scene, camera);
   }
+  // Refresh the date readout 4× per second (cheap)
+  _dateTickMs += dt;
+  if (_dateTickMs > 0.25) { _dateTickMs = 0; updateVirtualDate(); }
   requestAnimationFrame(animate);
 }
 
