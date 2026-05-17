@@ -52,108 +52,49 @@ export function buildGalaxies({ camera, controls, onSelect }) {
 
   const objects = {};
 
-  // Rolled back to v1.3-style spiral — bright hard-pixel particles, dust lane,
-  // sprinkled H-II + blue cloud sprites, bright multi-layer core.
+  // Rolled all the way back to the v1.0 spiral: 4000 plain particles,
+  // bright core sphere, nothing else. Simplest possible look.
   function makeSpiral(x, y, z, opts) {
-    const {
-      arms = 4,
-      radius = 28,
-      color = 0xaabbff,
-      tilt = 0.3,
-      key,
-      hueShift = 0
-    } = opts;
+    const { arms = 4, radius = 25, color = 0xaabbff, key, tilt = 0 } = opts;
 
     const group = new THREE.Group();
     group.position.set(x, y, z);
     group.rotation.x = tilt;
 
-    const count = 14000;
+    const count = 4000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const base = new THREE.Color(color);
     for (let i = 0; i < count; i++) {
       const arm = i % arms;
-      const distNorm = Math.pow(Math.random(), 0.62);
-      const dist = distNorm * radius;
+      const dist = Math.pow(Math.random(), 0.7) * radius;
       const armAngle = (arm / arms) * Math.PI * 2;
-      const twist = dist * 0.21;
-      const a = armAngle + twist + (Math.random() - 0.5) * 0.5;
+      const twist = dist * 0.18;
+      const a = armAngle + twist + (Math.random() - 0.5) * 0.4;
       positions[i*3]   = Math.cos(a) * dist;
-      positions[i*3+1] = (Math.random() - 0.5) * (1.8 - distNorm * 1.3);
+      positions[i*3+1] = (Math.random() - 0.5) * 1.5;
       positions[i*3+2] = Math.sin(a) * dist;
-      const tNorm = 1 - distNorm;
-      const c = base.clone();
-      c.offsetHSL(hueShift + (Math.random() - 0.5) * 0.05, 0, (Math.random() - 0.5) * 0.15);
-      colors[i*3]   = c.r * (0.55 + tNorm * 0.85);
-      colors[i*3+1] = c.g * (0.55 + tNorm * 0.7);
-      colors[i*3+2] = c.b * (0.6 + tNorm * 0.5);
+      const tNorm = 1 - dist / radius;
+      colors[i*3]   = base.r * (0.6 + tNorm * 0.6);
+      colors[i*3+1] = base.g * (0.6 + tNorm * 0.6);
+      colors[i*3+2] = base.b * (0.6 + tNorm * 0.6);
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     const mat = new THREE.PointsMaterial({
-      size: 0.45, vertexColors: true,
-      transparent: true, opacity: 0.95,
-      blending: THREE.AdditiveBlending, depthWrite: false
+      size: 0.4, vertexColors: true,
+      transparent: true, opacity: 0.9
     });
     group.add(new THREE.Points(geo, mat));
 
-    // Dust lane — separate slightly-darker particle band
-    {
-      const dustCount = 2500;
-      const dust = new Float32Array(dustCount * 3);
-      const dustColors = new Float32Array(dustCount * 3);
-      for (let i = 0; i < dustCount; i++) {
-        const a = Math.random() * Math.PI * 2;
-        const r = (0.3 + Math.random() * 0.65) * radius;
-        const twist = r * 0.22;
-        dust[i*3]   = Math.cos(a + twist) * r;
-        dust[i*3+1] = (Math.random() - 0.5) * 0.4;
-        dust[i*3+2] = Math.sin(a + twist) * r;
-        dustColors[i*3] = 0.35;
-        dustColors[i*3+1] = 0.20;
-        dustColors[i*3+2] = 0.15;
-      }
-      const dustGeo = new THREE.BufferGeometry();
-      dustGeo.setAttribute('position', new THREE.BufferAttribute(dust, 3));
-      dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
-      const dustMat = new THREE.PointsMaterial({ size: 0.7, vertexColors: true, transparent: true, opacity: 0.6, depthWrite: false });
-      group.add(new THREE.Points(dustGeo, dustMat));
-    }
-
-    // Pink H-II star-forming patches
-    for (let i = 0; i < 14; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const r = (0.3 + Math.random() * 0.6) * radius;
-      const cloud = nebulaCloud(
-        new THREE.Color().setHSL(0.92 + Math.random() * 0.05, 0.8, 0.55),
-        3 + Math.random() * 4, 0.65
-      );
-      cloud.position.set(Math.cos(a) * r, (Math.random() - 0.5) * 0.5, Math.sin(a) * r);
-      group.add(cloud);
-    }
-    // Blue young-star regions
-    for (let i = 0; i < 10; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const r = (0.4 + Math.random() * 0.6) * radius;
-      const cloud = nebulaCloud(new THREE.Color(0x88bbff), 4 + Math.random() * 5, 0.5);
-      cloud.position.set(Math.cos(a) * r, (Math.random() - 0.5) * 0.6, Math.sin(a) * r);
-      group.add(cloud);
-    }
-
-    // Bright multi-layer core
+    // Bright core
     const core = new THREE.Mesh(
-      new THREE.SphereGeometry(2.2, 48, 48),
-      new THREE.MeshBasicMaterial({ color: 0xfff2c8, transparent: true, opacity: 0.98, blending: THREE.AdditiveBlending, depthWrite: false })
+      new THREE.SphereGeometry(2.5, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffeecc, transparent: true, opacity: 0.9 })
     );
     core.userData.key = key;
     group.add(core);
-    group.add(new THREE.Mesh(
-      new THREE.SphereGeometry(4, 48, 48),
-      new THREE.MeshBasicMaterial({ color: 0xffddaa, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false })
-    ));
-    group.add(nebulaCloud(0xffeebb, 22, 0.7));
 
     scene.add(group);
     return { core, group };
