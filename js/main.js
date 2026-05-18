@@ -6,6 +6,7 @@ import { buildRemnants } from './scenes/remnants.js';
 import { buildGalaxies } from './scenes/galaxies.js';
 import { buildConstellations } from './scenes/constellations.js';
 import { buildGallery } from './scenes/gallery.js';
+import { buildCelestialBodies } from './scenes/celestialBodies.js';
 import { flyTo } from './cameraTween.js';
 
 const container = document.getElementById('canvas-container');
@@ -13,6 +14,7 @@ const stars2dContainer = document.getElementById('stars2d-container');
 const stars2dPrev = document.getElementById('stars2d-prev');
 const stars2dNext = document.getElementById('stars2d-next');
 const galleryContainer = document.getElementById('gallery-container');
+const celestialContainer = document.getElementById('celestial-container');
 const infoPanel = document.getElementById('info-panel');
 const infoTitle = document.getElementById('info-title');
 const infoType = document.getElementById('info-type');
@@ -170,6 +172,7 @@ function loadScene(key) {
     stars2dContainer.classList.add('hidden');
     stars2dPrev.classList.add('hidden');
     stars2dNext.classList.add('hidden');
+    celestialContainer.classList.add('hidden');
     galleryContainer.classList.remove('hidden');
     scaleToggle.classList.add('hidden');
     timeControls.classList.add('hidden');
@@ -180,9 +183,26 @@ function loadScene(key) {
     currentScene = null;
     return;
   }
+  if (key === 'celestial') {
+    container.style.display = 'none';
+    stars2dContainer.classList.add('hidden');
+    stars2dPrev.classList.add('hidden');
+    stars2dNext.classList.add('hidden');
+    galleryContainer.classList.add('hidden');
+    celestialContainer.classList.remove('hidden');
+    scaleToggle.classList.add('hidden');
+    timeControls.classList.add('hidden');
+    sidebarTitle.textContent = 'Body type';
+    sceneHint.textContent = '';
+    buildCelestialBodies(celestialContainer, content.celestialBodies, objectList);
+    hideInfo();
+    currentScene = null;
+    return;
+  }
   if (key === 'stars') {
     container.style.display = 'none';
     galleryContainer.classList.add('hidden');
+    celestialContainer.classList.add('hidden');
     stars2dContainer.classList.remove('hidden');
     stars2dPrev.classList.add('hidden');  // single-page now — no arrows needed
     stars2dNext.classList.add('hidden');
@@ -198,6 +218,7 @@ function loadScene(key) {
 
   container.style.display = 'block';
   galleryContainer.classList.add('hidden');
+  celestialContainer.classList.add('hidden');
   stars2dContainer.classList.add('hidden');
   stars2dPrev.classList.add('hidden');
   stars2dNext.classList.add('hidden');

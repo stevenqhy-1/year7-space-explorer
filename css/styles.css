@@ -250,6 +250,167 @@ main {
   margin-top: 4px;
 }
 
+/* Celestial Bodies — overview / note-taking page */
+#celestial-container {
+  position: absolute;
+  top: 60px;
+  left: 220px;
+  right: 0;
+  bottom: 38px;
+  overflow-y: auto;
+  padding: 32px 36px;
+  background: radial-gradient(ellipse at top, #0a1024 0%, #000005 75%);
+}
+#celestial-container.hidden { display: none; }
+.cb-header { max-width: 1200px; margin: 0 auto 28px; }
+.cb-title { color: #9cf; font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+.cb-hint { color: #aab; font-size: 14px; margin-bottom: 18px; }
+.cb-intentions {
+  background: rgba(70, 110, 180, 0.10);
+  border-left: 3px solid #6af;
+  padding: 12px 18px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+.cb-intentions h3 {
+  color: #6af;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+.cb-intentions ul { padding-left: 18px; color: #ddd; font-size: 14px; line-height: 1.55; }
+.cb-intentions li { margin: 4px 0; }
+.cb-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.cb-action-btn {
+  display: inline-block;
+  background: rgba(70, 110, 180, 0.25);
+  color: #cdf;
+  border: 1px solid #3a5080;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.cb-action-btn:hover {
+  background: rgba(80, 130, 220, 0.45);
+  color: #fff;
+  border-color: #6af;
+  transform: translateY(-1px);
+}
+
+.cb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 18px;
+  max-width: 1400px;
+  margin: 0 auto 28px;
+}
+.cb-card {
+  --accent: #9cf;
+  background: #0c1220;
+  border: 1px solid #1f2638;
+  border-top: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 20px 22px;
+  transition: all 0.2s;
+}
+.cb-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 18px rgba(80, 140, 255, 0.15);
+  transform: translateY(-2px);
+}
+.cb-card.cb-pulse {
+  box-shadow: 0 0 0 3px var(--accent);
+  transition: box-shadow 0.3s;
+}
+.cb-icon { font-size: 34px; margin-bottom: 6px; }
+.cb-name {
+  color: var(--accent);
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.cb-desc {
+  color: #d4d8e4;
+  font-size: 14px;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.cb-desc mark {
+  background: rgba(120, 180, 255, 0.18);
+  color: #cdf;
+  padding: 0 3px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.cb-meta {
+  font-size: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #1f2638;
+  margin-bottom: 10px;
+}
+.cb-meta-label {
+  color: #6a7a9a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-right: 4px;
+}
+.cb-examples { color: #aab; }
+.cb-keywords { display: flex; flex-wrap: wrap; gap: 6px; }
+.cb-keyword {
+  background: rgba(110, 170, 255, 0.10);
+  color: #aaccff;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 180, 255, 0.25);
+}
+
+.cb-compare {
+  max-width: 900px;
+  margin: 0 auto 60px;
+  padding: 24px;
+  background: rgba(20, 25, 45, 0.6);
+  border: 1px solid #1f2638;
+  border-radius: 12px;
+}
+.cb-compare h2 {
+  color: #9cf;
+  font-size: 19px;
+  margin-bottom: 4px;
+}
+.cb-compare-sub {
+  color: #889;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.cb-q {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background: #0c1220;
+  border: 1px solid #1f2638;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #ddd;
+  cursor: pointer;
+}
+.cb-q summary {
+  cursor: pointer;
+  list-style: none;
+  outline: none;
+  user-select: none;
+}
+.cb-q summary::-webkit-details-marker { display: none; }
+.cb-q[open] summary { color: #9cf; margin-bottom: 8px; }
+.cb-q p { color: #aab; font-size: 13px; line-height: 1.55; }
+
 /* Gallery */
 #gallery-container {
   position: absolute;

@@ -509,6 +509,103 @@
       }
     }
   },
+  "celestialBodies": {
+    "title": "Celestial Bodies",
+    "hint": "The eight kinds of objects you'll find in space. Click any card to read more.",
+    "learningIntentions": [
+      "I can describe in my own words what a planet, star, moon, asteroid, meteor, comet, constellation and galaxy are.",
+      "I can explain how each of these is different from the others."
+    ],
+    "items": [
+      {
+        "key": "planets",
+        "name": "Planets",
+        "icon": "🪐",
+        "color": "#4a8fe7",
+        "description": "A planet is a large round object that orbits a star (like our Sun). Planets are not stars — they don't make their own light. They shine because they reflect the light from their star. Our Solar System has eight planets, divided into rocky terrestrial planets close to the Sun and bigger gas and ice giants further out.",
+        "blanks": ["orbits", "light", "reflect", "Solar System", "terrestrial", "gas", "ice"],
+        "wordBank": ["orbits", "light", "reflect", "Solar System", "terrestrial", "gas", "ice"],
+        "examples": "Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune"
+      },
+      {
+        "key": "stars",
+        "name": "Stars",
+        "icon": "⭐",
+        "color": "#ffcc55",
+        "description": "A star is a huge ball of hot gas (mostly hydrogen and helium) held together by gravity. Stars produce their own light and heat through a process called nuclear fusion in their cores. Our Sun is a medium-sized star — there are stars much smaller and much bigger.",
+        "blanks": ["hydrogen", "helium", "gravity", "light", "heat", "nuclear fusion", "Sun"],
+        "wordBank": ["hydrogen", "helium", "gravity", "light", "heat", "nuclear fusion", "Sun"],
+        "examples": "The Sun, Sirius, Betelgeuse, Proxima Centauri"
+      },
+      {
+        "key": "moons",
+        "name": "Moons",
+        "icon": "🌙",
+        "color": "#cccccc",
+        "description": "A moon is a natural object that orbits a planet. Moons are smaller than the planet they orbit. Earth has one moon, but Jupiter has more than 90! Moons are also called natural satellites because they go around their planet, just like a planet goes around its star.",
+        "blanks": ["orbits", "smaller", "one", "satellites"],
+        "wordBank": ["orbits", "smaller", "one", "satellites"],
+        "examples": "Earth's Moon (Luna), Jupiter's Io and Europa, Saturn's Titan"
+      },
+      {
+        "key": "asteroids",
+        "name": "Asteroids",
+        "icon": "🪨",
+        "color": "#aaa080",
+        "description": "An asteroid is a rocky leftover from when the Solar System formed about 4.6 billion years ago. Most asteroids are found in the asteroid belt, a wide ring of rocks between Mars and Jupiter. They are too small to be planets — most are less than 1,000 km across.",
+        "blanks": ["rocky", "Solar System", "asteroid belt", "Mars", "Jupiter", "planets"],
+        "wordBank": ["rocky", "Solar System", "asteroid belt", "Mars", "Jupiter", "planets"],
+        "examples": "Ceres (the largest, 940 km wide), Vesta, Pallas"
+      },
+      {
+        "key": "meteors",
+        "name": "Meteors",
+        "icon": "🌠",
+        "color": "#ffaa66",
+        "description": "A meteor is the bright streak of light you see when a small piece of space rock or dust burns up in Earth's atmosphere. The piece of rock while it's still in space is called a meteoroid. If a piece survives the fall and hits the ground, it's called a meteorite.",
+        "blanks": ["light", "burns up", "atmosphere", "meteoroid", "meteorite"],
+        "wordBank": ["light", "burns up", "atmosphere", "meteoroid", "meteorite"],
+        "examples": "Shooting stars, the Perseid meteor shower in August"
+      },
+      {
+        "key": "comets",
+        "name": "Comets",
+        "icon": "☄️",
+        "color": "#bbccff",
+        "description": "A comet is like a 'dirty snowball' made of ice, dust and rock. Comets orbit the Sun on very long, stretched-out paths. When a comet gets close to the Sun, the ice heats up and turns into gas, forming a glowing tail that always points away from the Sun.",
+        "blanks": ["ice", "dust", "Sun", "gas", "tail", "away"],
+        "wordBank": ["ice", "dust", "Sun", "gas", "tail", "away"],
+        "examples": "Halley's Comet (returns every 76 years), Comet NEOWISE"
+      },
+      {
+        "key": "constellations",
+        "name": "Constellations",
+        "icon": "✨",
+        "color": "#aaccff",
+        "description": "A constellation is a pattern of stars in the night sky. The stars in a constellation are usually not actually close together — they just look that way from Earth. Astronomers have agreed on 88 official constellations. The 12 that the Sun appears to move through each year make up the zodiac.",
+        "blanks": ["pattern", "Earth", "88", "12", "zodiac"],
+        "wordBank": ["pattern", "Earth", "88", "12", "zodiac"],
+        "examples": "Southern Cross, Orion, Scorpius, Leo"
+      },
+      {
+        "key": "galaxies",
+        "name": "Galaxies",
+        "icon": "🌌",
+        "color": "#aabbff",
+        "description": "A galaxy is a huge collection of stars, gas, dust and dark matter all held together by gravity. Our galaxy is called the Milky Way and contains over 100 billion stars. Astronomers think there are more than 2 trillion galaxies in the observable universe.",
+        "blanks": ["stars", "gas", "dust", "gravity", "Milky Way", "100 billion", "2 trillion"],
+        "wordBank": ["stars", "gas", "dust", "gravity", "Milky Way", "100 billion", "2 trillion"],
+        "examples": "Milky Way (ours), Andromeda, Sombrero Galaxy, Whirlpool Galaxy"
+      }
+    ],
+    "comparisons": [
+      { "q": "What is the difference between a meteor and a meteorite?", "a": "A meteor is the streak of light in the sky as a rock burns up in the atmosphere. A meteorite is the piece of rock that survives and lands on the ground." },
+      { "q": "What is the difference between an asteroid and a comet?", "a": "Asteroids are made of rock and stay mostly in the asteroid belt. Comets are made of ice and dust and grow a glowing tail when they get close to the Sun." },
+      { "q": "What is the difference between a star and a planet?", "a": "Stars make their own light by nuclear fusion. Planets do not — they only shine because they reflect light from a star." },
+      { "q": "What is the difference between a moon and a planet?", "a": "A planet orbits a star. A moon orbits a planet. Moons are usually smaller than the planet they orbit." },
+      { "q": "What is the difference between a constellation and a galaxy?", "a": "A constellation is just a pattern of stars we see from Earth — they aren't really grouped together in space. A galaxy is an actual huge group of stars, gas and dust held together by gravity." }
+    ]
+  },
   "gallery": [
     {
       "title": "Pillars of Creation",
