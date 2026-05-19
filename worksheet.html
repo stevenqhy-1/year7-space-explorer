@@ -149,6 +149,50 @@
     margin-bottom: 4px;
   }
 
+  .stellarium {
+    margin-top: 28px;
+    padding: 16px 18px;
+    background: #f6f4ee;
+    border-left: 4px solid #d4a014;
+    border-radius: 0 6px 6px 0;
+    page-break-before: always;
+  }
+  .stellarium h2 { border: none; margin-top: 0; }
+  .stellarium .lead { font-size: 10.5pt; color: #444; margin-bottom: 14px; }
+  .stellarium a { color: #1055b0; }
+  .stellarium-task { margin-bottom: 18px; page-break-inside: avoid; }
+  .stellarium-task .task-title {
+    font-weight: 700; color: #1a3a6a; font-size: 11pt;
+    margin-bottom: 2px;
+  }
+  .stellarium-task .task-body { font-size: 10pt; color: #555; margin-bottom: 8px; }
+  .stellarium-table {
+    width: 100%; border-collapse: collapse; font-size: 10.5pt;
+  }
+  .stellarium-table th, .stellarium-table td {
+    border: 1px solid #bbb;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .stellarium-table th {
+    background: #eef4fb;
+    color: #1a3a6a;
+    font-weight: 600;
+  }
+  .stellarium-table td.prop {
+    background: #fafbfd;
+    font-weight: 500;
+    width: 28%;
+  }
+  .stellarium-table td.fill { height: 32px; }
+  .stellarium-tip {
+    margin-top: 14px;
+    font-size: 10pt;
+    color: #444;
+  }
+  .stellarium-tip strong { color: #1a3a6a; }
+
   .selfcheck {
     margin-top: 22px;
     padding: 12px 16px;
@@ -236,6 +280,68 @@
     <h2>Self-check</h2>
     <p class="subtitle">Tick a box when you can answer the question in your own words.</p>
     <ul id="selfcheck-list"></ul>
+  </div>
+
+  <div class="stellarium">
+    <h2>Do later — Stellarium Web</h2>
+    <p class="lead">
+      Go to <a href="https://stellarium-web.org/" target="_blank">https://stellarium-web.org/</a> and have a play around.
+      Then complete the following tasks and record the values in the tables below.
+    </p>
+
+    <div class="stellarium-task">
+      <div class="task-title">1. The Moon</div>
+      <div class="task-body">Find the Moon by clicking it directly or using the search bar at the top of the screen. Record the values shown in the side panel.</div>
+      <table class="stellarium-table">
+        <tr><th>Property</th><th>Value</th></tr>
+        <tr><td class="prop">Magnitude (brightness)</td><td class="fill"></td></tr>
+        <tr><td class="prop">Distance</td><td class="fill"></td></tr>
+        <tr><td class="prop">Radius</td><td class="fill"></td></tr>
+        <tr><td class="prop">Ra / Dec (location)</td><td class="fill"></td></tr>
+      </table>
+    </div>
+
+    <div class="stellarium-task">
+      <div class="task-title">2. Two planets in the Solar System</div>
+      <div class="task-body">Pick any two planets (e.g. Venus, Mars, Jupiter). For each, record the values below.</div>
+      <table class="stellarium-table">
+        <tr><th>Planet</th><th>Magnitude</th><th>Distance (AU)</th><th>Radius</th><th>Ra / Dec</th></tr>
+        <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+      </table>
+    </div>
+
+    <div class="stellarium-task">
+      <div class="task-title">3. Two stars</div>
+      <div class="task-body">Pick any two stars — Sirius is a good one to start with. Search by name and record the values shown.</div>
+      <table class="stellarium-table">
+        <tr><th>Star</th><th>Magnitude</th><th>Distance</th><th>Ra / Dec</th></tr>
+        <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+        <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+      </table>
+    </div>
+
+    <div class="stellarium-task">
+      <div class="task-title">4. One galaxy</div>
+      <div class="task-body">Search for a galaxy (try 'Andromeda' or 'M31'). Record what Stellarium shows.</div>
+      <table class="stellarium-table">
+        <tr><th>Galaxy</th><th>Magnitude</th><th>Ra / Dec</th></tr>
+        <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+      </table>
+    </div>
+
+    <div class="stellarium-task">
+      <div class="task-title">5. One artificial satellite</div>
+      <div class="task-body">Find any artificial satellite — the International Space Station (ISS) is the easiest. Make sure satellites are turned on in Stellarium's settings.</div>
+      <table class="stellarium-table">
+        <tr><th>Satellite</th><th>Magnitude</th><th>Distance</th></tr>
+        <tr><td class="fill"></td><td class="fill"></td><td class="fill"></td></tr>
+      </table>
+    </div>
+
+    <p class="stellarium-tip">
+      <strong>Tip:</strong> Click the search icon (🔍) at the bottom-left of Stellarium Web to look up an object by name. The object's details appear in the side panel after you click it.
+    </p>
   </div>
 </div>
 

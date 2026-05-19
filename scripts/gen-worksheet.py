@@ -268,6 +268,13 @@ r.font.size = Pt(13)
 p.add_run("I can explain the difference between any two of these eight bodies.")
 
 
+# ── Do later: Stellarium ──
+import sys
+sys.path.insert(0, str(PROJECT / "scripts"))
+from append_stellarium import append_stellarium_section  # noqa: E402
+append_stellarium_section(doc)
+
+
 # ── Answer key (separate page) ──
 doc.add_page_break()
 add_heading("Teacher answer key", level=2)
