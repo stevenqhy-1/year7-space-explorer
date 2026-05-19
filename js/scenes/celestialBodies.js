@@ -16,10 +16,6 @@ export function buildCelestialBodies(container, data, sidebarList) {
       <h3>Learning intentions</h3>
       <ul>${data.learningIntentions.map(li => `<li>${escapeHtml(li)}</li>`).join('')}</ul>
     </div>
-    <div class="cb-actions">
-      <a class="cb-action-btn" href="worksheet.html" target="_blank">📄 Open worksheet (print or save as PDF)</a>
-      <a class="cb-action-btn" href="worksheet.docx" download>📥 Download Word .docx</a>
-    </div>
   `;
   container.appendChild(header);
 
