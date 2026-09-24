@@ -1,51 +1,36 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="assets/favicon.svg">
-<meta name="theme-color" content="#090c15"><meta name="description" content="Your mission to understand the universe. An interactive space explorer for Years 7–9.">
-<title>Space Explorer — Your universe awaits</title>
-<link rel="stylesheet" href="css/explorer.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#030408">
+<meta name="description" content="Enter a black hole. Find our Solar System. Pull back into a universe of stars and galaxies. An immersive journey through space.">
+<title>Beyond — A journey through the universe</title>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="css/journey.css">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/controls/OrbitControls.js":"./vendor/OrbitControls.js"}}</script>
 </head>
 <body>
-<a class="skip" href="#main">Skip to exploration</a>
-<aside class="sidebar">
-<a class="brand" href="./"><span class="brand-symbol">✳</span><span>SPACE<span class="brand-small">EXPLORER</span></span></a>
-<div class="edition">THE UNIVERSE IS YOUR CLASSROOM</div>
-<div class="nav-label">YOUR EXPEDITION</div>
-<nav aria-label="Main navigation">
-<button class="nav-item active" data-page="explore"><span>◈</span> Explore the universe</button>
-<button class="nav-item" data-page="missions"><span>⚑</span> Missions <small>3</small></button>
-<button class="nav-item" data-page="lab"><span>⚗</span> Space lab</button>
-<button class="nav-item" data-page="quiz"><span>✧</span> Test your knowledge</button>
-</nav>
-<div class="sidebar-bottom"><div class="rank-icon">✦</div><strong id="rank">Space cadet</strong><span id="progress-copy">0 discoveries made</span><div class="progress-track"><i id="progress-fill"></i></div><p>Small steps. Infinite possibilities.</p><button id="reset-progress" class="text-button">Reset progress</button></div>
-<div class="year-tag"><span class="status-dot"></span> BUILT FOR YEARS 7–9</div>
-</aside>
-<div class="workspace">
-<header class="topbar"><div><span class="breadcrumb">Your expedition</span><span class="slash">/</span><span id="page-title">Explore</span></div><div class="top-actions"><button id="motion" class="text-button" aria-pressed="false">◌ Motion on</button><span class="xp"><span>✧</span> <b id="xp">0</b> XP</span><span class="avatar">YOU</span></div></header>
-<main id="main" tabindex="-1">
-<section id="explore-page">
-<div class="page-heading"><div><div class="eyebrow">LOOK UP. WONDER MORE.</div><h1>A whole universe to discover<span>.</span></h1><p>Get closer. Ask big questions. Find something extraordinary.</p></div><span class="live-tag"><span class="status-dot"></span> EXPLORATION MODE</span></div>
-<div class="category-tabs" role="group" aria-label="Choose a space collection"></div>
-<section class="universe" aria-label="Interactive celestial object viewer">
-<div id="viewport"><div id="render-status">Preparing your window to the universe…</div></div>
-<div class="viewer-top"><span><i class="status-dot"></i> LIVE 3D EXPLORER</span><span id="object-index">03 / 09</span></div>
-<div class="object-copy"><div class="eyebrow" id="object-type"></div><h2 id="object-name"></h2><p id="object-description"></p><button class="primary" id="discover">Discover Earth <span>↗</span></button><div class="object-coordinate" id="object-coordinate"></div></div>
-<div class="planet-label"><span class="label-line"></span><span id="visual-label">EARTH</span><small>DRAG TO ROTATE</small></div>
-<div class="viewer-tools"><button id="pause" aria-label="Pause rotation" title="Pause rotation">Ⅱ</button><button id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button><button id="reset-view" aria-label="Reset camera" title="Reset camera">⟲</button></div>
-<div class="viewer-bottom"><span>↔ Drag to orbit <b>·</b> Scroll to zoom</span><span>Artist’s visualisation · sizes not to scale</span></div>
+<div id="cosmos" aria-label="Interactive universe"></div>
+<div class="vignette" aria-hidden="true"></div>
+<header class="masthead"><a class="wordmark" href="./" aria-label="Beyond home"><span class="brand-orbit" aria-hidden="true">◉</span> BEYOND<span class="brand-sub">A JOURNEY THROUGH THE UNIVERSE</span></a><div class="utilities"><button id="sound" aria-label="Turn ambient sound on" aria-pressed="false"><span aria-hidden="true">♫</span><span class="utility-label">Sound off</span></button><button id="settings" aria-label="Open experience settings"><span aria-hidden="true">☷</span></button><button id="fullscreen" aria-label="Enter fullscreen"><span aria-hidden="true">⛶</span></button></div></header>
+<main>
+<section id="entrance" aria-label="Black-hole entrance">
+<div class="entrance-top"><span class="tiny-rule"></span> AT THE EDGE OF EVERYTHING</div>
+<button id="enter-hole" aria-label="Enter the black hole and begin the journey"><span class="enter-orbit"></span><span class="sr-only">Enter the black hole</span></button>
+<div class="entrance-copy"><div class="eyebrow">LET CURIOSITY PULL YOU IN</div><h1>The unknown is calling.</h1><button id="enter" class="enter-button">Enter the universe <span aria-hidden="true">↗</span></button><p>A small step into something infinite.</p></div>
+<div class="entrance-footer"><span>INSPIRED BY THE COSMOS. MADE FOR YOUR CURIOSITY.</span><span>BEST EXPERIENCED FULL SCREEN <span aria-hidden="true">↗</span></span></div>
 </section>
-<div class="objects-heading"><h3 id="collection-title">Our solar neighbourhood</h3><span>Pick your next destination <span>→</span></span></div>
-<div id="object-cards" class="object-cards"></div>
-<div class="feature-grid"><button class="feature-card mission-feature" data-page="missions"><span class="feature-icon">⚑</span><div><span class="eyebrow">YOUR NEXT CHALLENGE</span><h3>A little curiosity. A big mission.</h3><p>Follow the clues and earn your explorer stripes.</p></div><span class="feature-arrow">↗</span></button><button class="feature-card hole-feature" id="black-hole-link"><span class="mini-hole"></span><div><span class="eyebrow">INTO THE UNKNOWN</span><h3>What happens near a black hole?</h3><p>Meet the universe’s most extreme objects.</p></div><span class="feature-arrow">↗</span></button></div>
+<section id="flight-ui" hidden aria-label="Travelling to the Solar System"><p id="flight-caption" aria-live="polite">Leave the familiar behind.</p><button id="skip-flight">Skip journey ↗</button></section>
+<section id="exploration" hidden aria-label="Free exploration">
+<div class="location"><div class="eyebrow" id="location-kicker">A FAMILIAR CORNER OF INFINITY</div><h1 id="location-title">Our Solar System</h1><p id="location-subtitle">Eight worlds. One extraordinary star.</p></div>
+<nav class="scale-nav" aria-label="Choose your scale"><span class="scale-nav-label">PULL BACK. SEE MORE.</span><div id="scale-stops"></div></nav>
+<div id="planet-labels" aria-hidden="true"></div>
+<div id="planet-focus" hidden><span class="eyebrow">YOU ARE HERE</span><h2 id="planet-name"></h2><button id="leave-planet">← Back to the Solar System</button></div>
+<div class="explore-bottom"><div class="journey-actions"><button id="go-in" aria-label="Travel to a smaller scale">↙ <span>Closer</span></button><button id="go-out" aria-label="Travel to a larger scale"><span>Further out</span> ↗</button></div><div id="planet-dock" aria-label="Choose a planet"></div><div class="bottom-row"><button id="home">◉ <span>Back to the beginning</span></button><span id="gesture-hint">Drag to look around <i>·</i> Scroll to explore</span><button id="pause" aria-pressed="false">Ⅱ <span>Pause</span></button></div></div>
 </section>
-<section id="activity-page" hidden></section>
-<footer><span>Stay curious. There’s always more out there.</span><a href="classic.html">Original explorer ↗</a><a href="https://science.nasa.gov/solar-system/" target="_blank" rel="noreferrer">Learn more at NASA ↗</a></footer>
+<div id="loading" role="status"><div class="loading-orbit"></div><span>Opening a window to the universe</span></div>
+<div id="unavailable" hidden role="alert"><h1>A universe worth seeing.</h1><p>This experience needs WebGL. Try a browser with hardware acceleration, or visit the learning explorer.</p><a href="learn.html" class="enter-button">Open learning explorer ↗</a><button id="retry-render">Try again</button></div>
 </main>
-</div>
-<dialog id="detail-dialog"><button class="dialog-close" aria-label="Close details">×</button><div id="detail-content"></div></dialog>
-<div id="toast" role="status" aria-live="polite"></div>
-<script type="module" src="js/explorer.js"></script>
+<dialog id="settings-dialog"><button class="close-dialog" aria-label="Close settings">×</button><div class="eyebrow">YOUR EXPERIENCE</div><h2>Make yourself at home.</h2><label for="quality">Visual detail</label><select id="quality"><option value="ultra">Ultra · maximum atmosphere</option><option value="balanced">Balanced · smoother travel</option></select><label class="check-row"><input id="reduced-motion" type="checkbox"> Gentle motion</label><p>Gentle motion skips the flight and reduces automatic movement. You can still explore freely.</p><a href="learn.html">Open the learning explorer ↗</a><a href="classic.html">Open the original explorer ↗</a><details><summary>About this journey</summary><p>An original, cinematic interpretation of space. The black-hole passage is imaginative; scale transitions and planetary spacing are compressed for exploration. The black-hole image approximates bent light rather than using a full general-relativity simulation.</p><p>No movie footage or soundtrack is used. Ambient audio is generated in your browser.</p></details></dialog>
+<div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+<script type="module" src="js/journey/main.js"></script>
 </body></html>

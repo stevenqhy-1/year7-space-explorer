@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="assets/favicon.svg">
+<meta name="theme-color" content="#090c15"><meta name="description" content="Your mission to understand the universe. An interactive space explorer for Years 7–9.">
+<title>Space Explorer — Your universe awaits</title>
+<link rel="stylesheet" href="css/explorer.css">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/controls/OrbitControls.js":"./vendor/OrbitControls.js"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to exploration</a>
+<aside class="sidebar">
+<a class="brand" href="./"><span class="brand-symbol">✳</span><span>SPACE<span class="brand-small">EXPLORER</span></span></a>
+<div class="edition">THE UNIVERSE IS YOUR CLASSROOM</div>
+<div class="nav-label">YOUR EXPEDITION</div>
+<nav aria-label="Main navigation">
+<button class="nav-item active" data-page="explore"><span>◈</span> Explore the universe</button>
+<button class="nav-item" data-page="missions"><span>⚑</span> Missions <small>3</small></button>
+<button class="nav-item" data-page="lab"><span>⚗</span> Space lab</button>
+<button class="nav-item" data-page="quiz"><span>✧</span> Test your knowledge</button>
+</nav>
+<div class="sidebar-bottom"><div class="rank-icon">✦</div><strong id="rank">Space cadet</strong><span id="progress-copy">0 discoveries made</span><div class="progress-track"><i id="progress-fill"></i></div><p>Small steps. Infinite possibilities.</p><button id="reset-progress" class="text-button">Reset progress</button></div>
+<div class="year-tag"><span class="status-dot"></span> BUILT FOR YEARS 7–9</div>
+</aside>
+<div class="workspace">
+<header class="topbar"><div><span class="breadcrumb">Your expedition</span><span class="slash">/</span><span id="page-title">Explore</span></div><div class="top-actions"><button id="motion" class="text-button" aria-pressed="false">◌ Motion on</button><span class="xp"><span>✧</span> <b id="xp">0</b> XP</span><span class="avatar">YOU</span></div></header>
+<main id="main" tabindex="-1">
+<section id="explore-page">
+<div class="page-heading"><div><div class="eyebrow">LOOK UP. WONDER MORE.</div><h1>A whole universe to discover<span>.</span></h1><p>Get closer. Ask big questions. Find something extraordinary.</p></div><span class="live-tag"><span class="status-dot"></span> EXPLORATION MODE</span></div>
+<div class="category-tabs" role="group" aria-label="Choose a space collection"></div>
+<section class="universe" aria-label="Interactive celestial object viewer">
+<div id="viewport"><div id="render-status">Preparing your window to the universe…</div></div>
+<div class="viewer-top"><span><i class="status-dot"></i> LIVE 3D EXPLORER</span><span id="object-index">03 / 09</span></div>
+<div class="object-copy"><div class="eyebrow" id="object-type"></div><h2 id="object-name"></h2><p id="object-description"></p><button class="primary" id="discover">Discover Earth <span>↗</span></button><div class="object-coordinate" id="object-coordinate"></div></div>
+<div class="planet-label"><span class="label-line"></span><span id="visual-label">EARTH</span><small>DRAG TO ROTATE</small></div>
+<div class="viewer-tools"><button id="pause" aria-label="Pause rotation" title="Pause rotation">Ⅱ</button><button id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button><button id="reset-view" aria-label="Reset camera" title="Reset camera">⟲</button></div>
+<div class="viewer-bottom"><span>↔ Drag to orbit <b>·</b> Scroll to zoom</span><span>Artist’s visualisation · sizes not to scale</span></div>
+</section>
+<div class="objects-heading"><h3 id="collection-title">Our solar neighbourhood</h3><span>Pick your next destination <span>→</span></span></div>
+<div id="object-cards" class="object-cards"></div>
+<div class="feature-grid"><button class="feature-card mission-feature" data-page="missions"><span class="feature-icon">⚑</span><div><span class="eyebrow">YOUR NEXT CHALLENGE</span><h3>A little curiosity. A big mission.</h3><p>Follow the clues and earn your explorer stripes.</p></div><span class="feature-arrow">↗</span></button><button class="feature-card hole-feature" id="black-hole-link"><span class="mini-hole"></span><div><span class="eyebrow">INTO THE UNKNOWN</span><h3>What happens near a black hole?</h3><p>Meet the universe’s most extreme objects.</p></div><span class="feature-arrow">↗</span></button></div>
+</section>
+<section id="activity-page" hidden></section>
+<footer><span>Stay curious. There’s always more out there.</span><a href="classic.html">Original explorer ↗</a><a href="https://science.nasa.gov/solar-system/" target="_blank" rel="noreferrer">Learn more at NASA ↗</a></footer>
+</main>
+</div>
+<dialog id="detail-dialog"><button class="dialog-close" aria-label="Close details">×</button><div id="detail-content"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="js/explorer.js"></script>
+</body></html>

@@ -1,6 +1,6 @@
 # Space Explorer: interactive learning upgrade
 
-The landing page is now a mission-control experience for Years 7–9. The original app remains at `classic.html`, including its orbital simulation, constellation scenes, formation animations and gallery.
+The learning page at `learn.html` is a mission-control experience for Years 7–9. The original app remains at `classic.html`, including its orbital simulation, constellation scenes, formation animations and gallery.
 
 ## New experience
 
@@ -20,7 +20,7 @@ Run `python3 -m http.server 8765 --bind 127.0.0.1` from the repository, then ope
 
 ## Files
 
-- `index.html`, `css/explorer.css`, `js/explorer.js`: new experience.
+- `learn.html`, `css/explorer.css`, `js/explorer.js`: new experience.
 - `data/content.json`: original content plus star-type lessons. Existing `stars.bodies` remains compatible with the original app.
 - `vendor/`: Three.js 0.160.0 and OrbitControls, with MIT license.
 - `assets/earth.jpg`: Earth texture from the Three.js example planet textures, https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg.
