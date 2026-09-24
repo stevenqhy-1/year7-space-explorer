@@ -1,3 +1,7 @@
+# Space Explorer — Years 7–9
+
+The interactive upgrade opens at `index.html`. See [UPGRADE.md](UPGRADE.md) for features, teaching notes, sources and validation. The original explorer is preserved at `classic.html`.
+
 # Year 7 Space Explorer
 
 An interactive 3D web page for Year 7 science (Western Australia curriculum) covering planets, stars, moons, asteroids, meteors, comets, constellations and galaxies.
