@@ -1,3 +1,11 @@
+# Beyond — A journey through the universe
+
+Open `index.html` for the cinematic black-hole entrance and free universe exploration. See [CINEMATIC-PLAN.md](CINEMATIC-PLAN.md) for the agreed direction and baseline QA, and [CINEMATIC-QA.md](CINEMATIC-QA.md) for the final checks.
+
+The learning dashboard, missions and experiments remain at `learn.html`; the original orbital explorer remains at `classic.html`. Both are linked from experience settings.
+
+The cinematic experience has no build step and uses the locally bundled Three.js library. Run `python3 -m http.server 8765 --bind 127.0.0.1` and open http://127.0.0.1:8765. Ambient sound is optional and starts only after a click.
+
 # Year 7 Space Explorer
 
 An interactive 3D web page for Year 7 science (Western Australia curriculum) covering planets, stars, moons, asteroids, meteors, comets, constellations and galaxies.
