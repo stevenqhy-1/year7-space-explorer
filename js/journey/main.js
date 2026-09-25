@@ -4,12 +4,13 @@ import { createBlackHole } from './black-hole.js';
 import { createPost } from './post.js';
 import { createFlight } from './flight.js';
 import { buildWorlds, PLANETS, LAYERS } from './worlds.js';
+import { OBJECTS, SCALES } from './discoveries.js';
 import { createAudio } from './audio.js';
 
 const $=selector=>document.querySelector(selector);
 const ease=t=>t*t*(3-2*t);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
-const layerDistance=index=>LAYERS[index].distance*(innerWidth<700?(index===0?2.45:1.85):1);
+const layerDistance=index=>LAYERS[index].distance*(innerWidth<700?(index===0?2.45:index===5?2.6:1.85):1);
 const reducedMedia=matchMedia('(prefers-reduced-motion: reduce)');
 let gentle=reducedMedia.matches,quality='ultra';
 try{const s=JSON.parse(localStorage.getItem('beyond-settings')||'{}');gentle=gentle||!!s.gentle;quality=s.quality==='balanced'?'balanced':'ultra';}catch{}
@@ -20,6 +21,7 @@ let measuredFps=60,slowSeconds=0,adaptiveScale=1,wheelSum=0,lastWheel=0;
 const audio=createAudio(),mouse=new THREE.Vector2(),raycaster=new THREE.Raycaster();
 const pointer=new THREE.Vector2(),temp=new THREE.Vector3();
 const targetOffset=new THREE.Vector3();
+let pendingInfo=null,creditTimer=null;
 let pointerDown=null,followPrevious=new THREE.Vector3();
 
 function announce(message){$('#announcement').textContent=message;}
@@ -60,13 +62,14 @@ function setup(){
 
 function startJourney(){
   if(mode!=='entrance'||!worlds)return;
+  $('#creator-credit').hidden=false;clearTimeout(creditTimer);creditTimer=setTimeout(()=>$('#creator-credit').hidden=true,3500);
   if(gentle){arrive();return;}
   setMode('flight');flightStart=performance.now();audio.mood(0,true);$('#skip-flight').focus();
 }
 function arrive(){
   if(!worlds)return;
   transition=null;stage=0;focus=null;document.body.dataset.focus='false';
-  worlds.layers.forEach((g,i)=>{g.visible=i===0;g.scale.setScalar(1);worlds.opacity(g,1);});
+  worlds.layers.forEach((g,i)=>{g.visible=i===0;g.scale.setScalar(1);g.position.set(0,0,0);worlds.opacity(g,1);});
   setMode('explore');updateInterface();audio.mood(0,false);
   controls.target.set(0,0,0);camera.position.set(170,120,210).setLength(gentle?layerDistance(0):layerDistance(0)*1.7);
   if(!gentle)tweenCamera(new THREE.Vector3(),new THREE.Vector3(170,120,210).setLength(layerDistance(0)),2.6);
@@ -74,6 +77,7 @@ function arrive(){
 }
 function restart(){
   transition=null;cameraTween=null;focus=null;stage=0;document.body.dataset.focus='false';
+  pendingInfo=null;$('#creator-credit').hidden=true;
   hole.uniforms.uDive.value=0;setMode('entrance');audio.mood(0,false);$('#enter').focus({preventScroll:true});announce('Back at the black hole.');
 }
 function tweenCamera(target,position,duration=1.7){
@@ -84,15 +88,19 @@ function updateInterface(){
   const info=LAYERS[stage];$('#location-kicker').textContent=info.kicker;$('#location-title').textContent=info.title;$('#location-subtitle').textContent=info.subtitle;
   document.body.dataset.stage=String(stage);$('#planet-dock').hidden=stage!==0;$('#planet-focus').hidden=!focus;
   document.querySelectorAll('.scale-stop').forEach((button,i)=>{button.classList.toggle('active',i===stage);button.setAttribute('aria-current',i===stage?'step':'false');});
-  $('#go-in').disabled=stage===0&&!focus;$('#go-out').disabled=stage===LAYERS.length-1&&!focus;
+  $('#cosmic-dock').hidden=stage!==5;$('#galaxy-legend').hidden=stage!==3;$('#object-info').hidden=stage!==5||!focus;
+  $('#leave-planet').textContent=stage===5?'← Back to the collection':'← Back to the Solar System';
+  $('#scale-comparison').textContent=SCALES[stage][0];$('#scale-caption').textContent=SCALES[stage][1];
+  document.querySelectorAll('.cosmic-button').forEach(b=>{b.classList.toggle('active',b.dataset.cosmic===focus?.id);b.setAttribute('aria-pressed',String(b.dataset.cosmic===focus?.id));});
+  $('#go-in').disabled=stage===0&&!focus;$('#go-out').disabled=stage>=4&&!focus;
   document.querySelectorAll('.planet-button').forEach(button=>{button.classList.toggle('active',button.dataset.planet===focus?.id);button.setAttribute('aria-pressed',String(button.dataset.planet===focus?.id));});
   $('#planet-labels').hidden=stage!==0||!!focus;
   if(worlds)worlds.bodies.forEach(body=>{body.orbitLine.visible=!focus;});
   $('#go-out span').textContent=focus?'Leave orbit':'Further out';
 }
 function clearFocus(animate=true){
-  if(!focus)return;focus=null;document.body.dataset.focus='false';$('#planet-focus').hidden=true;
-  if(animate)tweenCamera(new THREE.Vector3(),new THREE.Vector3(170,120,210).setLength(layerDistance(0)));
+  pendingInfo=null;if(!focus)return;focus=null;document.body.dataset.focus='false';$('#planet-focus').hidden=true;
+  if(animate)tweenCamera(new THREE.Vector3(),(stage===5?new THREE.Vector3(0,60,335):new THREE.Vector3(170,120,210)).setLength(layerDistance(stage)));
   updateInterface();
 }
 function goToStage(next){
@@ -105,9 +113,17 @@ function goToStage(next){
   const old=worlds.layers[from],incoming=worlds.layers[next];
   incoming.visible=true;incoming.scale.setScalar(outward?5:.008);worlds.opacity(incoming,0);
   stage=next;updateInterface();audio.mood(next);
-  const direction=camera.position.clone().sub(controls.target).normalize();
+  const direction=next===5?new THREE.Vector3(0,60,335).normalize():camera.position.clone().sub(controls.target).normalize();
   if(direction.y<.15)direction.y=.2;
   transition={old,incoming,outward,start:performance.now(),duration:gentle?0:3.2,fromPosition:camera.position.clone(),fromTarget:controls.target.clone(),toPosition:direction.normalize().multiplyScalar(layerDistance(next))};
+  if(from===1&&next===2){
+    // Re-express the whole neighbourhood in a small patch of the galactic disk.
+    // Transform the camera with it so the first frame retains the same view.
+    const anchor=new THREE.Vector3(62,3,50),factor=.025;
+    old.scale.setScalar(factor);old.position.copy(anchor);incoming.scale.setScalar(1);
+    camera.position.multiplyScalar(factor).add(anchor);controls.target.multiplyScalar(factor).add(anchor);
+    Object.assign(transition,{galactic:true,duration:gentle?0:5.8,anchor,fromTarget:controls.target.clone(),startDistance:camera.position.distanceTo(controls.target),direction:camera.position.clone().sub(controls.target).normalize()});
+  }
   wheelSum=0;announce(LAYERS[next].title);
 }
 function focusPlanet(id){
@@ -121,6 +137,28 @@ function focusPlanet(id){
   targetOffset.copy(dir).multiplyScalar(distance);
   tweenCamera(temp,temp.clone().add(targetOffset),2.2);announce(body.name);
 }
+
+function showDiscovery(id){
+  const item=OBJECTS.find(o=>o.id===id);if(!item)return;
+  $('#object-title').textContent=item.name;$('#object-tag').textContent=item.tag;$('#object-description').textContent=item.description;
+  $('#object-facts').replaceChildren(...item.facts.map(f=>{const li=document.createElement('li');li.textContent=f;return li;}));
+  $('#image-credit').textContent=item.caption;$('#object-scale').textContent=item.scale;$('#object-source').href=item.source;
+  const hypothetical=item.id==='wormhole';$('#object-image').hidden=hypothetical;$('#no-photo').hidden=!hypothetical;
+  if(!hypothetical){$('#object-image').src=`assets/cosmic/${item.id}.jpg`;$('#object-image').alt=item.caption;}
+  $('#object-dialog').showModal();
+}
+function focusCosmic(id){
+  if(mode!=='explore'||stage!==5||transition||!worlds)return;
+  const body=worlds.cosmicBodies.find(b=>b.id===id);if(!body)return;
+  focus=body;pendingInfo=id;document.body.dataset.focus='true';$('#planet-name').textContent=body.name;updateInterface();
+  body.body.getWorldPosition(temp);followPrevious.copy(temp);targetOffset.set(0,30,95).multiplyScalar(innerWidth<700?1.4:1);
+  tweenCamera(temp,temp.clone().add(targetOffset),2.1);announce(body.name);
+}
+$('#cosmic-dock').innerHTML=OBJECTS.map(o=>`<button class="cosmic-button" data-cosmic="${o.id}" aria-pressed="false">${o.name}</button>`).join('');
+$('#cosmic-dock').onclick=e=>{const b=e.target.closest('[data-cosmic]');if(b)focusCosmic(b.dataset.cosmic);};
+$('#object-info').onclick=()=>focus&&showDiscovery(focus.id);
+$('#close-object').onclick=()=>$('#object-dialog').close();
+$('#scale-guide').onclick=()=>$('#scale-dialog').showModal();$('#close-scale').onclick=()=>$('#scale-dialog').close();
 
 $('#scale-stops').innerHTML=LAYERS.map((layer,i)=>`<button class="scale-stop ${i===0?'active':''}" data-stage="${i}" aria-current="${i===0?'step':'false'}">${layer.name}</button>`).join('');
 $('#scale-stops').addEventListener('click',e=>{const b=e.target.closest('[data-stage]');if(b)goToStage(Number(b.dataset.stage));});
@@ -147,27 +185,27 @@ document.addEventListener('fullscreenchange',()=>$('#fullscreen').setAttribute('
 document.addEventListener('visibilitychange',()=>{audio.visibility(document.hidden).catch(()=>{});lastFrame=performance.now();});
 window.addEventListener('resize',resize);
 window.addEventListener('pointermove',e=>mouse.set((e.clientX/innerWidth-.5)*2,-(e.clientY/innerHeight-.5)*2));
-$('#cosmos').addEventListener('pointerdown',e=>{pointerDown={x:e.clientX,y:e.clientY};if(mode==='explore')cameraTween=null;});
+$('#cosmos').addEventListener('pointerdown',e=>{pointerDown={x:e.clientX,y:e.clientY};if(mode==='explore'){cameraTween=null;pendingInfo=null;}});
 $('#cosmos').addEventListener('pointerup',e=>{
-  if(mode!=='explore'||stage!==0||!pointerDown||transition)return;
+  if(mode!=='explore'||(stage!==0&&stage!==5)||!pointerDown||transition)return;
   const moved=Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y);pointerDown=null;if(moved>6)return;
   pointer.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);
-  const hit=raycaster.intersectObjects(worlds.selectable)[0];if(hit)focusPlanet(hit.object.userData.planet);
+  const hit=raycaster.intersectObjects(stage===5?worlds.cosmicSelectable:worlds.selectable)[0];if(hit){if(stage===5)focusCosmic(hit.object.userData.cosmic);else focusPlanet(hit.object.userData.planet);}
 });
 $('#cosmos').addEventListener('wheel',e=>{
-  if(mode!=='explore'||transition||cameraTween)return;
+  if(mode!=='explore'||transition||cameraTween||stage===5)return;
   const now=performance.now();if(now-lastWheel>250)wheelSum=0;lastWheel=now;wheelSum+=e.deltaY;
   const distance=camera.position.distanceTo(controls.target),reference=layerDistance(stage);
   if(focus&&e.deltaY>0&&distance>focus.radius*19){clearFocus();wheelSum=0;}
-  else if(!focus&&e.deltaY>0&&distance>reference*1.7&&wheelSum>80)goToStage(stage+1);
+  else if(!focus&&stage<4&&e.deltaY>0&&distance>reference*1.7&&wheelSum>80)goToStage(stage+1);
   else if(!focus&&e.deltaY<0&&stage>0&&distance<reference*.28&&wheelSum< -80)goToStage(stage-1);
 },{passive:true});
 window.addEventListener('keydown',e=>{
-  if($('#settings-dialog').open)return;
+  if(document.querySelector('dialog[open]'))return;
   if(e.key==='Escape'&&mode==='flight')arrive();else if(e.key==='Escape'&&focus)clearFocus();
   else if(['INPUT','SELECT'].includes(document.activeElement.tagName))return;
-  else if(mode==='explore'&&(e.key==='+'||e.key==='=')){e.preventDefault();goToStage(stage-1);}
-  else if(mode==='explore'&&e.key==='-'){e.preventDefault();goToStage(stage+1);}
+  else if(mode==='explore'&&stage!==5&&(e.key==='+'||e.key==='=')){e.preventDefault();goToStage(stage-1);}
+  else if(mode==='explore'&&stage<4&&e.key==='-'){e.preventDefault();goToStage(stage+1);}
 });
 function updateLabels(){
   $('#planet-labels').hidden=stage!==0||!!focus||!!transition;
@@ -185,24 +223,31 @@ function updateExploration(now,dt){
   document.body.dataset.transitioning=String(!!transition||!!cameraTween);
   if(transition){
     const tr=transition,t=tr.duration?clamp((now-tr.start)/(tr.duration*1000)):1,e=ease(t);
+    if(tr.galactic){
+      controls.target.copy(tr.fromTarget).multiplyScalar(1-e);
+      const distance=tr.startDistance*Math.pow(layerDistance(2)/tr.startDistance,e);
+      camera.position.copy(controls.target).addScaledVector(tr.direction,distance);
+      worlds.opacity(tr.old,1-ease(clamp(t*1.6)));worlds.opacity(tr.incoming,ease(clamp(t*2)));
+    }else{
     tr.old.scale.setScalar(tr.outward?Math.pow(.006,e):Math.pow(5,e));
     tr.incoming.scale.setScalar(tr.outward?Math.pow(5,1-e):Math.pow(.008,1-e));
     worlds.opacity(tr.old,1-ease(clamp(t*1.5)));worlds.opacity(tr.incoming,ease(clamp((t-.15)/.85)));
     camera.position.lerpVectors(tr.fromPosition,tr.toPosition,e);controls.target.copy(tr.fromTarget).multiplyScalar(1-e);
-    if(t===1){tr.old.visible=false;tr.old.scale.setScalar(1);worlds.opacity(tr.old,1);tr.incoming.scale.setScalar(1);worlds.opacity(tr.incoming,1);transition=null;}
+    }
+    if(t===1){tr.old.position.set(0,0,0);tr.old.visible=false;tr.old.scale.setScalar(1);worlds.opacity(tr.old,1);tr.incoming.scale.setScalar(1);worlds.opacity(tr.incoming,1);transition=null;}
   }else if(cameraTween){
     const tw=cameraTween,t=tw.duration?clamp((now-tw.start)/(tw.duration*1000)):1,e=ease(t);
     if(focus){focus.body.getWorldPosition(temp);tw.to.copy(temp).add(targetOffset);tw.targetTo.copy(temp);followPrevious.copy(temp);}
     camera.position.lerpVectors(tw.from,tw.to,e);controls.target.lerpVectors(tw.targetFrom,tw.targetTo,e);
-    if(t===1)cameraTween=null;
+    if(t===1){cameraTween=null;if(pendingInfo){const id=pendingInfo;pendingInfo=null;showDiscovery(id);}}
   }else if(focus){
     focus.body.getWorldPosition(temp);const delta=temp.clone().sub(followPrevious);camera.position.add(delta);controls.target.add(delta);followPrevious.copy(temp);
   }
   controls.enabled=!transition;controls.update();updateLabels();
-  if(!transition&&!cameraTween){
+  if(!transition&&!cameraTween&&stage!==5){
     const distance=camera.position.distanceTo(controls.target),reference=layerDistance(stage);
     if(focus&&distance>focus.radius*19)clearFocus();
-    else if(!focus&&stage<LAYERS.length-1&&distance>reference*1.9)goToStage(stage+1);
+    else if(!focus&&stage<4&&distance>reference*1.9)goToStage(stage+1);
     else if(!focus&&stage>0&&distance<reference*.24)goToStage(stage-1);
   }
   post.render(worlds.scene,camera,{bloom:stage===0?.65:.85});

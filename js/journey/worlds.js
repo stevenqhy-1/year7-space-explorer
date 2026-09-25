@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OBJECTS } from './discoveries.js';
 import { makeGasGiantTexture, makeRockyTexture, makeSunTexture, makeRingTexture } from '../textureFactory.js';
 
 export const PLANETS = [
@@ -15,8 +16,9 @@ export const LAYERS = [
   {name:'Solar System',title:'Our Solar System',kicker:'A FAMILIAR CORNER OF INFINITY',subtitle:'Eight worlds. One extraordinary star.',distance:290},
   {name:'Nearby stars',title:'A sea of suns',kicker:'OUR SUN IS ONE OF MANY',subtitle:'Every point of light could have worlds of its own.',distance:330},
   {name:'Milky Way',title:'This is our galaxy.',kicker:'EVERY STAR YOU SEE BELONGS TO SOMETHING BIGGER',subtitle:'Our entire Solar System is a tiny part of this.',distance:390},
-  {name:'Galaxies',title:'Islands of light',kicker:'BEYOND OUR GALACTIC HOME',subtitle:'Each island holds a universe of possibilities.',distance:440},
+  {name:'Galaxies',title:'Islands of light',kicker:'BEYOND OUR GALACTIC HOME',subtitle:'Different shapes. Different histories. Countless worlds.',distance:440},
   {name:'Cosmic web',title:'And still, there is more.',kicker:'THE LARGEST STRUCTURES IN THE COSMOS',subtitle:'Galaxies gather along an immense web of matter.',distance:530},
+  {name:'Weird cosmic objects',title:'Beautifully strange.',kicker:'THE UNIVERSE HAS A WILD SIDE',subtitle:'Choose a wonder. Fly closer. Discover its story.',distance:340},
 ];
 function random(seed=32){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 function particles(positions,colors,sizes,{opacity=1,size=1}={}) {
@@ -29,7 +31,7 @@ function particles(positions,colors,sizes,{opacity=1,size=1}={}) {
     uniforms:{uOpacity:{value:opacity},uSize:{value:size},uTime:{value:0}},
     vertexShader:`attribute float aSize;varying vec3 vColor;uniform float uSize,uTime;
       void main(){vColor=color;vec4 p=modelViewMatrix*vec4(position,1.);float shimmer=.94+.06*sin(uTime*.7+position.x);
-      gl_PointSize=clamp(aSize*uSize*380./max(1.,-p.z),1.,50.)*shimmer;gl_Position=projectionMatrix*p;}`,
+      gl_PointSize=clamp(aSize*uSize*length(modelMatrix[0].xyz)*380./max(.03,-p.z),1.,50.)*shimmer;gl_Position=projectionMatrix*p;}`,
     fragmentShader:`varying vec3 vColor;uniform float uOpacity;
       void main(){float r=length(gl_PointCoord-.5)*2.;if(r>1.)discard;float a=exp(-r*r*5.)*(1.-smoothstep(.65,1.,r));gl_FragColor=vec4(vColor,a*uOpacity);}`,
   });
@@ -58,6 +60,9 @@ function galacticHaze(radius, seed) {
       float taper=pow(1.-smoothstep(.15,1.,r),1.4);
       float disk=(.08+arms*.65)*taper*(.3+clouds*1.4)*(.5+fine);
       float core=exp(-r*r*110.);
+      float bar=exp(-p.x*p.x*35.-p.y*p.y*420.);
+      disk*=smoothstep(.18,.55,fine+clouds*.25);
+      core+=bar*.35;
       vec3 color=mix(vec3(.16,.23,.48),vec3(.68,.32,.37),smoothstep(.55,.8,clouds));
       color=mix(color,vec3(1.,.68,.36),exp(-r*r*12.));
       color*=disk; color+=vec3(1.6,1.05,.6)*core*.6;
@@ -127,11 +132,28 @@ export function buildWorlds() {
     for(let i=0;i<27;i++){const r=(.25+rand()*.65)*radius,a=i%4*Math.PI/2+r/radius*6.2;const cloud=glow(i%4===0?0xb4386b:0x426abd,radius*(.05+rand()*.1),.13);cloud.position.set(Math.cos(a)*r,0,Math.sin(a)*r);group.add(cloud)}
     return group;
   }
-  const milky=galaxy(145,65000,76);milky.rotation.set(.2,.4,.15);layers[2].add(milky);
-  // Distinct galaxies, rather than a field of identical bright dots.
+  const milky=galaxy(145,90000,76);milky.rotation.set(.2,.4,.15);layers[2].add(milky);
+  // Separate stellar distributions for genuinely different galaxy morphologies.
+  function otherGalaxy(radius,count,seed,type){
+    if(type==='spiral'||type==='barred'){
+      const g=galaxy(radius,count,seed);
+      if(type==='barred'){const bar=glow(0xffcf91,radius*.8,.7);bar.scale.set(radius, radius*.17,1);g.add(bar);}return g;
+    }
+    const rand=random(seed),g=new THREE.Group(),p=[],co=[],sz=[];
+    for(let i=0;i<count;i++){
+      let x,y,z;const a=rand()*Math.PI*2,r=Math.pow(rand(),1.3)*radius,u=rand()*2-1;
+      if(type==='irregular'){const k=i%5,cx=Math.sin(k*2.7)*radius*.55,cz=Math.cos(k*4.1)*radius*.5;x=cx+(rand()-.5)*radius*.8;y=(rand()-.5)*radius*.4;z=cz+(rand()-.5)*radius*.65;c.setHSL(.55+rand()*.35,.5,.55);}
+      else {x=Math.cos(a)*r*Math.sqrt(1-u*u);z=Math.sin(a)*r*Math.sqrt(1-u*u);y=u*r*(type==='elliptical'?.7:.12);x*=type==='elliptical'?1.25:1;c.setHSL(.1,.3,.4+rand()*.4);}
+      p.push(x,y,z);co.push(c.r,c.g,c.b);sz.push(.2+rand()*.7);
+    }
+    g.add(particles(p,co,sz,{size:radius/22}));
+    if(type!=='irregular'){const light=glow(0xffd3a0,radius*1.3,.5);if(type==='lenticular')light.scale.y*=.32;g.add(light);}
+    return g;
+  }
+  // A deliberately mixed gallery: spirals, bars, ellipsoids, disks and irregular clumps.
   const central=galaxy(23,9000,17);central.rotation.set(.35,0,.2);layers[3].add(central);
   for(let i=0;i<45;i++){
-    const radius=3+rng()*11;const g=galaxy(radius,950,100+i);const a=rng()*Math.PI*2,r=50+rng()*190;
+    const radius=7+rng()*13;const g=otherGalaxy(radius,1800,100+i,['spiral','elliptical','irregular','lenticular','barred'][i%5]);const a=rng()*Math.PI*2,r=50+rng()*190;
     g.position.set(Math.cos(a)*r,(rng()-.5)*190,Math.sin(a)*r);g.rotation.set(rng()*3,rng()*5,rng()*2);layers[3].add(g);
   }
   // A filament network with dense galaxy nodes and naturally empty voids.
@@ -148,13 +170,44 @@ export function buildWorlds() {
     for(let j=0;j<160;j++){const p=nodes[i];webP.push(p.x+(rng()-.5)*10,p.y+(rng()-.5)*10,p.z+(rng()-.5)*10);webC.push(.9,.8,1.);webS.push(.2+rng()*.9)}
   }
   layers[4].add(particles(webP,webC,webS,{size:1.4}));
+  const cosmicBodies=[],cosmicSelectable=[];
+  for(let index=0;index<OBJECTS.length;index++){
+    const item=OBJECTS[index],g=new THREE.Group(),radius=15;
+    const angle=index/OBJECTS.length*Math.PI*2;
+    g.position.set((index-2)*59,index%2?-18:20,0);
+    const hit=new THREE.Mesh(new THREE.SphereGeometry(22,24,16),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}));hit.userData.cosmic=item.id;g.add(hit);cosmicSelectable.push(hit);
+    const p=[],co=[],sz=[];const rand=random(900+index);
+    for(let i=0;i<6500;i++){
+      const a=rand()*Math.PI*2,u=rand()*2-1;
+      let r,x,y,z;
+      if(item.id==='blackhole'||item.id==='quasar'){r=7+Math.pow(rand(),.65)*20;x=Math.cos(a)*r;z=Math.sin(a)*r;y=(rand()-.5)*.7;c.setHSL(item.id==='blackhole'?.09:.58,.5,.55+rand()*.35);}
+      else if(item.id==='wormhole'){r=8+Math.pow(rand(),2)*15;z=(r-8)*Math.sin(a*.5);x=Math.cos(a)*r;y=Math.sin(a)*r;c.setHSL(.64+r/180,.6,.65);}
+      else {r=item.id==='supernova'?17+rand()*4:Math.pow(rand(),.6)*25;const q=Math.sqrt(1-u*u);x=Math.cos(a)*q*r;y=u*r;z=Math.sin(a)*q*r;if(item.id==='nebula'){x*=1+.35*Math.sin(y*.3);z*=.6;}c.setHSL(item.id==='supernova'?.02+rand()*.13:.55+rand()*.35,.6,.45+rand()*.3);}
+      p.push(x,y,z);co.push(c.r,c.g,c.b);sz.push(.12+rand()*.42);
+    }
+    const cloud=particles(p,co,sz,{size:1.3});g.add(cloud);
+    if(item.id==='blackhole'){
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(6.6,48,32),new THREE.MeshBasicMaterial({color:0x000000})));
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(7,.2,12,120),new THREE.MeshBasicMaterial({color:new THREE.Color(2,1.3,.65)}));g.add(ring);
+    }else if(item.id==='quasar'){
+      g.add(glow(0xaedfff,20,1));for(const sign of [-1,1]){const jet=new THREE.Mesh(new THREE.ConeGeometry(3,48,32,1,true),new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false,uniforms:{uOpacity:{value:.6}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec2 vUv;uniform float uOpacity;void main(){float a=pow(vUv.y,1.5)*(.25+.75*pow(sin(vUv.x*3.14159),4.));gl_FragColor=vec4(.3,.65,1.,a*uOpacity);}'}));jet.position.y=sign*24;jet.rotation.z=sign>0?Math.PI:0;g.add(jet);}
+    }else if(item.id==='nebula'){
+      for(let j=0;j<16;j++){const mist=glow(j%2?0x853898:0x285a9f,25,.22);mist.position.set((rand()-.5)*30,(rand()-.5)*30,(rand()-.5)*15);g.add(mist);}
+    }else if(item.id==='supernova'){
+      g.add(glow(0xade9ff,5,1));for(let j=0;j<20;j++){const a=j/20*Math.PI*2;const wisp=glow(j%2?0xf58448:0x764ed1,12,.25);wisp.position.set(Math.cos(a)*18,Math.sin(a)*18,Math.sin(a*3)*5);g.add(wisp);}
+    }else if(item.id==='wormhole'){
+      for(let j=0;j<9;j++){const ring=new THREE.Mesh(new THREE.TorusGeometry(8+j*1.3,.07,8,96),new THREE.MeshBasicMaterial({color:j%2?0x78bfff:0xb886ff,transparent:true,opacity:.65-j*.045,blending:THREE.AdditiveBlending,depthWrite:false}));ring.position.z=-j*1.5;g.add(ring);}
+    }
+    g.rotation.z=.25;layers[5].add(g);cosmicBodies.push({...item,radius,body:g,cloud});
+  }
   layers.forEach(group=>group.traverse(o=>{if(o.material){const m=o.material;m.userData.baseOpacity=m.opacity??1;if(m.uniforms?.uOpacity)m.userData.baseUniformOpacity=m.uniforms.uOpacity.value}}));
   function opacity(group,value){group.traverse(o=>{const m=o.material;if(!m)return;if(m.uniforms?.uOpacity)m.uniforms.uOpacity.value=(m.userData.baseUniformOpacity??1)*value;else{m.transparent=true;m.opacity=(m.userData.baseOpacity??1)*value;}});}
   function update(time,dt,moving=true,active=0){
     for(const b of bodies){if(moving)b.angle+=dt*.07*Math.pow(365/b.period,.4);b.body.position.set(Math.cos(b.angle)*b.orbit,0,Math.sin(b.angle)*b.orbit);if(moving)b.mesh.rotation.y+=dt*.08;}
+    if(moving&&active===5)cosmicBodies.forEach(b=>{b.cloud.rotation.y+=dt*.045;});
     if(moving){sun.rotation.y+=dt*.03;background.rotation.y+=dt*.0005;}
     layers[active]?.traverse(o=>{if(o.material?.uniforms?.uTime)o.material.uniforms.uTime.value=time});
   }
   update(0,0,false);
-  return {scene,layers,bodies,selectable,opacity,update,background};
+  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,opacity,update,background};
 }
