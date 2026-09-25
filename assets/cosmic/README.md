@@ -8,3 +8,9 @@ Images downloaded from the Open Graph image linked by these NASA pages on 25 Sep
 - `quasar.jpg`: RX J1131 composite. X-ray NASA/CXC/Univ. of Michigan/R. C. Reis et al.; optical NASA/STScI. https://www.nasa.gov/image-article/distant-quasar-rx-j1131/
 
 Infrared, radio, and X-ray observations are represented in visible colours; these are not human-eye views. There is deliberately no wormhole photograph: wormholes have not been observed. The 3D objects are original artistic models, not reconstructions of these observations.
+
+Gallery additions:
+- `cliffs.jpg`: Cosmic Cliffs in the Carina Nebula, Webb NIRCam + MIRI composite. NASA, ESA, CSA, STScI. https://science.nasa.gov/asset/webb/cosmic-cliffs-in-the-carina-nebula-nircam-and-miri-composite-image/
+- `ring.jpg`: Southern Ring Nebula, Webb NIRCam. NASA, ESA, CSA, STScI. https://science.nasa.gov/asset/webb/southern-ring-nebula-nircam-image/
+
+These NASA display renditions were converted to JPEG at quality 85. Gallery thumbnails crop for layout; opening a photo shows the entire image.

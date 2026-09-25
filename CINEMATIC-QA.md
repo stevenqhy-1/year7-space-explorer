@@ -48,3 +48,13 @@ No movie assets or soundtrack are included. Audio is synthesised locally. The We
 - JavaScript syntax checks and git whitespace validation passed.
 
 Limitations: artistic models, not a physically scaled atlas; wormholes are hypothetical; black-hole/galaxy geometry is an illustration. Telescope images are credited, with instrument/wavelength caveats and source links. Laptop/mobile GPU performance can differ from the tested desktop.
+
+## Gallery and challenge update
+
+- Added a ten-question, untimed space challenge with shuffled questions/answers, locked answer selection, explanatory feedback and retry support.
+- Browser-tested completed rounds at 7/10 (no badge) and 8/10 (Cosmic Explorer badge). Verified the earned state survives a reload on an isolated test origin, so the main preview retains a fresh personal record.
+- Unit checks cover 0%, 70%, 80%, 100%, an empty denominator, question count, one correct choice per question and shuffle integrity.
+- A static SVG badge download is available after earning the badge. SVG XML validates. The embedded browser did not report the initial dynamic-download event; replaced that implementation with a regular downloadable SVG asset link.
+- Restored a six-image gallery with full-image views, previous/next controls, arrow-key navigation, credits and NASA source links. All six images loaded with nonzero intrinsic dimensions. Tested next, previous and back-to-grid interactions.
+- Visually inspected desktop gallery, phone question controls and phone image viewer; reduced image letterboxing on mobile. Native dialogs retain keyboard focus and support Escape.
+- JavaScript syntax and git whitespace checks passed. Best scores are local to this browser, with a session-only fallback when storage is unavailable.

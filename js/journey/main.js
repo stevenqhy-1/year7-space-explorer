@@ -175,7 +175,8 @@ $('#sound').onclick=async()=>{
   try{const enabled=await audio.toggle();$('#sound').setAttribute('aria-pressed',String(enabled));$('#sound').setAttribute('aria-label',enabled?'Turn ambient sound off':'Turn ambient sound on');$('#sound .utility-label').textContent=enabled?'Sound on':'Sound off';}
   catch{announce('Sound is unavailable in this browser. You can continue exploring silently.');}
 };
-$('#settings').onclick=()=>$('#settings-dialog').showModal();$('.close-dialog').onclick=()=>$('#settings-dialog').close();
+for(const id of ['open-gallery','open-challenge'])$('#'+id).addEventListener('click',()=>{pendingInfo=null;});
+$('#settings').onclick=()=>{pendingInfo=null;$('#settings-dialog').showModal();};$('.close-dialog').onclick=()=>$('#settings-dialog').close();
 $('#settings-dialog').addEventListener('click',e=>{if(e.target===$('#settings-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
 $('#quality').value=quality;$('#quality').onchange=e=>{quality=e.target.value;adaptiveScale=1;slowSeconds=0;resize();saveSettings();};
 $('#reduced-motion').checked=gentle;$('#reduced-motion').onchange=e=>{gentle=e.target.checked;saveSettings();if(gentle&&mode==='flight')arrive();};
