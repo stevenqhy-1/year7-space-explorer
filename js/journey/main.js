@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createBlackHole } from './black-hole.js';
-import { createPost } from './post.js';
-import { createFlight } from './flight.js';
-import { buildWorlds, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js';
-import { OBJECTS, SCALES } from './discoveries.js';
-import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js';
-import { HORIZON_WORLDS } from './horizon-system.js';
-import { createAudio } from './audio.js';
+import { createBlackHole } from './black-hole.js?v=20261025';
+import { createPost } from './post.js?v=20261025';
+import { createFlight } from './flight.js?v=20261025';
+import { buildWorlds, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261025';
+import { OBJECTS, SCALES } from './discoveries.js?v=20261025';
+import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261025';
+import { HORIZON_WORLDS } from './horizon-system.js?v=20261025';
+import { createAudio } from './audio.js?v=20261025';
 
 const $=selector=>document.querySelector(selector);
 const ease=smoothJourney;

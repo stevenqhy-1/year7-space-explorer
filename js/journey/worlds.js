@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { makeWonder, makeObservable } from './wonders.js';
-import { buildHorizonSystem } from './horizon-system.js';
-import { OBJECTS } from './discoveries.js';
+import { makeWonder, makeObservable } from './wonders.js?v=20261025';
+import { buildHorizonSystem } from './horizon-system.js?v=20261025';
+import { OBJECTS } from './discoveries.js?v=20261025';
 import { makeGasGiantTexture, makeRockyTexture, makeSunTexture, makeRingTexture } from '../textureFactory.js';
 
 export const PLANETS = [

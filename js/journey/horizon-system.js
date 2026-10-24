@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createLens } from './black-hole.js';
+import { createLens } from './black-hole.js?v=20261025';
 import { makeRockyTexture } from '../textureFactory.js';
 export const HORIZON_WORLDS=[
  {id:'tide',name:'Tide · ocean world',radius:6,orbit:88,color:0x4f94ad,angle:.35},
