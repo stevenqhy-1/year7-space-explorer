@@ -24,7 +24,14 @@ const audio=createAudio(),mouse=new THREE.Vector2(),raycaster=new THREE.Raycaste
 const pointer=new THREE.Vector2(),temp=new THREE.Vector3();
 const targetOffset=new THREE.Vector3();
 let pendingInfo=null,creditTimer=null,discoveryTimer=null,queuedStage=null;
-let localSeconds=0,distantSeconds=0;
+let localSeconds=0,distantSeconds=0,scenic=false;
+function setScenic(value){
+ scenic=value;document.body.dataset.scenic=String(value);
+ for(const selector of ['.masthead','#exploration','.experience-links'])$(selector).inert=value;
+ $('#exit-scenic').hidden=!value;$('#scenic').setAttribute('aria-pressed',String(value));
+ if(value){pendingInfo=null;clearTimeout(discoveryTimer);$('#exit-scenic').focus();}else $('#scenic').focus();
+}
+$('#scenic').onclick=()=>setScenic(true);$('#exit-scenic').onclick=()=>setScenic(false);
 let pointerDown=null,followPrevious=new THREE.Vector3();
 
 function announce(message){$('#announcement').textContent=message;}
@@ -229,7 +236,7 @@ window.addEventListener('resize',resize);
 window.addEventListener('pointermove',e=>mouse.set((e.clientX/innerWidth-.5)*2,-(e.clientY/innerHeight-.5)*2));
 $('#cosmos').addEventListener('pointerdown',e=>{pointerDown={x:e.clientX,y:e.clientY};if(mode==='explore'){cameraTween=null;pendingInfo=null;clearTimeout(discoveryTimer);}});
 $('#cosmos').addEventListener('pointerup',e=>{
-  if(mode!=='explore'||(stage!==0&&stage!==COSMIC&&stage!==HORIZON)||!pointerDown||transition)return;
+  if(scenic||mode!=='explore'||(stage!==0&&stage!==COSMIC&&stage!==HORIZON)||!pointerDown||transition)return;
   const moved=Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y);pointerDown=null;if(moved>6)return;
   pointer.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);
   const hit=raycaster.intersectObjects(stage===COSMIC?worlds.cosmicSelectable:stage===HORIZON?worlds.horizon.selectable:worlds.selectable)[0];if(hit){if(stage===COSMIC)focusCosmic(hit.object.userData.cosmic);else if(stage===HORIZON)focusHorizon(hit.object.userData.horizon);else focusPlanet(hit.object.userData.planet);}
@@ -244,6 +251,8 @@ $('#cosmos').addEventListener('wheel',e=>{
 },{passive:true});
 window.addEventListener('keydown',e=>{
   if(document.querySelector('dialog[open]'))return;
+  if(e.key==='Escape'&&scenic){setScenic(false);return;}
+  if(e.key.toLowerCase()==='h'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)){setScenic(!scenic);return;}
   if(e.key==='Escape'&&mode==='flight')arrive();else if(e.key==='Escape'&&focus)clearFocus();
   else if(['INPUT','SELECT'].includes(document.activeElement.tagName))return;
   else if(mode==='explore'&&stage<=OBSERVABLE&&(e.key==='+'||e.key==='=')){e.preventDefault();goToStage(stage-1);}
@@ -286,17 +295,18 @@ function updateExploration(now,dt){
     const tw=cameraTween,t=tw.duration?clamp((now-tw.start)/(tw.duration*1000)):1,e=ease(t);
     if(focus){focus.body.getWorldPosition(temp);tw.to.copy(temp).add(targetOffset);tw.targetTo.copy(temp);followPrevious.copy(temp);}
     camera.position.lerpVectors(tw.from,tw.to,e);controls.target.lerpVectors(tw.targetFrom,tw.targetTo,e);
-    if(t===1){cameraTween=null;if(pendingInfo){const id=pendingInfo;pendingInfo=null;discoveryTimer=setTimeout(()=>{if(mode==='explore'&&stage===COSMIC&&focus?.id===id&&!document.querySelector('dialog[open]'))showDiscovery(id);},gentle?0:750);}}
+    if(t===1){cameraTween=null;if(pendingInfo){const id=pendingInfo;pendingInfo=null;discoveryTimer=setTimeout(()=>{if(!scenic&&mode==='explore'&&stage===COSMIC&&focus?.id===id&&!document.querySelector('dialog[open]'))showDiscovery(id);},gentle?0:750);}}
   }else if(focus){
     focus.body.getWorldPosition(temp);const delta=temp.clone().sub(followPrevious);camera.position.add(delta);controls.target.add(delta);followPrevious.copy(temp);
   }
-  controls.enabled=!transition&&!cameraTween&&!document.querySelector('dialog[open]');if(transition||cameraTween)camera.lookAt(controls.target);else controls.update();updateLabels();
+  controls.enabled=!transition&&!cameraTween&&!document.querySelector('dialog[open]');if(transition||cameraTween)camera.lookAt(controls.target);else controls.update();worlds.orient(camera);updateLabels();
   if(!transition&&!cameraTween&&stage<=OBSERVABLE){
     const distance=camera.position.distanceTo(controls.target),reference=layerDistance(stage);
     if(focus&&distance>focus.radius*19)clearFocus();
     else if(!focus&&stage<OBSERVABLE&&distance>reference*1.9)goToStage(stage+1);
     else if(!focus&&stage>0&&distance<reference*.24)goToStage(stage-1);
   }
+  if(stage===HORIZON)worlds.horizon.orbits.forEach(line=>{line.visible=!scenic&&!focus&&camera.position.distanceTo(controls.target)>300;});
   post.render(worlds.scene,camera,{bloom:stage===0?.65:.85});
 }
 function draw(now){

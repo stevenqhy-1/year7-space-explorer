@@ -190,8 +190,9 @@ export function buildWorlds() {
     for(const b of bodies){if(moving)b.angle+=dt*.07*Math.pow(365/b.period,.4);b.body.position.set(Math.cos(b.angle)*b.orbit,0,Math.sin(b.angle)*b.orbit);if(moving)b.mesh.rotation.y+=dt*.08;}
     horizon.update(dt,moving&&active===HORIZON);
     if(moving){sun.rotation.y+=dt*.03;background.rotation.y+=dt*.0005;}
-    layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.material?.uniforms?.uTime)o.material.uniforms.uTime.value=time;if(camera&&o.userData.billboard){o.quaternion.copy(camera.quaternion);}}));
+    layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.material?.uniforms?.uTime)o.material.uniforms.uTime.value=time;}));
   }
+  function orient(camera){layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.userData.billboard)o.quaternion.copy(camera.quaternion);}));}
   update(0,0,false);
-  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,horizon,opacity,update,background};
+  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,horizon,opacity,update,orient,background};
 }

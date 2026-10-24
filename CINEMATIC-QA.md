@@ -71,3 +71,10 @@ Limitations: artistic models, not a physically scaled atlas; wormholes are hypot
 - Automated tests cover the stationary-clock limit, horizon exclusion, mass scaling, cinematic conversion, bounded monotonic easing and stationary endpoints. All journey JavaScript syntax and whitespace checks pass.
 
 Scientific references: NASA “How Big Is Space?” (observable diameter approximately 92 billion light-years), Einstein Online time dilation, University of Maryland ASTR350 lecture 8 (Schwarzschild redshift), NASA HEASARC pulsars, and NASA Imagine the Universe neutron stars. Sources are linked in the relevant interface. Black-hole lensing, the wormhole flight, magnetic field illustrations and planetary orbits are artistic teaching visuals, not a relativistic simulation.
+
+## 25 October 2026 — follow-up QA and visual polish
+
+- Added Scenic view (diamond control or H) with a persistent Show controls button and Escape exit. Hidden controls are inert so keyboard focus cannot disappear into the interface.
+- Hid black-hole orbit guides during close approaches, planet focus and Scenic view. Updated camera-facing portraits after camera movement to eliminate a one-frame orientation lag.
+- Browser-tested all eight discovery dialogs with gentle motion, all three expedition worlds and return to overview, scenic entry/Escape exit, paused clock reset, gallery access and trivia introduction. All six gallery images loaded. No browser warnings or errors were reported in the follow-up checks.
+- Existing automated relativity/easing tests, JavaScript syntax checks and whitespace validation pass. Physical trackpad/touch gestures and GPU performance on other computers remain unverified.
