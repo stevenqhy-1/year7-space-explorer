@@ -58,3 +58,16 @@ Limitations: artistic models, not a physically scaled atlas; wormholes are hypot
 - Restored a six-image gallery with full-image views, previous/next controls, arrow-key navigation, credits and NASA source links. All six images loaded with nonzero intrinsic dimensions. Tested next, previous and back-to-grid interactions.
 - Visually inspected desktop gallery, phone question controls and phone image viewer; reduced image letterboxing on mobile. Native dialogs retain keyboard focus and support Escape.
 - JavaScript syntax and git whitespace checks passed. Best scores are local to this browser, with a session-only fallback when storage is unavailable.
+
+## 24 October 2026 — deeper universe
+
+- Rebuilt the entrance as a 16-second approach, curved dust-and-star tunnel, and overlapping reveal of the moving Solar System. Two HDR scenes blend before bloom, avoiding the previous cut. Skip and gentle-motion paths remain available.
+- Quintic easing, overlapping scale views and exponential camera distances soften travel; nearby stars transform with the camera into a galactic patch for a 7.2-second pullback. Requests during travel are queued.
+- Increased wheel, trackpad-pinch and touch-pinch responsiveness, with strongest trackpad response in the Solar System. Physical two-finger hardware input was not tested.
+- Added an illustrative observable-universe volume after the cosmic web, with a clear distinction between the observable horizon and all space.
+- Added an Interstellar-inspired black-hole system with three original fictional worlds, a close approach, and interactive clock comparison. Simplified stationary Schwarzschild clocks are separate from the explicitly fictional seven-years-per-hour preset. Mass changes the displayed horizon radius; scene geometry is artistic.
+- Rebuilt eight cosmic portraits with lensing, volumetric gas, shock shells, jets and illustrative magnetic fields. Added pulsars, magnetars and planetary nebulae. Cards appear after camera travel and fade in; non-photographic illustrations are labelled.
+- Desktop browser checks: full entrance arrival, nearby-to-galactic travel, all eight collection models rendering, delayed magnetar card, observable universe, black-hole approach/overview, ocean-world approach, both clock modes and mass selection. No rendering warnings/errors in these checks.
+- Automated tests cover the stationary-clock limit, horizon exclusion, mass scaling, cinematic conversion, bounded monotonic easing and stationary endpoints. All journey JavaScript syntax and whitespace checks pass.
+
+Scientific references: NASA “How Big Is Space?” (observable diameter approximately 92 billion light-years), Einstein Online time dilation, University of Maryland ASTR350 lecture 8 (Schwarzschild redshift), NASA HEASARC pulsars, and NASA Imagine the Universe neutron stars. Sources are linked in the relevant interface. Black-hole lensing, the wormhole flight, magnetic field illustrations and planetary orbits are artistic teaching visuals, not a relativistic simulation.

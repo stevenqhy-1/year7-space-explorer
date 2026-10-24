@@ -116,3 +116,16 @@ export function createBlackHole() {
   scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
   return { scene, camera: new THREE.Camera(), uniforms };
 }
+
+// World-space, camera-facing lens portrait, sharing the entrance ray-bending model.
+// The surrounding system is 3D; this local lens is an artistic approximation.
+export function createLens(width=100){
+  const source=createBlackHole();const original=source.scene.children[0];
+  const material=original.material;
+  material.vertexShader='varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}';
+  material.fragmentShader=material.fragmentShader.replace('screen.y-=.22;','screen.y-=0.;').replace('if(!swallowed)light+=sky(dir)*trans;','').replace('gl_FragColor=vec4(light,1.);','float alpha=swallowed?1.:clamp(max(light.r,max(light.g,light.b))*3.,0.,1.);gl_FragColor=vec4(light,alpha*uOpacity);').replace('uniform float uTime, uDive, uQuality;','uniform float uTime, uDive, uQuality, uOpacity;');
+  material.uniforms.uOpacity={value:1};material.uniforms.uResolution.value.set(2,1);
+  material.transparent=true;material.depthTest=true;material.depthWrite=false;
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,width/2),material);original.geometry.dispose();
+  mesh.userData.billboard=true;return mesh;
+}
