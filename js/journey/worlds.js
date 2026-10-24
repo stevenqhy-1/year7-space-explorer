@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { makeWonder, makeObservable } from './wonders.js';
+import { buildHorizonSystem } from './horizon-system.js';
 import { OBJECTS } from './discoveries.js';
 import { makeGasGiantTexture, makeRockyTexture, makeSunTexture, makeRingTexture } from '../textureFactory.js';
 
@@ -12,13 +14,16 @@ export const PLANETS = [
   {id:'uranus',name:'Uranus',radius:2.3,orbit:111,color:'#91d5de',period:30687},
   {id:'neptune',name:'Neptune',radius:2.2,orbit:143,color:'#668fe7',period:60190},
 ];
+export const OBSERVABLE=5, COSMIC=6, HORIZON=7;
 export const LAYERS = [
   {name:'Solar System',title:'Our Solar System',kicker:'A FAMILIAR CORNER OF INFINITY',subtitle:'Eight worlds. One extraordinary star.',distance:290},
   {name:'Nearby stars',title:'A sea of suns',kicker:'OUR SUN IS ONE OF MANY',subtitle:'Every point of light could have worlds of its own.',distance:330},
   {name:'Milky Way',title:'This is our galaxy.',kicker:'EVERY STAR YOU SEE BELONGS TO SOMETHING BIGGER',subtitle:'Our entire Solar System is a tiny part of this.',distance:390},
   {name:'Galaxies',title:'Islands of light',kicker:'BEYOND OUR GALACTIC HOME',subtitle:'Different shapes. Different histories. Countless worlds.',distance:440},
   {name:'Cosmic web',title:'And still, there is more.',kicker:'THE LARGEST STRUCTURES IN THE COSMOS',subtitle:'Galaxies gather along an immense web of matter.',distance:530},
-  {name:'Weird cosmic objects',title:'Beautifully strange.',kicker:'THE UNIVERSE HAS A WILD SIDE',subtitle:'Choose a wonder. Fly closer. Discover its story.',distance:340},
+  {name:'Observable universe',title:'As far as light can reach.',kicker:'OUR OBSERVABLE COSMIC HORIZON',subtitle:'A view of what we can observe — not an edge of all space.',distance:710},
+  {name:'Weird cosmic objects',title:'Beautifully strange.',kicker:'THE UNIVERSE HAS A WILD SIDE',subtitle:'Choose a wonder. Fly closer. Discover its story.',distance:395},
+  {name:'Black-hole system',title:'Where time drifts apart.',kicker:'AN INTERSTELLAR-INSPIRED EXPEDITION',subtitle:'Three imagined worlds. One immense black hole.',distance:560},
 ];
 function random(seed=32){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 function particles(positions,colors,sizes,{opacity=1,size=1}={}) {
@@ -170,44 +175,24 @@ export function buildWorlds() {
     for(let j=0;j<160;j++){const p=nodes[i];webP.push(p.x+(rng()-.5)*10,p.y+(rng()-.5)*10,p.z+(rng()-.5)*10);webC.push(.9,.8,1.);webS.push(.2+rng()*.9)}
   }
   layers[4].add(particles(webP,webC,webS,{size:1.4}));
+  layers[OBSERVABLE].add(makeObservable(particles,random));
   const cosmicBodies=[],cosmicSelectable=[];
   for(let index=0;index<OBJECTS.length;index++){
-    const item=OBJECTS[index],g=new THREE.Group(),radius=15;
-    const angle=index/OBJECTS.length*Math.PI*2;
-    g.position.set((index-2)*59,index%2?-18:20,0);
-    const hit=new THREE.Mesh(new THREE.SphereGeometry(22,24,16),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}));hit.userData.cosmic=item.id;g.add(hit);cosmicSelectable.push(hit);
-    const p=[],co=[],sz=[];const rand=random(900+index);
-    for(let i=0;i<6500;i++){
-      const a=rand()*Math.PI*2,u=rand()*2-1;
-      let r,x,y,z;
-      if(item.id==='blackhole'||item.id==='quasar'){r=7+Math.pow(rand(),.65)*20;x=Math.cos(a)*r;z=Math.sin(a)*r;y=(rand()-.5)*.7;c.setHSL(item.id==='blackhole'?.09:.58,.5,.55+rand()*.35);}
-      else if(item.id==='wormhole'){r=8+Math.pow(rand(),2)*15;z=(r-8)*Math.sin(a*.5);x=Math.cos(a)*r;y=Math.sin(a)*r;c.setHSL(.64+r/180,.6,.65);}
-      else {r=item.id==='supernova'?17+rand()*4:Math.pow(rand(),.6)*25;const q=Math.sqrt(1-u*u);x=Math.cos(a)*q*r;y=u*r;z=Math.sin(a)*q*r;if(item.id==='nebula'){x*=1+.35*Math.sin(y*.3);z*=.6;}c.setHSL(item.id==='supernova'?.02+rand()*.13:.55+rand()*.35,.6,.45+rand()*.3);}
-      p.push(x,y,z);co.push(c.r,c.g,c.b);sz.push(.12+rand()*.42);
-    }
-    const cloud=particles(p,co,sz,{size:1.3});g.add(cloud);
-    if(item.id==='blackhole'){
-      g.add(new THREE.Mesh(new THREE.SphereGeometry(6.6,48,32),new THREE.MeshBasicMaterial({color:0x000000})));
-      const ring=new THREE.Mesh(new THREE.TorusGeometry(7,.2,12,120),new THREE.MeshBasicMaterial({color:new THREE.Color(2,1.3,.65)}));g.add(ring);
-    }else if(item.id==='quasar'){
-      g.add(glow(0xaedfff,20,1));for(const sign of [-1,1]){const jet=new THREE.Mesh(new THREE.ConeGeometry(3,48,32,1,true),new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false,uniforms:{uOpacity:{value:.6}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec2 vUv;uniform float uOpacity;void main(){float a=pow(vUv.y,1.5)*(.25+.75*pow(sin(vUv.x*3.14159),4.));gl_FragColor=vec4(.3,.65,1.,a*uOpacity);}'}));jet.position.y=sign*24;jet.rotation.z=sign>0?Math.PI:0;g.add(jet);}
-    }else if(item.id==='nebula'){
-      for(let j=0;j<16;j++){const mist=glow(j%2?0x853898:0x285a9f,25,.22);mist.position.set((rand()-.5)*30,(rand()-.5)*30,(rand()-.5)*15);g.add(mist);}
-    }else if(item.id==='supernova'){
-      g.add(glow(0xade9ff,5,1));for(let j=0;j<20;j++){const a=j/20*Math.PI*2;const wisp=glow(j%2?0xf58448:0x764ed1,12,.25);wisp.position.set(Math.cos(a)*18,Math.sin(a)*18,Math.sin(a*3)*5);g.add(wisp);}
-    }else if(item.id==='wormhole'){
-      for(let j=0;j<9;j++){const ring=new THREE.Mesh(new THREE.TorusGeometry(8+j*1.3,.07,8,96),new THREE.MeshBasicMaterial({color:j%2?0x78bfff:0xb886ff,transparent:true,opacity:.65-j*.045,blending:THREE.AdditiveBlending,depthWrite:false}));ring.position.z=-j*1.5;g.add(ring);}
-    }
-    g.rotation.z=.25;layers[5].add(g);cosmicBodies.push({...item,radius,body:g,cloud});
+    const item=OBJECTS[index],g=makeWonder(item.id),radius=19;
+    g.position.set((index%4-1.5)*80,index<4?48:-48,0);
+    const hit=new THREE.Mesh(new THREE.SphereGeometry(26,24,16),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}));hit.userData.cosmic=item.id;g.add(hit);cosmicSelectable.push(hit);
+    layers[COSMIC].add(g);cosmicBodies.push({...item,radius,body:g});
   }
+  const horizon=buildHorizonSystem();layers[HORIZON].add(horizon.group);
   layers.forEach(group=>group.traverse(o=>{if(o.material){const m=o.material;m.userData.baseOpacity=m.opacity??1;if(m.uniforms?.uOpacity)m.userData.baseUniformOpacity=m.uniforms.uOpacity.value}}));
   function opacity(group,value){group.traverse(o=>{const m=o.material;if(!m)return;if(m.uniforms?.uOpacity)m.uniforms.uOpacity.value=(m.userData.baseUniformOpacity??1)*value;else{m.transparent=true;m.opacity=(m.userData.baseOpacity??1)*value;}});}
-  function update(time,dt,moving=true,active=0){
+  function update(time,dt,moving=true,active=0,camera=null){
     for(const b of bodies){if(moving)b.angle+=dt*.07*Math.pow(365/b.period,.4);b.body.position.set(Math.cos(b.angle)*b.orbit,0,Math.sin(b.angle)*b.orbit);if(moving)b.mesh.rotation.y+=dt*.08;}
-    if(moving&&active===5)cosmicBodies.forEach(b=>{b.cloud.rotation.y+=dt*.045;});
+    horizon.update(dt,moving&&active===HORIZON);
     if(moving){sun.rotation.y+=dt*.03;background.rotation.y+=dt*.0005;}
-    layers[active]?.traverse(o=>{if(o.material?.uniforms?.uTime)o.material.uniforms.uTime.value=time});
+    layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.material?.uniforms?.uTime)o.material.uniforms.uTime.value=time;}));
   }
+  function orient(camera){layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.userData.billboard)o.quaternion.copy(camera.quaternion);}));}
   update(0,0,false);
-  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,opacity,update,background};
+  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,horizon,opacity,update,orient,background};
 }
