@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { buildMilkyWay } from './milky-way.js?v=20261025c';
-import { createLens } from './black-hole.js?v=20261025c';
-import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261025c';
-import { advanceOrbit } from './orbits.js?v=20261025c';
-import { makeWonder, makeObservable } from './wonders.js?v=20261025c';
-import { buildHorizonSystem } from './horizon-system.js?v=20261025c';
-import { OBJECTS } from './discoveries.js?v=20261025c';
+import { buildMilkyWay } from './milky-way.js?v=20261025d';
+import { createLens } from './black-hole.js?v=20261025d';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261025d';
+import { advanceOrbit } from './orbits.js?v=20261025d';
+import { makeWonder, makeObservable } from './wonders.js?v=20261025d';
+import { buildHorizonSystem } from './horizon-system.js?v=20261025d';
+import { OBJECTS } from './discoveries.js?v=20261025d';
 import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
 export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};
@@ -115,10 +115,8 @@ export function buildWorlds() {
     if(p.id==='earth'){
       const moon=new THREE.Mesh(new THREE.SphereGeometry(.3,24,16),new THREE.MeshStandardMaterial({map:planetMap('moon'),roughness:1}));moon.position.set(2.6,.1,0);body.add(moon);
     }
-    const orbitGeo=new THREE.BufferGeometry().setFromPoints(Array.from({length:241},(_,j)=>{const a=j/240*Math.PI*2;return new THREE.Vector3(Math.cos(a)*p.orbit,0,Math.sin(a)*p.orbit)}));
-    const orbit=new THREE.Line(orbitGeo,new THREE.LineBasicMaterial({color:0x61738e,transparent:true,opacity:.2}));solar.add(orbit);
     const angle=[.7,2.1,3.85,5.1,1.1,3.35,5.4,2.25][i];
-    bodies.push({ ...p,body,mesh,angle,orbitLine:orbit });solar.add(body);
+    bodies.push({ ...p,body,mesh,angle });solar.add(body);
   }
   const beltP=[],beltC=[],beltS=[];
   for(let i=0;i<5500;i++){const a=rng()*Math.PI*2,r=46+rng()*6;beltP.push(Math.cos(a)*r,(rng()-.5)*1.2,Math.sin(a)*r);beltC.push(.32,.3,.28);beltS.push(.12+rng()*.2)}solar.add(particles(beltP,beltC,beltS,{opacity:.7}));

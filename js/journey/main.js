@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createBlackHole } from './black-hole.js?v=20261025c';
-import { createPost } from './post.js?v=20261025c';
-import { createFlight } from './flight.js?v=20261025c';
-import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261025c';
-import { OBJECTS, SCALES } from './discoveries.js?v=20261025c';
-import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261025c';
-import { HORIZON_WORLDS } from './horizon-system.js?v=20261025c';
-import { createAudio } from './audio.js?v=20261025c';
+import { createBlackHole } from './black-hole.js?v=20261025d';
+import { createPost } from './post.js?v=20261025d';
+import { createFlight } from './flight.js?v=20261025d';
+import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261025d';
+import { OBJECTS, SCALES } from './discoveries.js?v=20261025d';
+import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261025d';
+import { HORIZON_WORLDS } from './horizon-system.js?v=20261025d';
+import { createAudio } from './audio.js?v=20261025d';
 
 const $=selector=>document.querySelector(selector);
 const ease=smoothJourney;
@@ -113,8 +113,8 @@ function updateInterface(){
   document.querySelectorAll('.cosmic-button').forEach(b=>{b.classList.toggle('active',b.dataset.cosmic===focus?.id);b.setAttribute('aria-pressed',String(b.dataset.cosmic===focus?.id));});
   $('#go-in').disabled=stage===0&&!focus;$('#go-out').disabled=stage>=OBSERVABLE&&!focus;
   document.querySelectorAll('.planet-button').forEach(button=>{button.classList.toggle('active',button.dataset.planet===focus?.id);button.setAttribute('aria-pressed',String(button.dataset.planet===focus?.id));});
-  $('#planet-labels').hidden=stage!==0||!!focus;
-  if(worlds)worlds.bodies.forEach(body=>{body.orbitLine.visible=!focus;});
+  $('#planet-labels').hidden=true;
+
   $('#go-out span').textContent=focus?'Leave orbit':'Further out';
 }
 function clearFocus(animate=true){
@@ -221,7 +221,6 @@ $('#scale-stops').innerHTML=LAYERS.map((layer,i)=>`<button class="scale-stop ${i
 $('#scale-stops').addEventListener('click',e=>{const b=e.target.closest('[data-stage]');if(b)goToStage(Number(b.dataset.stage));});
 $('#planet-dock').innerHTML=[SUN,...PLANETS].map(p=>`<button class="planet-button" data-planet="${p.id}" style="--planet:${p.color}" aria-pressed="false">${p.name}</button>`).join('');
 $('#planet-dock').addEventListener('click',e=>{const b=e.target.closest('[data-planet]');if(b)focusPlanet(b.dataset.planet);});
-$('#planet-labels').innerHTML=[SUN,...PLANETS].map(p=>`<span class="world-label" data-label="${p.id}">${p.name}</span>`).join('');
 $('#enter').onclick=startJourney;$('#enter-hole').onclick=startJourney;$('#skip-flight').onclick=()=>arrive();$('#home').onclick=restart;
 $('#go-in').onclick=()=>focus?clearFocus():goToStage(stage-1);
 $('#go-out').onclick=()=>focus?clearFocus():goToStage(stage+1);
@@ -268,16 +267,6 @@ window.addEventListener('keydown',e=>{
   else if(mode==='explore'&&stage<=OBSERVABLE&&(e.key==='+'||e.key==='=')){e.preventDefault();goToStage(stage-1);}
   else if(mode==='explore'&&stage<OBSERVABLE&&e.key==='-'){e.preventDefault();goToStage(stage+1);}
 });
-function updateLabels(){
-  $('#planet-labels').hidden=stage!==0||!!focus||!!transition;
-  if(stage!==0||focus||transition)return;
-  for(const b of worlds.bodies){
-    const label=$(`[data-label="${b.id}"]`);temp.copy(b.body.position);temp.y+=b.radius+1.6;temp.project(camera);
-    const x=(temp.x*.5+.5)*innerWidth,y=(-temp.y*.5+.5)*innerHeight;
-    const visible=temp.z<1&&x>20&&x<innerWidth-145&&y>230&&y<innerHeight-180;
-    label.style.opacity=visible?'1':'0';label.style.left=x+'px';label.style.top=y+'px';
-  }
-}
 function updateExploration(now,dt){
   const moving=!paused&&!gentle;
   worlds.update(clockTime,dt,moving,stage,camera);
@@ -310,7 +299,7 @@ function updateExploration(now,dt){
   }else if(focus){
     focus.body.getWorldPosition(temp);const delta=temp.clone().sub(followPrevious);camera.position.add(delta);controls.target.add(delta);followPrevious.copy(temp);
   }
-  controls.enabled=!transition&&!cameraTween&&!document.querySelector('dialog[open]');if(transition||cameraTween)camera.lookAt(controls.target);else controls.update();worlds.orient(camera);updateLabels();
+  controls.enabled=!transition&&!cameraTween&&!document.querySelector('dialog[open]');if(transition||cameraTween)camera.lookAt(controls.target);else controls.update();worlds.orient(camera);
   if(!transition&&!cameraTween&&stage<=OBSERVABLE){
     const distance=camera.position.distanceTo(controls.target),reference=layerDistance(stage);
     if(focus&&distance>focus.radius*19)clearFocus();
