@@ -89,3 +89,14 @@ Scientific references: NASA “How Big Is Space?” (observable diameter approxi
 - Added nebula.html: a ray-marched cloud volume with three blending palettes, embedded stars, orbit/zoom, drift pause, re-centre, Scenic view/Escape and real Webb photos. Tested palette selection, pause, scenic return, photo loading and navigation back. About 47 fps observed on this desktop; adaptive resolution reduces rendering load when needed. GPU performance on other devices is unverified.
 - Visual QA covered desktop and 390×844 layouts, Sun/Mars/Earth/Jupiter close-ups, and selection of every planet. Fixed an overlapping time panel, reduced overly harsh procedural terrain, replaced generic maps and refined nebula contrast. Browser checks reported no shader errors or warnings.
 - Five math tests pass, all journey modules pass syntax checks, and git whitespace checks pass. Physical touch/pinch hardware was not tested.
+
+## Pillars and galactic heart — 25 October 2026
+
+- Nebula opens on an artistic three-pillar formation, with three selectable stars, eased approach/return flights and a whole-nebula reset.
+- Explicit back controls on both the voyage and real-photo dialog; dialog return and star approach verified in browser.
+- Rebuilt barred spiral galaxy with dust, bulge, star-forming regions and Sagittarius A* approach/return; visually checked in browser.
+- Milky Way home marker retained at larger scales; observable-universe marker and return verified.
+- Cinema is the initial clock mode (1 hour = 7 years); selecting Physics enables the radius slider and changes the ratio. Verified in browser.
+- Five existing orbit/relativity tests pass. Browser reported no JavaScript errors during main exploration.
+- Mobile viewport override did not take effect in this browser session; mobile layout has not been visually verified for this release.
+- Nebula geometry, star names, lensing and close-up scales are illustrative, labelled accordingly.
