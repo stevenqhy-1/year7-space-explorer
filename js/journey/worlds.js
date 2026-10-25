@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { spaceNoise } from './surfaces.js?v=20261026a';
-import { buildMilkyWay } from './milky-way.js?v=20261026a';
-import { createLens } from './black-hole.js?v=20261026a';
-import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026a';
-import { advanceOrbit } from './orbits.js?v=20261026a';
-import { makeWonder, makeObservable } from './wonders.js?v=20261026a';
-import { buildHorizonSystem } from './horizon-system.js?v=20261026a';
-import { OBJECTS } from './discoveries.js?v=20261026a';
+import { spaceNoise } from './surfaces.js?v=20261026b';
+import { buildMilkyWay } from './milky-way.js?v=20261026b';
+import { createLens } from './black-hole.js?v=20261026b';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026b';
+import { advanceOrbit } from './orbits.js?v=20261026b';
+import { makeWonder, makeObservable } from './wonders.js?v=20261026b';
+import { buildHorizonSystem } from './horizon-system.js?v=20261026b';
+import { OBJECTS } from './discoveries.js?v=20261026b';
 import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
 export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};
@@ -23,9 +23,9 @@ export const PLANETS = [
 export const OBSERVABLE=5, COSMIC=6, HORIZON=7;
 export const LAYERS = [
   {name:'Solar System',title:'Our Solar System',kicker:'A FAMILIAR CORNER OF INFINITY',subtitle:'Eight worlds. One extraordinary star.',distance:290},
-  {name:'Nearby stars',title:'A sea of suns',kicker:'OUR SUN IS ONE OF MANY',subtitle:'Every point of light could have worlds of its own.',distance:760},
+  {name:'Nearby stars',title:'A sea of suns',kicker:'OUR SUN IS ONE OF MANY',subtitle:'Every point of light could have worlds of its own.',distance:2300},
   {name:'Milky Way',title:'This is our galaxy.',kicker:'EVERY STAR YOU SEE BELONGS TO SOMETHING BIGGER',subtitle:'Our entire Solar System is a tiny part of this.',distance:390},
-  {name:'Galaxies',title:'Islands of light',kicker:'BEYOND OUR GALACTIC HOME',subtitle:'Different shapes. Different histories. Countless worlds.',distance:1050},
+  {name:'Galaxies',title:'Islands of light',kicker:'BEYOND OUR GALACTIC HOME',subtitle:'Different shapes. Different histories. Countless worlds.',distance:3200},
   {name:'Cosmic web',title:'And still, there is more.',kicker:'THE LARGEST STRUCTURES IN THE COSMOS',subtitle:'Superclusters are neighbourhoods. The cosmic web is the network connecting them.',distance:530},
   {name:'Observable universe',title:'As far as light can reach.',kicker:'OUR OBSERVABLE COSMIC HORIZON',subtitle:'A view of what we can observe — not an edge of all space.',distance:710},
   {name:'Weird cosmic objects',title:'Beautifully strange.',kicker:'THE UNIVERSE HAS A WILD SIDE',subtitle:'Choose a wonder. Fly closer. Discover its story.',distance:395},
@@ -128,7 +128,7 @@ export function buildWorlds() {
   for(let i=0;i<5500;i++){const a=rng()*Math.PI*2,r=46+rng()*6;beltP.push(Math.cos(a)*r,(rng()-.5)*1.2,Math.sin(a)*r);beltC.push(.32,.3,.28);beltS.push(.12+rng()*.2)}solar.add(particles(beltP,beltC,beltS,{opacity:.7}));
   // Nearby suns: depth, a few foreground stars, and subtle clouds.
   const nearP=[],nearC=[],nearS=[];
-  for(let i=0;i<9000;i++){const r=25+Math.pow(rng(),.45)*245,a=rng()*Math.PI*2,z=rng()*2-1,q=Math.sqrt(1-z*z);nearP.push(Math.cos(a)*q*r*5,z*r*.65*5,Math.sin(a)*q*r*5);c.setHSL(rng()<.4?.09:.61,.25,.6+rng()*.3);nearC.push(c.r*1.5,c.g*1.5,c.b*1.5);nearS.push(.3+Math.pow(rng(),7)*3.4)}
+  for(let i=0;i<24000;i++){const r=25+Math.pow(rng(),.45)*245,a=rng()*Math.PI*2,z=rng()*2-1,q=Math.sqrt(1-z*z);nearP.push(Math.cos(a)*q*r*5,z*r*.65*5,Math.sin(a)*q*r*5);c.setHSL(rng()<.4?.09:.61,.25,.6+rng()*.3);nearC.push(c.r*1.5,c.g*1.5,c.b*1.5);nearS.push(.3+Math.pow(rng(),7)*3.4)}
   layers[1].add(particles(nearP,nearC,nearS,{size:3.2}));layers[1].add(glow(0xffd399,8,1));
   for(let i=0;i<9;i++){const cloud=glow(i%2?0x5c3985:0x21435f,450,.13);cloud.position.set((rng()-.5)*1600,(rng()-.5)*800,(rng()-.5)*1600);layers[1].add(cloud)}
   // A single galaxy, with blue arms, warm bulge, pink star-forming regions.
@@ -170,8 +170,8 @@ export function buildWorlds() {
   }
   // A deliberately mixed gallery: spirals, bars, ellipsoids, disks and irregular clumps.
   const central=galaxy(23,9000,17);central.rotation.set(.35,0,.2);layers[3].add(central);
-  for(let i=0;i<45;i++){
-    const radius=7+rng()*13;const g=otherGalaxy(radius,1800,100+i,['spiral','elliptical','irregular','lenticular','barred'][i%5]);const a=rng()*Math.PI*2,r=50+rng()*190;
+  for(let i=0;i<100;i++){
+    const radius=7+rng()*13;const g=otherGalaxy(radius,1300,100+i,['spiral','elliptical','irregular','lenticular','barred'][i%5]);const a=rng()*Math.PI*2,r=50+rng()*190;
     g.position.set(Math.cos(a)*r*5,(rng()-.5)*950,Math.sin(a)*r*5);g.scale.setScalar(3);g.rotation.set(rng()*3,rng()*5,rng()*2);layers[3].add(g);
   }
   // A filament network with dense galaxy nodes and naturally empty voids.

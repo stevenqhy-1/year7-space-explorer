@@ -117,3 +117,10 @@ Scientific references: NASA “How Big Is Space?” (observable diameter approxi
 - Desktop browser checks: Solar System orbit/sky/home appearance; nearby and galaxy scale views; collapse, sustain and expansion chapter selection; scrubbing and ending/replay labels; science modal return; direct futures-to-Solar-System navigation; gallery and challenge back controls. No JavaScript errors in observed futures or main-page sessions.
 - All standalone HTML pages now expose a route to #solar-system (nebula, futures, learning explorer and classic explorer). Gallery and challenge retain state with explicit Back controls; photo/detail/settings dialogs retain close/return controls.
 - JavaScript syntax checks, whitespace checks and five orbit/relativity tests passed. No mobile device performance claim; primary visual QA was desktop.
+
+## Automatic wide reveals and galaxy recession — 26 October 2026
+
+- Solar System → nearby stars and Milky Way → galaxies now use dedicated eight-second pullbacks. Incoming scenery is revealed early at its full extent, with wider automatic landing distances (2,300 / 3,200 scene units). Students no longer need another manual zoom to reveal the surroundings.
+- Increased nearby field to 24,000 stars and the galaxy region to 100 surrounding galaxies; per-galaxy particle count reduced to limit cost.
+- Replaced the Last Light solar evolution scene with 95 independently oriented spiral/elliptical galaxies. Positions separate exponentially while individual geometry remains unchanged; the chapter ends in darkness. Updated narrative and science notes to match.
+- Desktop visual checks confirmed wider automatic landings, the beginning/middle/end of recession, and replay after completion. No observed main-page JavaScript errors. Five existing math tests, syntax and whitespace checks pass. Mobile performance not verified.
