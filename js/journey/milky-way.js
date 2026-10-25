@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { spaceNoise } from './surfaces.js?v=20261025c';
+import { spaceNoise } from './surfaces.js?v=20261025d';
 // A barred-spiral illustration: two prominent arms, fainter branches, a thin
 // stellar disk, a thick central bulge and patchy absorbing dust lanes.
 export function buildMilkyWay(particles,random,glow){

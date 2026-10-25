@@ -100,3 +100,10 @@ Scientific references: NASA “How Big Is Space?” (observable diameter approxi
 - Five existing orbit/relativity tests pass. Browser reported no JavaScript errors during main exploration.
 - Mobile viewport override did not take effect in this browser session; mobile layout has not been visually verified for this release.
 - Nebula geometry, star names, lensing and close-up scales are illustrative, labelled accordingly.
+
+## Restore original nebula — 25 October 2026
+
+- Restored the original cloud-volume nebula shader and three original palettes, retaining explicit back links.
+- Expanded camera distance from 1.1–8 to 0.35–13. Doubled normal zoom sensitivity and added faster trackpad pinch response.
+- Removed floating solar planet labels and orbital path geometry. Planet selection remains available in the dock.
+- Desktop browser visual QA confirms the restored clouds, inward/outward zoom and reset, and the solar scene without path lines or floating names. No solar console errors observed. JavaScript syntax and whitespace checks passed.
