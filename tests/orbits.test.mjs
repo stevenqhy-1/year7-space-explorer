@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {ellipsePosition,advanceOrbit} from '../js/journey/orbits.js';
+test('ellipses have their attracting body at a focus and keep radius under tilt',()=>{const a=100,e=.3;assert.ok(Math.abs(Math.hypot(...ellipsePosition(0,a,e))-70)<1e-8);assert.ok(Math.abs(Math.hypot(...ellipsePosition(Math.PI,a,e))-130)<1e-8);for(const t of [0,.7,2,4])assert.ok(Math.abs(Math.hypot(...ellipsePosition(t,a,e,.6,1.4))-Math.hypot(...ellipsePosition(t,a,e)))<1e-8);});
+test('period controls a complete orbit and frozen time leaves position unchanged',()=>{assert.ok(Math.abs(advanceOrbit(0,365,365))<1e-8);assert.equal(advanceOrbit(1,0,88),1);assert.ok(Math.abs(advanceOrbit(0,44,88)-Math.PI)<1e-8);assert.equal(advanceOrbit(0,200,Infinity),0);});

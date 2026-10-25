@@ -1,0 +1,24 @@
+import * as THREE from 'three';
+export const spaceNoise=`
+float hash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.03+vec3(3.7,1.2,4.1);a*=.5;}return v;}`;
+const vertex=`varying vec3 p,n,w;varying vec2 tex;void main(){p=normalize(position);n=normalize(mat3(modelMatrix)*normal);w=(modelMatrix*vec4(position,1.)).xyz;tex=uv;gl_Position=projectionMatrix*viewMatrix*vec4(w,1.);}`;
+export function planetSurface(id,map,color,cloudMap){
+ const gas=['jupiter','saturn','uranus','neptune','venus'].includes(id);
+ const material=new THREE.ShaderMaterial({uniforms:{uTime:{value:0},uOpacity:{value:1},surface:{value:map},clouds:{value:cloudMap},tint:{value:new THREE.Color(color)},kind:{value:id==='earth'?0:gas?1:2},seed:{value:{mercury:12,mars:25,jupiter:7,saturn:10,uranus:31,neptune:49,venus:21}[id]||1},storm:{value:id==='jupiter'?1:id==='neptune'?2:0}},vertexShader:vertex,fragmentShader:`precision highp float;varying vec3 p,n,w;varying vec2 tex;uniform sampler2D surface,clouds;uniform float uTime,uOpacity,kind,seed,storm;uniform vec3 tint;${spaceNoise}
+ void main(){vec3 q=normalize(p);float f=fbm(q*24.+seed);vec3 normal=normalize(n);vec3 light=normalize(-w);vec3 view=normalize(cameraPosition-w);vec3 col;float spec=0.;
+ if(kind<.5){col=texture2D(surface,tex).rgb;float ocean=smoothstep(.02,.17,col.b-col.r);float cloud=texture2D(clouds,vec2(fract(tex.x+uTime*.0003),tex.y)).r;col=mix(col,vec3(.9,.94,1.),cloud*.8);spec=pow(max(dot(reflect(-light,normal),view),0.),60.)*ocean*.48;}
+ else if(kind<1.5){float eddies=fbm(vec3(q.x*28.,q.y*55.,q.z*28.)+seed);col=texture2D(surface,vec2(tex.x+sin(q.y*30.+uTime*.02)*.001,tex.y+(.5-f)*.001)).rgb;col*=.94+.12*eddies;}
+ else{float fine=fbm(q*85.+seed);float terrain=fbm(q*9.+seed);col=texture2D(surface,tex).rgb*(.95+fine*.1);float crater=0.;vec3 cell=floor(q*12.);for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)for(int z=-1;z<=1;z++){vec3 c=cell+vec3(float(x),float(y),float(z));vec3 centre=c+vec3(hash(c),hash(c+5.),hash(c+9.));float d=length(q*12.-centre);crater+=exp(-pow((d-.26)*22.,2.))*.22-exp(-d*d*38.)*.18;}col*=1.+crater*.12;
+ vec3 dx=dFdx(w),dy=dFdy(w);float h=terrain*.018+fine*.0015+crater*.012;normal=normalize(normal-cross(normal,normalize(dy))*dFdx(h)*6.-cross(normalize(dx),normal)*dFdy(h)*6.);}
+ float diffuse=max(dot(normal,light),0.);float night=.035;vec3 shaded=col*(night+diffuse*1.18)+vec3(spec)*diffuse;float rim=pow(1.-max(dot(normal,view),0.),4.)*smoothstep(-.25,.4,dot(normal,light));if(kind<1.5)shaded+=vec3(.16,.35,.65)*rim*.22;gl_FragColor=vec4(shaded,uOpacity);}`});return material;
+}
+export function solarSurface(){return new THREE.ShaderMaterial({uniforms:{uTime:{value:0},uOpacity:{value:1}},vertexShader:vertex,fragmentShader:`precision highp float;varying vec3 p,n,w;uniform float uTime,uOpacity;${spaceNoise}
+void main(){vec3 q=normalize(p);float broad=fbm(q*8.+vec3(0,uTime*.013,0));float cells=fbm(q*145.+broad*2.+uTime*.02);float filaments=pow(.5+.5*sin(fbm(q*35.)*26.+q.y*70.-uTime*.05),5.);float spots=1.-smoothstep(.67,.76,fbm(q*13.+3.))* .82;vec3 c=mix(vec3(.13,.012,.001),vec3(1.6,.48,.045),pow(cells,1.4));c+=vec3(.35,.09,.01)*filaments;c*=spots;float edge=pow(max(0.,dot(normalize(n),normalize(cameraPosition-w))),.2);gl_FragColor=vec4(c*(.55+.45*edge),uOpacity);}`});}
+export function solarCorona(radius){
+ const g=new THREE.Group();
+ const corona=new THREE.Mesh(new THREE.SphereGeometry(radius*1.07,96,64),new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{uTime:{value:0},uOpacity:{value:1}},vertexShader:vertex,fragmentShader:`varying vec3 p,n,w;uniform float uTime,uOpacity;${spaceNoise}void main(){float rim=pow(1.-abs(dot(normalize(n),normalize(cameraPosition-w))),3.);float threads=pow(fbm(p*28.+uTime*.025),2.);gl_FragColor=vec4(vec3(1.,.24,.025),rim*threads*.65*uOpacity);}`}));g.add(corona);
+ for(let i=0;i<14;i++){const angle=i*2.39996,lat=Math.sin(i*4.2)*.85;const base=new THREE.Vector3(Math.cos(angle)*Math.sqrt(1-lat*lat),lat,Math.sin(angle)*Math.sqrt(1-lat*lat));const tangent=new THREE.Vector3(-Math.sin(angle),0,Math.cos(angle));const points=[];for(let j=0;j<=48;j++){const t=j/48*Math.PI;points.push(base.clone().multiplyScalar(radius*(.99+Math.sin(t)*(.08+i%3*.035))).addScaledVector(tangent,Math.cos(t)*radius*.1));}const loop=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),48,radius*.0025,5,false),new THREE.MeshBasicMaterial({color:0xff6e18,transparent:true,opacity:.65,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(loop);}
+ return g;
+}
