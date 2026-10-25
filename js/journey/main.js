@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createBlackHole } from './black-hole.js?v=20261026a';
-import { createPost } from './post.js?v=20261026a';
-import { createFlight } from './flight.js?v=20261026a';
-import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261026a';
-import { OBJECTS, SCALES } from './discoveries.js?v=20261026a';
-import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261026a';
-import { HORIZON_WORLDS } from './horizon-system.js?v=20261026a';
-import { createAudio } from './audio.js?v=20261026a';
+import { createBlackHole } from './black-hole.js?v=20261026b';
+import { createPost } from './post.js?v=20261026b';
+import { createFlight } from './flight.js?v=20261026b';
+import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261026b';
+import { OBJECTS, SCALES } from './discoveries.js?v=20261026b';
+import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261026b';
+import { HORIZON_WORLDS } from './horizon-system.js?v=20261026b';
+import { createAudio } from './audio.js?v=20261026b';
 
 const $=selector=>document.querySelector(selector);
 const ease=smoothJourney;
@@ -137,6 +137,11 @@ function goToStage(next){
   const direction=next===COSMIC?new THREE.Vector3(0,60,335).normalize():camera.position.clone().sub(controls.target).normalize();
   if(direction.y<.15)direction.y=.2;
   transition={old,incoming,outward,start:performance.now(),duration:gentle?0:4.4,fromPosition:camera.position.clone(),fromTarget:controls.target.clone(),toPosition:direction.normalize().multiplyScalar(layerDistance(next))};
+  if((from===0&&next===1)||(from===2&&next===3)){
+    // Reveal the surrounding region during the flight, then land on its wide view.
+    incoming.scale.setScalar(1);
+    Object.assign(transition,{wideReveal:true,duration:gentle?0:8});
+  }
   if(from===1&&next===2){
     // Re-express the whole neighbourhood in a small patch of the galactic disk.
     // Transform the camera with it so the first frame retains the same view.
@@ -281,6 +286,14 @@ function updateExploration(now,dt){
       camera.position.copy(controls.target).addScaledVector(tr.direction,distance);
       worlds.opacity(tr.old,1-ease(clamp(t/.85)));worlds.opacity(tr.incoming,ease(clamp((t-.08)/.78)));
       worlds.background.scale.setScalar(.08*Math.pow(1/.08,e));worlds.background.position.copy(tr.anchor).multiplyScalar(1-e);
+    }else if(tr.wideReveal){
+      tr.old.scale.setScalar(Math.pow(.035,e));tr.incoming.scale.setScalar(1);
+      worlds.opacity(tr.old,1-ease(clamp(t/.7)));
+      worlds.opacity(tr.incoming,ease(clamp((t-.05)/.4)));
+      controls.target.copy(tr.fromTarget).multiplyScalar(1-e);
+      const offset=tr.fromPosition.clone().sub(tr.fromTarget);
+      const distance=offset.length()*Math.pow(tr.toPosition.length()/Math.max(.01,offset.length()),e);
+      camera.position.copy(offset.normalize().lerp(tr.toPosition.clone().normalize(),e).normalize().multiplyScalar(distance)).add(controls.target);
     }else{
     tr.old.scale.setScalar(tr.outward?Math.pow(.2,e):Math.pow(2.2,e));
     tr.incoming.scale.setScalar(tr.outward?Math.pow(2.2,1-e):Math.pow(.45,1-e));
