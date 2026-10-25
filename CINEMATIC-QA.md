@@ -107,3 +107,13 @@ Scientific references: NASA “How Big Is Space?” (observable diameter approxi
 - Expanded camera distance from 1.1–8 to 0.35–13. Doubled normal zoom sensitivity and added faster trackpad pinch response.
 - Removed floating solar planet labels and orbital path geometry. Planet selection remains available in the dock.
 - Desktop browser visual QA confirms the restored clouds, inward/outward zoom and reset, and the solar scene without path lines or floating names. No solar console errors observed. JavaScript syntax and whitespace checks passed.
+
+## Cosmic futures and a sense of home — 26 October 2026
+
+- Restored Solar System orbit paths at low opacity (0.09), hidden during close-ups. Added a procedural galactic sky band and a brighter distant star dome.
+- Home marker follows Earth, then the Solar System, then the Sun’s approximate galactic location and the Milky Way at larger scales. Marker actions step back towards home. Cosmic-web copy distinguishes the network from supercluster neighbourhoods.
+- Nearby-star and galaxy spatial extents are 5× the prior values; satellite galaxy models are 3× larger. Camera framing and maximum distance adjusted independently to preserve the feeling of depth. These are artistic scene coordinates, not a revised physical measurement.
+- New futures.html: three 32-second chapters, pause/replay/scrubbing, reduced-motion initial pause, modal science notes, and source links. Collapse/bounce and static balance are clearly speculative. Expansion includes red giant, shell shedding, white dwarf, distant recession, and eventual fading, with compressed timescales explained.
+- Desktop browser checks: Solar System orbit/sky/home appearance; nearby and galaxy scale views; collapse, sustain and expansion chapter selection; scrubbing and ending/replay labels; science modal return; direct futures-to-Solar-System navigation; gallery and challenge back controls. No JavaScript errors in observed futures or main-page sessions.
+- All standalone HTML pages now expose a route to #solar-system (nebula, futures, learning explorer and classic explorer). Gallery and challenge retain state with explicit Back controls; photo/detail/settings dialogs retain close/return controls.
+- JavaScript syntax checks, whitespace checks and five orbit/relativity tests passed. No mobile device performance claim; primary visual QA was desktop.

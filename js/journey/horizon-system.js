@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createLens } from './black-hole.js?v=20261025d';
-import { ellipsePosition } from './orbits.js?v=20261025d';
+import { createLens } from './black-hole.js?v=20261026a';
+import { ellipsePosition } from './orbits.js?v=20261026a';
 import { makeRockyTexture } from '../textureFactory.js';
 export const HORIZON_WORLDS=[
  {id:'tide',name:'Tide · ocean world',radius:6,orbit:88,color:0x4f94ad,angle:.35,e:.16,inclination:.09,apsis:.25},
