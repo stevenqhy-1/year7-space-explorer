@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createBlackHole } from './black-hole.js?v=20261025b';
-import { createPost } from './post.js?v=20261025b';
-import { createFlight } from './flight.js?v=20261025b';
-import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261025b';
-import { OBJECTS, SCALES } from './discoveries.js?v=20261025b';
-import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261025b';
-import { HORIZON_WORLDS } from './horizon-system.js?v=20261025b';
-import { createAudio } from './audio.js?v=20261025b';
+import { createBlackHole } from './black-hole.js?v=20261025c';
+import { createPost } from './post.js?v=20261025c';
+import { createFlight } from './flight.js?v=20261025c';
+import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261025c';
+import { OBJECTS, SCALES } from './discoveries.js?v=20261025c';
+import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261025c';
+import { HORIZON_WORLDS } from './horizon-system.js?v=20261025c';
+import { createAudio } from './audio.js?v=20261025c';
 
 const $=selector=>document.querySelector(selector);
 const ease=smoothJourney;
@@ -100,6 +100,7 @@ function tweenCamera(target,position,duration=2.2){
 function updateInterface(){
   controls.zoomSpeed=stage===0?2.4:1.5;
   $('#solar-time').hidden=stage!==0;
+  $('#galactic-dock').hidden=stage!==2||!!focus;$('#heart-note').hidden=stage!==2||focus?.id!=='sagittarius';
   $('#horizon-lab').hidden=stage!==HORIZON;$('#horizon-dock').hidden=stage!==HORIZON;
   const info=LAYERS[stage];$('#location-kicker').textContent=info.kicker;$('#location-title').textContent=info.title;$('#location-subtitle').textContent=info.subtitle;
   $('#horizon-status').textContent=stage===HORIZON&&focus?focus.name:'Black-hole system';
@@ -107,7 +108,7 @@ function updateInterface(){
   document.body.dataset.stage=String(stage);$('#planet-dock').hidden=stage!==0;$('#planet-focus').hidden=!focus;
   document.querySelectorAll('.scale-stop').forEach((button,i)=>{button.classList.toggle('active',i===stage);button.setAttribute('aria-current',i===stage?'step':'false');});
   $('#cosmic-dock').hidden=stage!==COSMIC;$('#galaxy-legend').hidden=stage!==3;$('#object-info').hidden=stage!==COSMIC||!focus;
-  $('#leave-planet').textContent=stage===COSMIC?'← Back to the collection':stage===HORIZON?'← Back to the system':'← Back to the Solar System';
+  $('#leave-planet').textContent=stage===COSMIC?'← Back to the collection':stage===HORIZON?'← Back to the system':stage===2?'← Back to the Milky Way':'← Back to the Solar System';
   $('#scale-comparison').textContent=SCALES[stage][0];$('#scale-caption').textContent=SCALES[stage][1];
   document.querySelectorAll('.cosmic-button').forEach(b=>{b.classList.toggle('active',b.dataset.cosmic===focus?.id);b.setAttribute('aria-pressed',String(b.dataset.cosmic===focus?.id));});
   $('#go-in').disabled=stage===0&&!focus;$('#go-out').disabled=stage>=OBSERVABLE&&!focus;
@@ -147,6 +148,13 @@ function goToStage(next){
   }
   wheelSum=0;announce(LAYERS[next].title);
 }
+function focusGalacticHeart(){
+ if(mode!=='explore'||stage!==2||transition)return;
+ focus=worlds.heartBody;document.body.dataset.focus='true';$('#planet-name').textContent=focus.name;pendingInfo=null;
+ followPrevious.set(0,0,0);targetOffset.set(8,5,22).multiplyScalar(innerWidth<700?1.6:1);
+ tweenCamera(new THREE.Vector3(),targetOffset.clone(),5.5);updateInterface();announce('Approaching Sagittarius A star. Scale is enlarged for exploration.');
+}
+$('#visit-heart').onclick=focusGalacticHeart;$('#home-galaxy-marker').onclick=()=>goToStage(2);
 function focusPlanet(id){
   if(mode!=='explore'||stage!==0||transition||!worlds)return;
   const body=worlds.bodies.find(b=>b.id===id);if(!body)return;
@@ -238,10 +246,10 @@ window.addEventListener('resize',resize);
 window.addEventListener('pointermove',e=>mouse.set((e.clientX/innerWidth-.5)*2,-(e.clientY/innerHeight-.5)*2));
 $('#cosmos').addEventListener('pointerdown',e=>{pointerDown={x:e.clientX,y:e.clientY};if(mode==='explore'){cameraTween=null;pendingInfo=null;clearTimeout(discoveryTimer);}});
 $('#cosmos').addEventListener('pointerup',e=>{
-  if(scenic||mode!=='explore'||(stage!==0&&stage!==COSMIC&&stage!==HORIZON)||!pointerDown||transition)return;
+  if(scenic||mode!=='explore'||(stage!==0&&stage!==2&&stage!==COSMIC&&stage!==HORIZON)||!pointerDown||transition)return;
   const moved=Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y);pointerDown=null;if(moved>6)return;
   pointer.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);raycaster.setFromCamera(pointer,camera);
-  const hit=raycaster.intersectObjects(stage===COSMIC?worlds.cosmicSelectable:stage===HORIZON?worlds.horizon.selectable:worlds.selectable)[0];if(hit){if(stage===COSMIC)focusCosmic(hit.object.userData.cosmic);else if(stage===HORIZON)focusHorizon(hit.object.userData.horizon);else focusPlanet(hit.object.userData.planet);}
+  const hit=raycaster.intersectObjects(stage===2?[worlds.heartHit]:stage===COSMIC?worlds.cosmicSelectable:stage===HORIZON?worlds.horizon.selectable:worlds.selectable)[0];if(hit){if(stage===2)focusGalacticHeart();else if(stage===COSMIC)focusCosmic(hit.object.userData.cosmic);else if(stage===HORIZON)focusHorizon(hit.object.userData.horizon);else focusPlanet(hit.object.userData.planet);}
 });
 $('#cosmos').addEventListener('wheel',e=>{
   if(mode!=='explore'||transition||cameraTween||stage>OBSERVABLE)return;
@@ -249,7 +257,7 @@ $('#cosmos').addEventListener('wheel',e=>{
   const distance=camera.position.distanceTo(controls.target),reference=layerDistance(stage);
   if(focus&&e.deltaY>0&&distance>focus.radius*19){clearFocus();wheelSum=0;}
   else if(!focus&&stage<OBSERVABLE&&e.deltaY>0&&distance>reference*1.7&&wheelSum>80)goToStage(stage+1);
-  else if(!focus&&e.deltaY<0&&stage>0&&distance<reference*.28&&wheelSum< -80)goToStage(stage-1);
+  else if(!focus&&e.deltaY<0&&stage>0&&distance<reference*.28&&wheelSum< -80){if(stage===2)focusGalacticHeart();else goToStage(stage-1);}
 },{passive:true});
 window.addEventListener('keydown',e=>{
   if(document.querySelector('dialog[open]'))return;
@@ -307,9 +315,13 @@ function updateExploration(now,dt){
     const distance=camera.position.distanceTo(controls.target),reference=layerDistance(stage);
     if(focus&&distance>focus.radius*19)clearFocus();
     else if(!focus&&stage<OBSERVABLE&&distance>reference*1.9)goToStage(stage+1);
-    else if(!focus&&stage>0&&distance<reference*.24)goToStage(stage-1);
+    else if(!focus&&stage>0&&distance<reference*.24){if(stage===2)focusGalacticHeart();else goToStage(stage-1);}
   }
   if(stage===HORIZON)worlds.horizon.orbits.forEach(line=>{line.visible=!scenic&&!focus&&camera.position.distanceTo(controls.target)>300;});
+  if(stage===2&&!transition){const near=1-ease(clamp((camera.position.length()-25)/150));worlds.opacity(worlds.milky,1-near*.98);worlds.galacticHeart.visible=near>.01;worlds.opacity(worlds.galacticHeart,near);}
+  else if(stage!==2&&!transition){worlds.galacticHeart.visible=false;worlds.opacity(worlds.milky,1);}
+  const marker=$('#home-galaxy-marker'),anchor=worlds.homeAnchors[stage];marker.hidden=!anchor||!!transition||!!focus;
+  if(!marker.hidden){temp.copy(anchor).project(camera);const behind=temp.z>1;const x=clamp(behind?-temp.x:temp.x,-.65,.65),y=clamp(temp.y,-.6,.6);marker.style.left=((x*.5+.5)*innerWidth)+'px';marker.style.top=((-y*.5+.5)*innerHeight)+'px';marker.querySelector('small').textContent=behind?'Outside this view · tap to visit':stage===5?'Our viewpoint · not the centre of all space':'Our home galaxy · illustrated location';}
   post.render(worlds.scene,camera,{bloom:stage===0?.65:.85});
 }
 function draw(now){

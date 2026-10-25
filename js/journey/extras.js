@@ -1,5 +1,5 @@
-import { OBJECTS } from './discoveries.js?v=20261025b';
-import { QUESTIONS, PASS_SCORE, earnsBadge, shuffled } from './challenge-data.js?v=20261025b';
+import { OBJECTS } from './discoveries.js?v=20261025c';
+import { QUESTIONS, PASS_SCORE, earnsBadge, shuffled } from './challenge-data.js?v=20261025c';
 const $=s=>document.querySelector(s);
 const gallery=[
  {name:'Cosmic Cliffs',file:'cliffs',caption:'A sculpted landscape of gas and dust in the Carina Nebula. Webb NIRCam + MIRI; NASA, ESA, CSA, STScI. Infrared mapped to visible colours.',source:'https://science.nasa.gov/asset/webb/cosmic-cliffs-in-the-carina-nebula-nircam-and-miri-composite-image/'},

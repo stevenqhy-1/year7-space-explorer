@@ -1,9 +1,11 @@
 import * as THREE from 'three';
-import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261025b';
-import { advanceOrbit } from './orbits.js?v=20261025b';
-import { makeWonder, makeObservable } from './wonders.js?v=20261025b';
-import { buildHorizonSystem } from './horizon-system.js?v=20261025b';
-import { OBJECTS } from './discoveries.js?v=20261025b';
+import { buildMilkyWay } from './milky-way.js?v=20261025c';
+import { createLens } from './black-hole.js?v=20261025c';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261025c';
+import { advanceOrbit } from './orbits.js?v=20261025c';
+import { makeWonder, makeObservable } from './wonders.js?v=20261025c';
+import { buildHorizonSystem } from './horizon-system.js?v=20261025c';
+import { OBJECTS } from './discoveries.js?v=20261025c';
 import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
 export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};
@@ -141,7 +143,10 @@ export function buildWorlds() {
     for(let i=0;i<27;i++){const r=(.25+rand()*.65)*radius,a=i%4*Math.PI/2+r/radius*6.2;const cloud=glow(i%4===0?0xb4386b:0x426abd,radius*(.05+rand()*.1),.13);cloud.position.set(Math.cos(a)*r,0,Math.sin(a)*r);group.add(cloud)}
     return group;
   }
-  const milky=galaxy(145,90000,76);milky.rotation.set(.2,.4,.15);layers[2].add(milky);
+  const milky=buildMilkyWay(particles,random,glow);milky.rotation.set(.12,.15,.07);layers[2].add(milky);
+  const galacticHeart=new THREE.Group();galacticHeart.visible=false;galacticHeart.add(createLens(13,{spatial:true}));layers[2].add(galacticHeart);
+  const heartHit=new THREE.Mesh(new THREE.SphereGeometry(12,24,16),new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false}));layers[2].add(heartHit);
+  const heartBody={id:'sagittarius',name:'Sagittarius A*',body:galacticHeart,radius:3};
   // Separate stellar distributions for genuinely different galaxy morphologies.
   function otherGalaxy(radius,count,seed,type){
     if(type==='spiral'||type==='barred'){
@@ -200,5 +205,5 @@ export function buildWorlds() {
   }
   function orient(camera){layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.userData.billboard)o.quaternion.copy(camera.quaternion);}));}
   update(0,0,false);
-  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,horizon,solarClock,opacity,update,orient,background};
+  return {milky,galacticHeart,heartHit,heartBody,homeAnchors:{3:new THREE.Vector3(),4:nodes[0].clone(),5:new THREE.Vector3()},scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,horizon,solarClock,opacity,update,orient,background};
 }
