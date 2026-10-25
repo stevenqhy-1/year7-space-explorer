@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createBlackHole } from './black-hole.js?v=20261025';
-import { createPost } from './post.js?v=20261025';
-import { createFlight } from './flight.js?v=20261025';
-import { buildWorlds, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261025';
-import { OBJECTS, SCALES } from './discoveries.js?v=20261025';
-import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261025';
-import { HORIZON_WORLDS } from './horizon-system.js?v=20261025';
-import { createAudio } from './audio.js?v=20261025';
+import { createBlackHole } from './black-hole.js?v=20261025b';
+import { createPost } from './post.js?v=20261025b';
+import { createFlight } from './flight.js?v=20261025b';
+import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261025b';
+import { OBJECTS, SCALES } from './discoveries.js?v=20261025b';
+import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261025b';
+import { HORIZON_WORLDS } from './horizon-system.js?v=20261025b';
+import { createAudio } from './audio.js?v=20261025b';
 
 const $=selector=>document.querySelector(selector);
 const ease=smoothJourney;
@@ -99,6 +99,7 @@ function tweenCamera(target,position,duration=2.2){
 }
 function updateInterface(){
   controls.zoomSpeed=stage===0?2.4:1.5;
+  $('#solar-time').hidden=stage!==0;
   $('#horizon-lab').hidden=stage!==HORIZON;$('#horizon-dock').hidden=stage!==HORIZON;
   const info=LAYERS[stage];$('#location-kicker').textContent=info.kicker;$('#location-title').textContent=info.title;$('#location-subtitle').textContent=info.subtitle;
   $('#horizon-status').textContent=stage===HORIZON&&focus?focus.name:'Black-hole system';
@@ -210,13 +211,14 @@ $('#scale-guide').onclick=()=>$('#scale-dialog').showModal();$('#close-scale').o
 
 $('#scale-stops').innerHTML=LAYERS.map((layer,i)=>`<button class="scale-stop ${i===0?'active':''}" data-stage="${i}" aria-current="${i===0?'step':'false'}">${layer.name}</button>`).join('');
 $('#scale-stops').addEventListener('click',e=>{const b=e.target.closest('[data-stage]');if(b)goToStage(Number(b.dataset.stage));});
-$('#planet-dock').innerHTML=PLANETS.map(p=>`<button class="planet-button" data-planet="${p.id}" style="--planet:${p.color}" aria-pressed="false">${p.name}</button>`).join('');
+$('#planet-dock').innerHTML=[SUN,...PLANETS].map(p=>`<button class="planet-button" data-planet="${p.id}" style="--planet:${p.color}" aria-pressed="false">${p.name}</button>`).join('');
 $('#planet-dock').addEventListener('click',e=>{const b=e.target.closest('[data-planet]');if(b)focusPlanet(b.dataset.planet);});
-$('#planet-labels').innerHTML=PLANETS.map(p=>`<span class="world-label" data-label="${p.id}">${p.name}</span>`).join('');
+$('#planet-labels').innerHTML=[SUN,...PLANETS].map(p=>`<span class="world-label" data-label="${p.id}">${p.name}</span>`).join('');
 $('#enter').onclick=startJourney;$('#enter-hole').onclick=startJourney;$('#skip-flight').onclick=()=>arrive();$('#home').onclick=restart;
 $('#go-in').onclick=()=>focus?clearFocus():goToStage(stage-1);
 $('#go-out').onclick=()=>focus?clearFocus():goToStage(stage+1);
 $('#leave-planet').onclick=()=>clearFocus();
+$('#solar-speed').onchange=e=>{if(worlds)worlds.solarClock.rate=Number(e.target.value);};
 $('#pause').onclick=()=>{paused=!paused;$('#pause').setAttribute('aria-pressed',String(paused));$('#pause').innerHTML=paused?'▷ <span>Resume</span>':'Ⅱ <span>Pause</span>';};
 $('#retry-render').onclick=()=>location.reload();
 $('#sound').onclick=async()=>{
@@ -272,6 +274,7 @@ function updateExploration(now,dt){
   const moving=!paused&&!gentle;
   worlds.update(clockTime,dt,moving,stage,camera);
   if(stage===HORIZON)updateClocks(dt,!paused);
+  if(stage===0){const days=Math.floor(worlds.solarClock.days);$('#solar-elapsed').textContent=days.toLocaleString()+(days===1?' day':' days')+' travelled'+(paused||gentle||worlds.solarClock.rate===0?' · paused':'');}
   document.body.dataset.transitioning=String(!!transition||!!cameraTween);
   if(transition){
     const tr=transition,t=tr.duration?clamp((now-tr.start)/(tr.duration*1000)):1,e=ease(t);

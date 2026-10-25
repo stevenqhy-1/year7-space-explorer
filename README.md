@@ -100,3 +100,9 @@ WA Science Year 7 outcome targeted:
 > *Describe objects in space including planets, stars, moons, asteroids, meteors, comets, constellations and galaxies.*
 
 Every category in that outcome has at least one clickable example with a short caption.
+
+### Living worlds and Nebula Voyage
+
+The cinematic explorer includes a Solar System time selector, a clickable Sun, mapped planetary close-ups, and a black-hole system with view-dependent lensing and tilted elliptical orbits. Open **Nebula voyage** from the top navigation for the separate immersive cloud-volume experience (`nebula.html`). Both experiences support Scenic view and Escape to return.
+
+Planetary texture credits and licensing: [assets/planets/ATTRIBUTION.md](assets/planets/ATTRIBUTION.md). The nebula scenes and gravitational lensing are artistic approximations. Run the pure math checks with `node --test tests/*.test.mjs`; browser QA notes are in `CINEMATIC-QA.md`.

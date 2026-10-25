@@ -1,9 +1,12 @@
 import * as THREE from 'three';
-import { makeWonder, makeObservable } from './wonders.js?v=20261025';
-import { buildHorizonSystem } from './horizon-system.js?v=20261025';
-import { OBJECTS } from './discoveries.js?v=20261025';
-import { makeGasGiantTexture, makeRockyTexture, makeSunTexture, makeRingTexture } from '../textureFactory.js';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261025b';
+import { advanceOrbit } from './orbits.js?v=20261025b';
+import { makeWonder, makeObservable } from './wonders.js?v=20261025b';
+import { buildHorizonSystem } from './horizon-system.js?v=20261025b';
+import { OBJECTS } from './discoveries.js?v=20261025b';
+import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
+export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};
 export const PLANETS = [
   {id:'mercury',name:'Mercury',radius:.7,orbit:13,color:'#ada093',period:88},
   {id:'venus',name:'Venus',radius:1.1,orbit:20,color:'#d5b077',period:225},
@@ -46,7 +49,7 @@ function particles(positions,colors,sizes,{opacity=1,size=1}={}) {
 function softTexture(){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d');const g=ctx.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'#ffffffff');g.addColorStop(.15,'#ffffffad');g.addColorStop(.5,'#ffffff1f');g.addColorStop(1,'#ffffff00');ctx.fillStyle=g;ctx.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);}
 const glowTexture=softTexture();
 function glow(color,size,opacity=1){const m=new THREE.SpriteMaterial({map:glowTexture,color,transparent:true,opacity,blending:THREE.AdditiveBlending,depthWrite:false});m.userData.opacity=opacity;const s=new THREE.Sprite(m);s.scale.setScalar(size);return s;}
-function atmosphere(radius,color){return new THREE.Mesh(new THREE.SphereGeometry(radius*1.045,48,32),new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{tint:{value:new THREE.Color(color)},uOpacity:{value:1}},vertexShader:'varying vec3 n,v;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n,v;uniform vec3 tint;uniform float uOpacity;void main(){float a=pow(1.-abs(dot(normalize(n),normalize(v))),3.);gl_FragColor=vec4(tint,a*.75*uOpacity);}'}));}
+function atmosphere(radius,color){return new THREE.Mesh(new THREE.SphereGeometry(radius*1.025,48,32),new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{tint:{value:new THREE.Color(color)},uOpacity:{value:1}},vertexShader:'varying vec3 n,v;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n,v;uniform vec3 tint;uniform float uOpacity;void main(){float a=pow(1.-abs(dot(normalize(n),normalize(v))),3.);gl_FragColor=vec4(tint,a*.75*uOpacity);}'}));}
 
 // Diffuse stellar light and dust between the individually rendered stars.
 // A procedural disk prevents the galaxy from looking like four isolated dotted lines.
@@ -90,15 +93,16 @@ export function buildWorlds() {
   const background=particles(bgP,bgC,bgS,{opacity:.65,size:1.3});scene.add(background);
   const solar=layers[0],bodies=[],selectable=[];
   const sunlight=new THREE.PointLight(0xffeed4,3.5,0,0);solar.add(sunlight);
-  const sun=new THREE.Mesh(new THREE.SphereGeometry(5.3,64,48),new THREE.MeshBasicMaterial({map:makeSunTexture(),color:new THREE.Color(2.2,1.9,1.4)}));solar.add(sun);
-  solar.add(glow(0xffad45,34,.65));solar.add(glow(0xffd685,17,.95));
-  const loader=new THREE.TextureLoader();const earthMap=loader.load('./assets/earth.jpg');earthMap.colorSpace=THREE.SRGBColorSpace;
+  const sun=new THREE.Mesh(new THREE.SphereGeometry(5.3,128,96),solarSurface());sun.userData.planet='sun';solar.add(sun);selectable.push(sun);const corona=solarCorona(5.3);solar.add(corona);
+  const sunOrbit=new THREE.Group();bodies.push({...SUN,body:sun,mesh:sun,angle:0,orbitLine:sunOrbit});
+  const solarClock={rate:10,days:0};
+  solar.add(glow(0xffad45,24,.14));solar.add(glow(0xffd685,14,.18));
+  const loader=new THREE.TextureLoader();const cloudMap=loader.load('./assets/planets/earth_clouds.jpg');cloudMap.wrapS=THREE.RepeatWrapping;
+  function planetMap(file){const texture=loader.load('./assets/planets/'+file+'.jpg');texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;return texture;}
   for(let i=0;i<PLANETS.length;i++) {
     const p=PLANETS[i],body=new THREE.Group();let map;
-    if(p.id==='earth')map=earthMap;
-    else if(['jupiter','saturn','uranus','neptune','venus'].includes(p.id))map=makeGasGiantTexture({palette:p.id==='jupiter'?['#cfb28f','#f3e5cd','#996b51','#dcc3a5']:p.id==='saturn'?['#d8c397','#f1e1ba','#a8926b']:p.id==='venus'?['#a47741','#e5bd7d','#d7b381']:[p.color,p.color,'#6288a9'],seed:i+7});
-    else map=makeRockyTexture({base:p.color,spots:[p.color,'#69564a','#b29276'],seed:i+12});
-    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.radius,64,48),new THREE.MeshStandardMaterial({map,roughness:.92}));
+    map=planetMap(p.id==='earth'?'earth_daymap':p.id==='venus'?'venus_atmosphere':p.id);
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.radius,128,96),planetSurface(p.id,map,p.color,cloudMap));
     mesh.rotation.z=p.id==='uranus'?1.7:.15;mesh.userData.planet=p.id;body.add(mesh);selectable.push(mesh);
     if(['earth','venus','uranus','neptune'].includes(p.id))body.add(atmosphere(p.radius,p.id==='venus'?0xe1b86c:0x589fee));
     if(p.id==='saturn'){
@@ -107,7 +111,7 @@ export function buildWorlds() {
       const ring=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:makeRingTexture(),color:0xe9d7b1,side:THREE.DoubleSide,transparent:true,opacity:.88,depthWrite:false}));ring.rotation.x=-Math.PI/2+.4;body.add(ring);
     }
     if(p.id==='earth'){
-      const moon=new THREE.Mesh(new THREE.SphereGeometry(.3,24,16),new THREE.MeshStandardMaterial({map:makeRockyTexture({base:'#aaa9a2',seed:90}),roughness:1}));moon.position.set(2.6,.1,0);body.add(moon);
+      const moon=new THREE.Mesh(new THREE.SphereGeometry(.3,24,16),new THREE.MeshStandardMaterial({map:planetMap('moon'),roughness:1}));moon.position.set(2.6,.1,0);body.add(moon);
     }
     const orbitGeo=new THREE.BufferGeometry().setFromPoints(Array.from({length:241},(_,j)=>{const a=j/240*Math.PI*2;return new THREE.Vector3(Math.cos(a)*p.orbit,0,Math.sin(a)*p.orbit)}));
     const orbit=new THREE.Line(orbitGeo,new THREE.LineBasicMaterial({color:0x61738e,transparent:true,opacity:.2}));solar.add(orbit);
@@ -187,12 +191,14 @@ export function buildWorlds() {
   layers.forEach(group=>group.traverse(o=>{if(o.material){const m=o.material;m.userData.baseOpacity=m.opacity??1;if(m.uniforms?.uOpacity)m.userData.baseUniformOpacity=m.uniforms.uOpacity.value}}));
   function opacity(group,value){group.traverse(o=>{const m=o.material;if(!m)return;if(m.uniforms?.uOpacity)m.uniforms.uOpacity.value=(m.userData.baseUniformOpacity??1)*value;else{m.transparent=true;m.opacity=(m.userData.baseOpacity??1)*value;}});}
   function update(time,dt,moving=true,active=0,camera=null){
-    for(const b of bodies){if(moving)b.angle+=dt*.07*Math.pow(365/b.period,.4);b.body.position.set(Math.cos(b.angle)*b.orbit,0,Math.sin(b.angle)*b.orbit);if(moving)b.mesh.rotation.y+=dt*.08;}
+    const days=moving&&active===0?dt*solarClock.rate:0;solarClock.days+=days;
+    for(const b of bodies){b.angle=advanceOrbit(b.angle,days,b.period);b.body.position.set(Math.cos(b.angle)*b.orbit,0,Math.sin(b.angle)*b.orbit);if(days)b.mesh.rotation.y+=days*.035;}
+    corona.rotation.copy(sun.rotation);
     horizon.update(dt,moving&&active===HORIZON);
-    if(moving){sun.rotation.y+=dt*.03;background.rotation.y+=dt*.0005;}
+    if(moving){background.rotation.y+=dt*.0005;}
     layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.material?.uniforms?.uTime)o.material.uniforms.uTime.value=time;}));
   }
   function orient(camera){layers.filter(g=>g.visible).forEach(g=>g.traverse(o=>{if(o.userData.billboard)o.quaternion.copy(camera.quaternion);}));}
   update(0,0,false);
-  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,horizon,opacity,update,orient,background};
+  return {scene,layers,bodies,selectable,cosmicBodies,cosmicSelectable,horizon,solarClock,opacity,update,orient,background};
 }

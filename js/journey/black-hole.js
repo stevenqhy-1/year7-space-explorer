@@ -117,15 +117,23 @@ export function createBlackHole() {
   return { scene, camera: new THREE.Camera(), uniforms };
 }
 
-// World-space, camera-facing lens portrait, sharing the entrance ray-bending model.
-// The surrounding system is 3D; this local lens is an artistic approximation.
-export function createLens(width=100){
+// A ray-integration canvas sharing the entrance model. Spatial mode follows the
+// world-space viewing direction, keeping the accretion disk in the system plane.
+// Light bending remains an artistic approximation rather than a GR solver.
+export function createLens(width=100,{spatial=false}={}){
   const source=createBlackHole();const original=source.scene.children[0];
   const material=original.material;
   material.vertexShader='varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}';
   material.fragmentShader=material.fragmentShader.replace('screen.y-=.22;','screen.y-=0.;').replace('if(!swallowed)light+=sky(dir)*trans;','').replace('gl_FragColor=vec4(light,1.);','float alpha=swallowed?1.:clamp(max(light.r,max(light.g,light.b))*3.,0.,1.);gl_FragColor=vec4(light,alpha*uOpacity);').replace('uniform float uTime, uDive, uQuality;','uniform float uTime, uDive, uQuality, uOpacity;');
-  material.uniforms.uOpacity={value:1};material.uniforms.uResolution.value.set(2,1);
+  material.uniforms.uOpacity={value:1};material.uniforms.uResolution.value.set(spatial?1:2,1);
+  if(spatial){
+    material.uniforms.uView={value:new THREE.Vector3(0,2.2,21)};
+    material.uniforms.uCameraUp={value:new THREE.Vector3(0,1,0)};
+    material.fragmentShader=material.fragmentShader.replace('uniform vec2 uResolution, uMouse;','uniform vec2 uResolution, uMouse;uniform vec3 uView,uCameraUp;').replace('vec3 ro=vec3(uMouse.x*.35,2.2+uMouse.y*.18,distance);','vec3 ro=normalize(uView)*21.;').replace('cross(forward,vec3(0.,1.,0.))','cross(forward,uCameraUp)');
+  }
   material.transparent=true;material.depthTest=true;material.depthWrite=false;
-  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,width/2),material);original.geometry.dispose();
-  mesh.userData.billboard=true;return mesh;
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,spatial?width:width/2),material);original.geometry.dispose();
+  mesh.userData.billboard=true;
+  if(spatial){const centre=new THREE.Vector3(),eye=new THREE.Vector3();mesh.onBeforeRender=(renderer,scene,camera)=>{mesh.getWorldPosition(centre);camera.getWorldPosition(eye);material.uniforms.uView.value.copy(eye).sub(centre);material.uniforms.uCameraUp.value.setFromMatrixColumn(camera.matrixWorld,1).normalize();};}
+  return mesh;
 }
