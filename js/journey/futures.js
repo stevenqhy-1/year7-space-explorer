@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {createPost} from './post.js?v=20261026c';
+import {createPost} from './post.js?v=20261026d';
 const $=s=>document.querySelector(s),clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const chapters=[
@@ -44,6 +44,6 @@ try{
  if(chapter===1){web.scale.setScalar(1+Math.sin(t*Math.PI*6)*.018*smooth(t/.3));webStars.material.uniforms.fade.value=.85+.15*Math.sin(t*12);lines.material.opacity=.16;}
  if(chapter===2){const expansion=Math.exp(smooth(t)*3.2);for(const g of galaxies){g.position.copy(g.userData.home).multiplyScalar(expansion);g.material.uniforms.fade.value=1-smooth((t-.6)/.4);}islands.rotation.set(.12,.25,0);}
 
- post.render(scene,camera,{bloom:chapter===0?1:.7});
+ post.render(scene,camera,{bloom:chapter===2?0:chapter===0?1:.7});
  }requestAnimationFrame(render);renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();$('#error').hidden=false;});
 }catch(e){console.error(e);$('#error').hidden=false;}

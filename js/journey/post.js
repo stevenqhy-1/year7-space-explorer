@@ -16,10 +16,9 @@ export function createPost(renderer) {
     vertexShader,
     fragmentShader:`varying vec2 vUv;uniform sampler2D image;uniform vec2 direction;uniform float threshold;
       vec3 sampleLight(vec2 p){vec3 c=texture2D(image,p).rgb;return c*max(0.,max(c.r,max(c.g,c.b))-threshold)/max(.001,max(c.r,max(c.g,c.b)));}
-      void main(){vec3 c=sampleLight(vUv)*.227027;
-        c+=sampleLight(vUv+direction*1.384615)*.316216;c+=sampleLight(vUv-direction*1.384615)*.316216;
-        c+=sampleLight(vUv+direction*3.230769)*.070270;c+=sampleLight(vUv-direction*3.230769)*.070270;
-        gl_FragColor=vec4(c,1.);}`,
+      void main(){vec3 c=vec3(0.);float total=0.;
+        for(int i=-6;i<=6;i++){float x=float(i),weight=exp(-x*x/12.5);c+=sampleLight(vUv+direction*x)*weight;total+=weight;}
+        gl_FragColor=vec4(c/total,1.);}`,
   });
   const composite = new THREE.ShaderMaterial({
     depthTest:false, depthWrite:false,
@@ -40,13 +39,13 @@ export function createPost(renderer) {
       let base=source.texture;
       if(nextScene&&mix>0){renderer.setRenderTarget(second);renderer.render(nextScene,nextCamera);quad.material=blend;blend.uniforms.amount.value=mix;renderer.setRenderTarget(merged);renderer.render(scene,ortho);base=merged.texture;}
       composite.uniforms.base.value=base;
-      quad.material=blur;blur.uniforms.image.value=base;blur.uniforms.direction.value.set(3/width,0);blur.uniforms.threshold.value=.8;
+      quad.material=blur;blur.uniforms.image.value=base;blur.uniforms.direction.value.set(2/width,0);blur.uniforms.threshold.value=.8;
       renderer.setRenderTarget(ping);renderer.render(scene,ortho);
-      blur.uniforms.image.value=ping.texture;blur.uniforms.direction.value.set(0,3/height);blur.uniforms.threshold.value=0;
+      blur.uniforms.image.value=ping.texture;blur.uniforms.direction.value.set(0,2/height);blur.uniforms.threshold.value=0;
       renderer.setRenderTarget(pong);renderer.render(scene,ortho);
-      blur.uniforms.image.value=pong.texture;blur.uniforms.direction.value.set(7/width,0);
+      blur.uniforms.image.value=pong.texture;blur.uniforms.direction.value.set(2/width,0);
       renderer.setRenderTarget(ping);renderer.render(scene,ortho);
-      blur.uniforms.image.value=ping.texture;blur.uniforms.direction.value.set(0,7/height);
+      blur.uniforms.image.value=ping.texture;blur.uniforms.direction.value.set(0,2/height);
       renderer.setRenderTarget(pong);renderer.render(scene,ortho);
       quad.material=composite;composite.uniforms.strength.value=bloom;composite.uniforms.fade.value=fade;
       renderer.setRenderTarget(null);renderer.render(scene,ortho);

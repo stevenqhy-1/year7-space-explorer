@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { spaceNoise } from './surfaces.js?v=20261026c';
-import { buildMilkyWay } from './milky-way.js?v=20261026c';
-import { createLens } from './black-hole.js?v=20261026c';
-import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026c';
-import { advanceOrbit } from './orbits.js?v=20261026c';
-import { makeWonder, makeObservable } from './wonders.js?v=20261026c';
-import { buildHorizonSystem } from './horizon-system.js?v=20261026c';
-import { OBJECTS } from './discoveries.js?v=20261026c';
+import { spaceNoise } from './surfaces.js?v=20261026d';
+import { buildMilkyWay } from './milky-way.js?v=20261026d';
+import { createLens } from './black-hole.js?v=20261026d';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026d';
+import { advanceOrbit } from './orbits.js?v=20261026d';
+import { makeWonder, makeObservable } from './wonders.js?v=20261026d';
+import { buildHorizonSystem } from './horizon-system.js?v=20261026d';
+import { OBJECTS } from './discoveries.js?v=20261026d';
 import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
 export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};
@@ -95,8 +95,20 @@ export function buildWorlds() {
   for(let i=0;i<6000;i++){const z=rng()*2-1,a=rng()*Math.PI*2,r=12000;const q=Math.sqrt(1-z*z);bgP.push(Math.cos(a)*q*r,z*r,Math.sin(a)*q*r);c.setHSL(.58+rng()*.1,.25,.25+rng()*.6);bgC.push(c.r,c.g,c.b);bgS.push(25+rng()*65);}
   const background=particles(bgP,bgC,bgS,{opacity:.85,size:1.8});scene.add(background);
   const solar=layers[0],bodies=[],selectable=[];
-  const skyDome=new THREE.Mesh(new THREE.SphereGeometry(10500,48,32),new THREE.ShaderMaterial({side:THREE.BackSide,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{uOpacity:{value:.7}},vertexShader:'varying vec3 vDirection;void main(){vDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:`varying vec3 vDirection;uniform float uOpacity;${spaceNoise}
- void main(){vec3 d=normalize(vDirection);float lat=dot(d,normalize(vec3(.35,.85,-.4)));float clouds=fbm(d*9.);float band=exp(-lat*lat*90.);float dust=smoothstep(.35,.68,fbm(d*36.));vec3 tint=mix(vec3(.035,.055,.12),vec3(.16,.12,.18),clouds);gl_FragColor=vec4(tint*band*(.25+clouds)*dust,uOpacity);}`}));solar.add(skyDome);
+  const skyDome=new THREE.Mesh(new THREE.SphereGeometry(10500,48,32),new THREE.ShaderMaterial({side:THREE.BackSide,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{uOpacity:{value:.95}},vertexShader:'varying vec3 vDirection;void main(){vDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:`varying vec3 vDirection;uniform float uOpacity;${spaceNoise}
+ void main(){vec3 d=normalize(vDirection);float lat=dot(d,normalize(vec3(.35,.85,-.4)));
+ float large=fbm(d*7.),detail=fbm(d*48.),grain=fbm(d*160.);float warped=lat+(large-.5)*.055;
+ float band=exp(-warped*warped*48.),ribbon=exp(-warped*warped*180.);
+ float centre=pow(max(0.,dot(d,normalize(vec3(-.8,.1,-.49)))),12.);
+ float rift=exp(-pow((warped+.012+(detail-.5)*.045)/.027,2.));
+ float patches=smoothstep(.42,.7,fbm(d*26.+4.));float transmission=1.-clamp(rift*(.65+patches*.3)+patches*.22,0.,.94);
+ vec3 light=mix(vec3(.11,.15,.23),vec3(.48,.39,.27),centre);
+ light*=band*(.35+large*.8)+ribbon*(.3+detail*.5);light*=transmission;
+ light+=vec3(.22,.17,.12)*centre*band*(.4+grain)*transmission;
+ gl_FragColor=vec4(light,uOpacity);}`}));solar.add(skyDome);
+  const bandP=[],bandC=[],bandS=[],normal=new THREE.Vector3(.35,.85,-.4).normalize(),axis=new THREE.Vector3().crossVectors(normal,new THREE.Vector3(0,1,0)).normalize(),across=new THREE.Vector3().crossVectors(normal,axis);
+  for(let i=0;i<26000;i++){const a=rng()*Math.PI*2,lat=(rng()+rng()+rng()-1.5)*.12;const direction=axis.clone().multiplyScalar(Math.cos(a)).addScaledVector(across,Math.sin(a)).addScaledVector(normal,lat).normalize();bandP.push(...direction.multiplyScalar(11000));const warm=rng();bandC.push(.45+warm*.25,.45+warm*.17,.5+warm*.1);bandS.push(9+rng()*22);}
+  solar.add(particles(bandP,bandC,bandS,{opacity:.7,size:1.3}));
   const solarOrbits=[];
   const sunlight=new THREE.PointLight(0xffeed4,3.5,0,0);solar.add(sunlight);
   const sun=new THREE.Mesh(new THREE.SphereGeometry(5.3,128,96),solarSurface());sun.userData.planet='sun';solar.add(sun);selectable.push(sun);const corona=solarCorona(5.3);solar.add(corona);
@@ -170,10 +182,11 @@ export function buildWorlds() {
   }
   // A deliberately mixed gallery: spirals, bars, ellipsoids, disks and irregular clumps.
   const central=galaxy(23,9000,17);central.rotation.set(.35,0,.2);layers[3].add(central);
-  for(let i=0;i<100;i++){
-    const radius=7+rng()*13;const g=otherGalaxy(radius,1300,100+i,['spiral','elliptical','irregular','lenticular','barred'][i%5]);const a=rng()*Math.PI*2,r=50+rng()*190;
-    g.position.set(Math.cos(a)*r*5,(rng()-.5)*950,Math.sin(a)*r*5);g.scale.setScalar(3);g.rotation.set(rng()*3,rng()*5,rng()*2);layers[3].add(g);
+  for(let i=0;i<240;i++){
+    const radius=7+rng()*13;const g=otherGalaxy(radius,1100,100+i,['spiral','elliptical','irregular','lenticular','barred'][i%5]);const a=rng()*Math.PI*2,r=50+rng()*255;
+    g.position.set(Math.cos(a)*r*5,(rng()-.5)*1250,Math.sin(a)*r*5);g.scale.setScalar(4.2);g.rotation.set(rng()*3,rng()*5,rng()*2);layers[3].add(g);
   }
+  layers[3].traverse(o=>{if(o.isSprite)o.visible=false;});
   // A filament network with dense galaxy nodes and naturally empty voids.
   const nodes=Array.from({length:85},()=>new THREE.Vector3((rng()-.5)*600,(rng()-.5)*320,(rng()-.5)*490));
   const webP=[],webC=[],webS=[];

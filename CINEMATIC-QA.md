@@ -131,3 +131,19 @@ Scientific references: NASA “How Big Is Space?” (observable diameter approxi
 - Standard transitions now last six seconds with staggered easing. Outward jumps between differently sized coordinate systems preserve the starting projection, then pull outward instead of accidentally moving inward. Existing eight-second star/galaxy reveals are preserved.
 - Added a collapsible nebula introduction covering gas/dust, star formation, stellar remnants, sculpted clouds and image colours. The reading panel has a Back to the view button and avoids the desktop preset navigation.
 - Desktop QA: Earth leader endpoint and clean appearance, galaxy-to-web transition and arrival, opening the nebula panel and inspecting its layout. No main-page console errors observed. Five existing tests and syntax/whitespace checks pass.
+
+## Clean galaxies and richer Galactic sky — 26 October 2026
+
+Changes:
+- Removed galaxy-scene sprite glow overlays and disabled added bloom for the galaxy view and Last Light. Replaced sparse wide blur taps with a normalized, densely sampled Gaussian filter in the shared bloom pass to eliminate the crosshatched/boxy pattern elsewhere.
+- Increased surrounding galaxies from 100 to 240, model scale from 3 to 4.2, and region extent from 1,200 to about 1,525 scene units. Lower per-galaxy particle count limits the increase in cost.
+- Rebuilt the Solar System sky band with a warm central region, luminous stellar ribbons, warped dark dust rifts, fine cloud structure and 26,000 additional faint stars along the galactic plane. It remains procedural artwork, not an astronomical sky map. Increased scale-navigation contrast.
+
+QA:
+- Desktop visual comparison: screenshot-style galaxy halos absent; enlarged galaxy population visible; brighter Galactic band with dark dust structure, subtle orbits and unobscured Earth leader.
+- Main experience smoke checks: Solar System, Earth and Sun close-ups/return, freeze-orbits selector; Milky Way and Sagittarius A* approach/return; galaxies, cosmic web, observable universe; weird-object nebula focus and its real-image info dialog; black-hole system initial cinematic ratio and selectable physics ratio.
+- Nebula page: introduction open/close, real-photo panel/back, all three presets, reset, and return directly to the Solar System.
+- Cosmic Futures: all three chapters selected and scrubbed; shared bloom inspected at collapse peak; no observed JavaScript errors in futures/nebula sessions.
+- Gallery: photo opening, next photo, all-photos return and explorer return. Challenge: question start, correct answer feedback and return; separate answer-integrity/shuffle and 80% badge-boundary assertions passed.
+- Five orbit/relativity tests pass; all local HTML asset/page references resolve; JavaScript syntax and whitespace checks pass.
+- QA scope: desktop browser. Mobile/device performance and exhaustive completion of every quiz/gallery item were not tested.
