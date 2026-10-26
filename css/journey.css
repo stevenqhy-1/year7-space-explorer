@@ -25,10 +25,12 @@ body[data-mode="flight"] #scenic{display:none}
 
 body[data-stage="0"][data-focus="true"] #scale-guide{display:none}
 
-#home-galaxy-marker{position:absolute;transform:translate(-50%,-50%);padding:9px 13px;border:1px solid #f2d29b99;border-radius:20px;background:#070b16cc;color:#f5dbb1;font-size:12px;pointer-events:auto;z-index:4;box-shadow:0 0 24px #e6c38a22}#home-galaxy-marker small{display:block;font-size:8px;color:#b3bac8;margin-top:5px}#galactic-dock{position:absolute;left:40px;top:280px;pointer-events:auto}#galactic-dock button{padding:13px 18px;border:1px solid #e3c49566;border-radius:25px;background:#0a0e18bb;font-size:12px}#galactic-dock span{display:block;font-size:10px;color:#9ea9ba;margin-top:10px}#heart-note{position:absolute;left:40px;bottom:200px;max-width:250px;font-size:11px;color:#b5a991;line-height:1.7}#heart-note a{color:#edcf9f}body[data-stage="2"][data-focus="true"] #scale-guide{display:none}@media(max-width:800px){#galactic-dock{left:22px;top:270px}#galactic-dock button{font-size:10px}#heart-note{left:22px;bottom:190px;max-width:210px;font-size:10px}#home-galaxy-marker{font-size:10px}}
+#galactic-dock{position:absolute;left:40px;top:280px;pointer-events:auto}#galactic-dock button{padding:13px 18px;border:1px solid #e3c49566;border-radius:25px;background:#0a0e18bb;font-size:12px}#galactic-dock span{display:block;font-size:10px;color:#9ea9ba;margin-top:10px}#heart-note{position:absolute;left:40px;bottom:200px;max-width:250px;font-size:11px;color:#b5a991;line-height:1.7}#heart-note a{color:#edcf9f}body[data-stage="2"][data-focus="true"] #scale-guide{display:none}@media(max-width:800px){#galactic-dock{left:22px;top:270px}#galactic-dock button{font-size:10px}#heart-note{left:22px;bottom:190px;max-width:210px;font-size:10px}#home-galaxy-marker{font-size:10px}}
 
 @media(max-width:800px){.experience-links{flex-wrap:wrap}.experience-links .nebula-link{font-size:9px;padding:7px 9px}}
 
-body[data-stage="0"] #home-galaxy-marker{transform:translate(-50%,-130%)}body[data-stage="0"] #home-galaxy-marker:after{content:"";position:absolute;height:17px;width:1px;left:50%;top:100%;background:#e7c79588}
+
 
 #close-gallery,#close-challenge{font-size:12px;width:auto;min-width:62px}
+
+#earth-leader{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:3}#earth-leader line{stroke:#ead6ae;stroke-width:.8;opacity:.65}#earth-leader circle{fill:#ead6ae;opacity:.9}#home-galaxy-marker{position:absolute;z-index:4;pointer-events:auto;border:0;border-radius:0;background:none;box-shadow:none;padding:3px 4px;color:#f3dfb9;font:400 11px 'DM Sans',sans-serif;letter-spacing:.7px;text-shadow:0 1px 5px #000;transform:none;min-width:0}#home-galaxy-marker:hover{color:#fff}#home-galaxy-marker:focus-visible{outline:1px solid #ead6ae;outline-offset:3px}
