@@ -147,3 +147,9 @@ QA:
 - Gallery: photo opening, next photo, all-photos return and explorer return. Challenge: question start, correct answer feedback and return; separate answer-integrity/shuffle and 80% badge-boundary assertions passed.
 - Five orbit/relativity tests pass; all local HTML asset/page references resolve; JavaScript syntax and whitespace checks pass.
 - QA scope: desktop browser. Mobile/device performance and exhaustive completion of every quiz/gallery item were not tested.
+
+
+## Galactic sky refinement — 26 October 2026
+- Galactic longitude now smoothly controls cloud width and brightness; anticentre is 32% of the centre width and 10% of its diffuse brightness.
+- Background star band follows the same taper.
+- Desktop visual checks: initial centre-facing view and rotated opposite sky; no browser errors. JavaScript syntax and diff checks passed.

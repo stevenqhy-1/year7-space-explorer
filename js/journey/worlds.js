@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { spaceNoise } from './surfaces.js?v=20261026d';
-import { buildMilkyWay } from './milky-way.js?v=20261026d';
-import { createLens } from './black-hole.js?v=20261026d';
-import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026d';
-import { advanceOrbit } from './orbits.js?v=20261026d';
-import { makeWonder, makeObservable } from './wonders.js?v=20261026d';
-import { buildHorizonSystem } from './horizon-system.js?v=20261026d';
-import { OBJECTS } from './discoveries.js?v=20261026d';
+import { spaceNoise } from './surfaces.js?v=20261026e';
+import { buildMilkyWay } from './milky-way.js?v=20261026e';
+import { createLens } from './black-hole.js?v=20261026e';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026e';
+import { advanceOrbit } from './orbits.js?v=20261026e';
+import { makeWonder, makeObservable } from './wonders.js?v=20261026e';
+import { buildHorizonSystem } from './horizon-system.js?v=20261026e';
+import { OBJECTS } from './discoveries.js?v=20261026e';
 import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
 export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};
@@ -98,16 +98,20 @@ export function buildWorlds() {
   const skyDome=new THREE.Mesh(new THREE.SphereGeometry(10500,48,32),new THREE.ShaderMaterial({side:THREE.BackSide,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{uOpacity:{value:.95}},vertexShader:'varying vec3 vDirection;void main(){vDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:`varying vec3 vDirection;uniform float uOpacity;${spaceNoise}
  void main(){vec3 d=normalize(vDirection);float lat=dot(d,normalize(vec3(.35,.85,-.4)));
  float large=fbm(d*7.),detail=fbm(d*48.),grain=fbm(d*160.);float warped=lat+(large-.5)*.055;
- float band=exp(-warped*warped*48.),ribbon=exp(-warped*warped*180.);
- float centre=pow(max(0.,dot(d,normalize(vec3(-.8,.1,-.49)))),12.);
+ // Galactic longitude shapes both the width and brightness: the anticentre stays faint.
+ float facing=dot(d,normalize(vec3(-.8,.1,-.49)));
+ float inner=pow(clamp(.5+.5*facing,0.,1.),3.);
+ float width=mix(.32,1.,inner), profile=warped/width;
+ float band=exp(-profile*profile*48.),ribbon=exp(-profile*profile*180.);
+ float centre=pow(max(0.,facing),12.);
  float rift=exp(-pow((warped+.012+(detail-.5)*.045)/.027,2.));
  float patches=smoothstep(.42,.7,fbm(d*26.+4.));float transmission=1.-clamp(rift*(.65+patches*.3)+patches*.22,0.,.94);
  vec3 light=mix(vec3(.11,.15,.23),vec3(.48,.39,.27),centre);
- light*=band*(.35+large*.8)+ribbon*(.3+detail*.5);light*=transmission;
+ light*=band*(.35+large*.8)+ribbon*(.3+detail*.5);light*=transmission*mix(.10,1.,inner);
  light+=vec3(.22,.17,.12)*centre*band*(.4+grain)*transmission;
  gl_FragColor=vec4(light,uOpacity);}`}));solar.add(skyDome);
   const bandP=[],bandC=[],bandS=[],normal=new THREE.Vector3(.35,.85,-.4).normalize(),axis=new THREE.Vector3().crossVectors(normal,new THREE.Vector3(0,1,0)).normalize(),across=new THREE.Vector3().crossVectors(normal,axis);
-  for(let i=0;i<26000;i++){const a=rng()*Math.PI*2,lat=(rng()+rng()+rng()-1.5)*.12;const direction=axis.clone().multiplyScalar(Math.cos(a)).addScaledVector(across,Math.sin(a)).addScaledVector(normal,lat).normalize();bandP.push(...direction.multiplyScalar(11000));const warm=rng();bandC.push(.45+warm*.25,.45+warm*.17,.5+warm*.1);bandS.push(9+rng()*22);}
+  for(let i=0;i<26000;i++){const a=rng()*Math.PI*2;const longitude=axis.clone().multiplyScalar(Math.cos(a)).addScaledVector(across,Math.sin(a));const inner=Math.pow(Math.max(0,(1+longitude.dot(new THREE.Vector3(-.8,.1,-.49).normalize()))*.5),3);const lat=(rng()+rng()+rng()-1.5)*.12*(.32+.68*inner);const direction=axis.clone().multiplyScalar(Math.cos(a)).addScaledVector(across,Math.sin(a)).addScaledVector(normal,lat).normalize();bandP.push(...direction.multiplyScalar(11000));const warm=rng();const brightness=.16+.84*inner;bandC.push((.45+warm*.25)*brightness,(.45+warm*.17)*brightness,(.5+warm*.1)*brightness);bandS.push(9+rng()*22);}
   solar.add(particles(bandP,bandC,bandS,{opacity:.7,size:1.3}));
   const solarOrbits=[];
   const sunlight=new THREE.PointLight(0xffeed4,3.5,0,0);solar.add(sunlight);
