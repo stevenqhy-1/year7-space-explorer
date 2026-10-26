@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createPost } from './post.js?v=20261026c';
-import { spaceNoise } from './surfaces.js?v=20261026c';
+import { createPost } from './post.js?v=20261026d';
+import { spaceNoise } from './surfaces.js?v=20261026d';
 const $=s=>document.querySelector(s),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let paused=reduced,scenic=false,preset=0,blend=0,time=0,last=performance.now(),frameTime=0,frameCount=0,resolutionScale=1;
 const names=[['Where stars<br>begin.','An ocean of colour. A thousand possible suns.'],['Wrapped<br>in wonder.','Violet light. Silent clouds. Room to imagine.'],['The glow<br>of becoming.','Golden ridges rising from a sea of starlight.']];
