@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { spaceNoise } from './surfaces.js?v=20261026b';
-import { buildMilkyWay } from './milky-way.js?v=20261026b';
-import { createLens } from './black-hole.js?v=20261026b';
-import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026b';
-import { advanceOrbit } from './orbits.js?v=20261026b';
-import { makeWonder, makeObservable } from './wonders.js?v=20261026b';
-import { buildHorizonSystem } from './horizon-system.js?v=20261026b';
-import { OBJECTS } from './discoveries.js?v=20261026b';
+import { spaceNoise } from './surfaces.js?v=20261026c';
+import { buildMilkyWay } from './milky-way.js?v=20261026c';
+import { createLens } from './black-hole.js?v=20261026c';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026c';
+import { advanceOrbit } from './orbits.js?v=20261026c';
+import { makeWonder, makeObservable } from './wonders.js?v=20261026c';
+import { buildHorizonSystem } from './horizon-system.js?v=20261026c';
+import { OBJECTS } from './discoveries.js?v=20261026c';
 import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
 export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};

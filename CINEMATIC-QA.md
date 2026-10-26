@@ -124,3 +124,10 @@ Scientific references: NASA “How Big Is Space?” (observable diameter approxi
 - Increased nearby field to 24,000 stars and the galaxy region to 100 surrounding galaxies; per-galaxy particle count reduced to limit cost.
 - Replaced the Last Light solar evolution scene with 95 independently oriented spiral/elliptical galaxies. Positions separate exponentially while individual geometry remains unchanged; the chapter ends in darkness. Updated narrative and science notes to match.
 - Desktop visual checks confirmed wider automatic landings, the beginning/middle/end of recession, and replay after completion. No observed main-page JavaScript errors. Five existing math tests, syntax and whitespace checks pass. Mobile performance not verified.
+
+## Earth leader label and nebula introduction — 26 October 2026
+
+- Replaced the home-location box with a small Earth label and an SVG leader ending at the projected location. No panel or secondary text obscures the scene. Off-screen anchors are hidden rather than drawn at a false clamped position; contextual details remain in the tooltip.
+- Standard transitions now last six seconds with staggered easing. Outward jumps between differently sized coordinate systems preserve the starting projection, then pull outward instead of accidentally moving inward. Existing eight-second star/galaxy reveals are preserved.
+- Added a collapsible nebula introduction covering gas/dust, star formation, stellar remnants, sculpted clouds and image colours. The reading panel has a Back to the view button and avoids the desktop preset navigation.
+- Desktop QA: Earth leader endpoint and clean appearance, galaxy-to-web transition and arrival, opening the nebula panel and inspecting its layout. No main-page console errors observed. Five existing tests and syntax/whitespace checks pass.

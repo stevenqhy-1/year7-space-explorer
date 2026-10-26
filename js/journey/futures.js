@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {createPost} from './post.js?v=20261026b';
+import {createPost} from './post.js?v=20261026c';
 const $=s=>document.querySelector(s),clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const chapters=[

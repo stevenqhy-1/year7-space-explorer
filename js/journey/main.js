@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createBlackHole } from './black-hole.js?v=20261026b';
-import { createPost } from './post.js?v=20261026b';
-import { createFlight } from './flight.js?v=20261026b';
-import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261026b';
-import { OBJECTS, SCALES } from './discoveries.js?v=20261026b';
-import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261026b';
-import { HORIZON_WORLDS } from './horizon-system.js?v=20261026b';
-import { createAudio } from './audio.js?v=20261026b';
+import { createBlackHole } from './black-hole.js?v=20261026c';
+import { createPost } from './post.js?v=20261026c';
+import { createFlight } from './flight.js?v=20261026c';
+import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261026c';
+import { OBJECTS, SCALES } from './discoveries.js?v=20261026c';
+import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261026c';
+import { HORIZON_WORLDS } from './horizon-system.js?v=20261026c';
+import { createAudio } from './audio.js?v=20261026c';
 
 const $=selector=>document.querySelector(selector);
 const ease=smoothJourney;
@@ -136,7 +136,7 @@ function goToStage(next){
   stage=next;updateInterface();audio.mood(next);
   const direction=next===COSMIC?new THREE.Vector3(0,60,335).normalize():camera.position.clone().sub(controls.target).normalize();
   if(direction.y<.15)direction.y=.2;
-  transition={old,incoming,outward,start:performance.now(),duration:gentle?0:4.4,fromPosition:camera.position.clone(),fromTarget:controls.target.clone(),toPosition:direction.normalize().multiplyScalar(layerDistance(next))};
+  transition={old,incoming,outward,start:performance.now(),duration:gentle?0:6,fromPosition:camera.position.clone(),fromTarget:controls.target.clone(),toPosition:direction.normalize().multiplyScalar(layerDistance(next))};
   if((from===0&&next===1)||(from===2&&next===3)){
     // Reveal the surrounding region during the flight, then land on its wide view.
     incoming.scale.setScalar(1);
@@ -150,6 +150,13 @@ function goToStage(next){
     worlds.background.scale.setScalar(factor);worlds.background.position.copy(anchor);
     camera.position.multiplyScalar(factor).add(anchor);controls.target.multiplyScalar(factor).add(anchor);
     Object.assign(transition,{galactic:true,duration:gentle?0:7.2,anchor,fromTarget:controls.target.clone(),startDistance:camera.position.distanceTo(controls.target),direction:camera.position.clone().sub(controls.target).normalize()});
+  }
+  if(outward&&next<=OBSERVABLE&&!transition.galactic&&!transition.wideReveal){
+    // Match the old image while changing coordinate scale, then continue pulling back.
+    const factor=Math.min(1,layerDistance(next)/Math.max(1,camera.position.length()*3));
+    old.scale.setScalar(factor);camera.position.multiplyScalar(factor);controls.target.multiplyScalar(factor);
+    worlds.background.scale.setScalar(factor);incoming.scale.setScalar(1);
+    Object.assign(transition,{remapped:true,oldScale:factor,fromPosition:camera.position.clone(),fromTarget:controls.target.clone()});
   }
   wheelSum=0;announce(LAYERS[next].title);
 }
@@ -295,9 +302,10 @@ function updateExploration(now,dt){
       const distance=offset.length()*Math.pow(tr.toPosition.length()/Math.max(.01,offset.length()),e);
       camera.position.copy(offset.normalize().lerp(tr.toPosition.clone().normalize(),e).normalize().multiplyScalar(distance)).add(controls.target);
     }else{
-    tr.old.scale.setScalar(tr.outward?Math.pow(.2,e):Math.pow(2.2,e));
-    tr.incoming.scale.setScalar(tr.outward?Math.pow(2.2,1-e):Math.pow(.45,1-e));
-    worlds.opacity(tr.old,1-e);worlds.opacity(tr.incoming,e);
+    tr.old.scale.setScalar((tr.oldScale||1)*(tr.outward?Math.pow(.2,e):Math.pow(2.2,e)));
+    tr.incoming.scale.setScalar(tr.remapped?1:tr.outward?Math.pow(2.2,1-e):Math.pow(.45,1-e));
+    if(tr.remapped)worlds.background.scale.setScalar(tr.oldScale*Math.pow(1/tr.oldScale,e));
+    worlds.opacity(tr.old,1-ease(clamp(t/.88)));worlds.opacity(tr.incoming,ease(clamp((t-.08)/.82)));
     controls.target.copy(tr.fromTarget).multiplyScalar(1-e);
     const fromOffset=tr.fromPosition.clone().sub(tr.fromTarget),endDistance=tr.toPosition.length();
     const distance=fromOffset.length()*Math.pow(endDistance/Math.max(.01,fromOffset.length()),e);
@@ -323,8 +331,20 @@ function updateExploration(now,dt){
   if(stage===HORIZON)worlds.horizon.orbits.forEach(line=>{line.visible=!scenic&&!focus&&camera.position.distanceTo(controls.target)>300;});
   if(stage===2&&!transition){const near=1-ease(clamp((camera.position.length()-25)/150));worlds.opacity(worlds.milky,1-near*.98);worlds.galacticHeart.visible=near>.01;worlds.opacity(worlds.galacticHeart,near);}
   else if(stage!==2&&!transition){worlds.galacticHeart.visible=false;worlds.opacity(worlds.milky,1);}
-  const marker=$('#home-galaxy-marker'),anchor=worlds.homeAnchors[stage];marker.hidden=!anchor||!!transition||(!!focus&&focus.id!=='earth');
-  if(!marker.hidden){temp.copy(anchor);if(stage===0)temp.y+=3;temp.project(camera);const behind=temp.z>1;const x=clamp(behind?-temp.x:temp.x,-.65,.65),y=clamp(temp.y,-.6,.6);marker.style.left=((x*.5+.5)*innerWidth)+'px';marker.style.top=((-y*.5+.5)*innerHeight)+'px';marker.querySelector('span').textContent=stage===0?'◉ Earth · our home':stage===1?'◉ Our Solar System':stage===2?'◉ Our Sun · Orion Arm':'◉ Milky Way · our home';marker.querySelector('small').textContent=behind?'Off-screen · tap to return':stage===0?'You are here':stage===1?'Earth is too small to see here':stage===2?'Earth lives here · approximate location':stage===5?'Our viewpoint, not the centre of all space':'Earth is inside this galaxy · illustrated location';}
+  const marker=$('#home-galaxy-marker'),leader=$('#earth-leader'),anchor=worlds.homeAnchors[stage];
+  let show=!!anchor&&!transition&&(!focus||focus.id==='earth');
+  if(show){
+    temp.copy(anchor).project(camera);
+    const x=(temp.x*.5+.5)*innerWidth,y=(-temp.y*.5+.5)*innerHeight;
+    show=temp.z>-1&&temp.z<1&&x>12&&x<innerWidth-12&&y>90&&y<innerHeight-110;
+    if(show){const lx=x+(x>innerWidth*.68?-65:48),ly=y+(y<160?35:-36);
+      marker.style.left=lx+'px';marker.style.top=ly+'px';
+      const line=leader.querySelector('line'),dot=leader.querySelector('circle');
+      line.setAttribute('x1',x);line.setAttribute('y1',y);line.setAttribute('x2',lx+17);line.setAttribute('y2',ly+17);dot.setAttribute('cx',x);dot.setAttribute('cy',y);
+      marker.title=stage===0?'Our home planet':stage===1?'Earth is inside this Solar System':stage===2?'Approximate location of our Solar System':'Earth is within our home galaxy; location is illustrative';
+    }
+  }
+  marker.hidden=!show;leader.toggleAttribute('hidden',!show);
   post.render(worlds.scene,camera,{bloom:stage===0?.65:.85});
 }
 function draw(now){

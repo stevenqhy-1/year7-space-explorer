@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createPost } from './post.js?v=20261026b';
-import { spaceNoise } from './surfaces.js?v=20261026b';
+import { createPost } from './post.js?v=20261026c';
+import { spaceNoise } from './surfaces.js?v=20261026c';
 const $=s=>document.querySelector(s),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let paused=reduced,scenic=false,preset=0,blend=0,time=0,last=performance.now(),frameTime=0,frameCount=0,resolutionScale=1;
 const names=[['Where stars<br>begin.','An ocean of colour. A thousand possible suns.'],['Wrapped<br>in wonder.','Violet light. Silent clouds. Room to imagine.'],['The glow<br>of becoming.','Golden ridges rising from a sea of starlight.']];
@@ -30,3 +30,5 @@ try{
 function setScenic(value){scenic=value;document.body.classList.toggle('scenic',value);for(const s of ['header','.story','nav','footer'])$(s).inert=value;$('#nebula-return').hidden=!value;$('#nebula-scenic').setAttribute('aria-pressed',String(value));$(value?'#nebula-return':'#nebula-scenic').focus();}
 $('#nebula-scenic').onclick=()=>setScenic(true);$('#nebula-return').onclick=()=>setScenic(false);addEventListener('keydown',e=>{if($('#nebula-photos').open)return;if(e.key==='Escape'&&scenic)setScenic(false);else if(e.key.toLowerCase()==='h')setScenic(!scenic);});
 $('#real-nebulae').onclick=()=>$('#nebula-photos').showModal();$('#close-nebula-photos').onclick=()=>$('#nebula-photos').close();
+
+$('#close-nebula-intro').onclick=()=>{$('.nebula-intro').open=false;$('.nebula-intro summary').focus();};
