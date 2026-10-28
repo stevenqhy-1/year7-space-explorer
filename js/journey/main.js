@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createBlackHole } from './black-hole.js?v=20261026e';
-import { createPost } from './post.js?v=20261026e';
-import { createFlight } from './flight.js?v=20261026e';
-import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261026e';
-import { OBJECTS, SCALES } from './discoveries.js?v=20261026e';
-import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261026e';
-import { HORIZON_WORLDS } from './horizon-system.js?v=20261026e';
-import { createAudio } from './audio.js?v=20261026e';
+import { createBlackHole } from './black-hole.js?v=20261028a';
+import { createPost } from './post.js?v=20261028a';
+import { createFlight } from './flight.js?v=20261028a';
+import { buildWorlds, SUN, PLANETS, LAYERS, OBSERVABLE, COSMIC, HORIZON } from './worlds.js?v=20261028a';
+import { OBJECTS, SCALES } from './discoveries.js?v=20261028a';
+import { smoothJourney, clockRatio, horizonKm, CINEMA_RATIO } from './relativity.js?v=20261028a';
+import { HORIZON_WORLDS } from './horizon-system.js?v=20261028a';
+import { createAudio } from './audio.js?v=20261028a';
 
 const $=selector=>document.querySelector(selector);
 const ease=smoothJourney;

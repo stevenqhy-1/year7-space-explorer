@@ -1,12 +1,13 @@
+import {galaxyShape,GALAXY_TYPES} from './galaxy-shapes.js?v=20261028a';
 import * as THREE from 'three';
-import { spaceNoise } from './surfaces.js?v=20261026e';
-import { buildMilkyWay } from './milky-way.js?v=20261026e';
-import { createLens } from './black-hole.js?v=20261026e';
-import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261026e';
-import { advanceOrbit } from './orbits.js?v=20261026e';
-import { makeWonder, makeObservable } from './wonders.js?v=20261026e';
-import { buildHorizonSystem } from './horizon-system.js?v=20261026e';
-import { OBJECTS } from './discoveries.js?v=20261026e';
+import { spaceNoise } from './surfaces.js?v=20261028a';
+import { buildMilkyWay } from './milky-way.js?v=20261028a';
+import { createLens } from './black-hole.js?v=20261028a';
+import { planetSurface, solarSurface, solarCorona } from './surfaces.js?v=20261028a';
+import { advanceOrbit } from './orbits.js?v=20261028a';
+import { makeWonder, makeObservable } from './wonders.js?v=20261028a';
+import { buildHorizonSystem } from './horizon-system.js?v=20261028a';
+import { OBJECTS } from './discoveries.js?v=20261028a';
 import { makeRockyTexture, makeRingTexture } from '../textureFactory.js';
 
 export const SUN={id:'sun',name:'Sun',radius:5.3,orbit:0,color:'#ffbd55',period:Infinity};
@@ -169,25 +170,14 @@ export function buildWorlds() {
   const heartBody={id:'sagittarius',name:'Sagittarius A*',body:galacticHeart,radius:3};
   // Separate stellar distributions for genuinely different galaxy morphologies.
   function otherGalaxy(radius,count,seed,type){
-    if(type==='spiral'||type==='barred'){
-      const g=galaxy(radius,count,seed);
-      if(type==='barred'){const bar=glow(0xffcf91,radius*.8,.7);bar.scale.set(radius, radius*.17,1);g.add(bar);}return g;
-    }
-    const rand=random(seed),g=new THREE.Group(),p=[],co=[],sz=[];
-    for(let i=0;i<count;i++){
-      let x,y,z;const a=rand()*Math.PI*2,r=Math.pow(rand(),1.3)*radius,u=rand()*2-1;
-      if(type==='irregular'){const k=i%5,cx=Math.sin(k*2.7)*radius*.55,cz=Math.cos(k*4.1)*radius*.5;x=cx+(rand()-.5)*radius*.8;y=(rand()-.5)*radius*.4;z=cz+(rand()-.5)*radius*.65;c.setHSL(.55+rand()*.35,.5,.55);}
-      else {x=Math.cos(a)*r*Math.sqrt(1-u*u);z=Math.sin(a)*r*Math.sqrt(1-u*u);y=u*r*(type==='elliptical'?.7:.12);x*=type==='elliptical'?1.25:1;c.setHSL(.1,.3,.4+rand()*.4);}
-      p.push(x,y,z);co.push(c.r,c.g,c.b);sz.push(.2+rand()*.7);
-    }
-    g.add(particles(p,co,sz,{size:radius/22}));
-    if(type!=='irregular'){const light=glow(0xffd3a0,radius*1.3,.5);if(type==='lenticular')light.scale.y*=.32;g.add(light);}
-    return g;
+    const data=galaxyShape(radius,count,random(seed),type),g=new THREE.Group();
+    g.add(particles(data.positions,data.colors,data.sizes,{size:radius/35}));return g;
   }
+
   // A deliberately mixed gallery: spirals, bars, ellipsoids, disks and irregular clumps.
   const central=galaxy(23,9000,17);central.rotation.set(.35,0,.2);layers[3].add(central);
   for(let i=0;i<240;i++){
-    const radius=7+rng()*13;const g=otherGalaxy(radius,1100,100+i,['spiral','elliptical','irregular','lenticular','barred'][i%5]);const a=rng()*Math.PI*2,r=50+rng()*255;
+    const radius=7+rng()*13;const g=otherGalaxy(radius,1100,100+i,GALAXY_TYPES[i%GALAXY_TYPES.length]);const a=rng()*Math.PI*2,r=50+rng()*255;
     g.position.set(Math.cos(a)*r*5,(rng()-.5)*1250,Math.sin(a)*r*5);g.scale.setScalar(4.2);g.rotation.set(rng()*3,rng()*5,rng()*2);layers[3].add(g);
   }
   layers[3].traverse(o=>{if(o.isSprite)o.visible=false;});
