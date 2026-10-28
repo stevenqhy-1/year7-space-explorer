@@ -1,5 +1,6 @@
+import {galaxyShape,GALAXY_TYPES} from './galaxy-shapes.js?v=20261028a';
 import * as THREE from 'three';
-import {createPost} from './post.js?v=20261026e';
+import {createPost} from './post.js?v=20261028a';
 const $=s=>document.querySelector(s),clamp=x=>Math.max(0,Math.min(1,x)),smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const chapters=[
@@ -20,16 +21,13 @@ try{
  for(let i=0;i<nodes.length;i++){const a=nodes[i];for(let j=i+1;j<nodes.length;j++){const b=nodes[j];if(a.distanceTo(b)>170)continue;line.push(...a,...b);for(let n=0;n<95;n++){const t=rand(),q=a.clone().lerp(b,t),w=Math.sin(t*Math.PI)*12;q.add(new THREE.Vector3((rand()-.5)*w,(rand()-.5)*w,(rand()-.5)*w));p.push(...q);c.push(.23+rand()*.4,.3+rand()*.3,.7+rand()*.5);sz.push(.4+rand()*1.4);}}
  for(let n=0;n<150;n++){const r=Math.pow(rand(),2)*12,theta=rand()*Math.PI*2,z=rand()*2-1;p.push(a.x+Math.cos(theta)*r,a.y+z*r,a.z+Math.sin(theta)*r);c.push(1.2,.7+rand()*.4,.4+rand()*.6);sz.push(.8+rand()*2);}}
  const webStars=points(p,c,sz);web.add(webStars);const lines=new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(line,3)),new THREE.LineBasicMaterial({color:0x6f81cf,transparent:true,opacity:.12,depthWrite:false,blending:THREE.AdditiveBlending}));web.add(lines);
+ // Recognisable islands of stars also populate the collapse and balance chapters.
+ nodes.forEach((node,i)=>{const data=galaxyShape(10+rand()*9,500,rand,GALAXY_TYPES[i%GALAXY_TYPES.length]);const island=points(data.positions,data.colors,data.sizes);island.position.copy(node);island.rotation.set(rand()*3,rand()*6,rand()*3);web.add(island);});
  // Each galaxy keeps its own size: only the distance between centres expands.
  const islands=new THREE.Group();scene.add(islands);const galaxies=[];
  for(let i=0;i<95;i++){
-  const pos=[],cols=[],sizes=[],radius=12+rand()*17,elliptical=i%4===0;
-  for(let j=0;j<1100;j++){const r=Math.pow(rand(),.65)*radius,a=j%5===0?rand()*Math.PI*2:j%2*Math.PI+r/radius*5+(rand()-.5)*.8;const bulge=j<220;
-   if(bulge){const b=rand()*radius*.2,theta=rand()*Math.PI*2;pos.push(Math.cos(theta)*b,(rand()-.5)*b,Math.sin(theta)*b);cols.push(1.8,1.2,.65);}
-   else if(elliptical){const theta=rand()*Math.PI*2;pos.push(Math.cos(theta)*r,(rand()-.5)*r*.7,Math.sin(theta)*r*.6);cols.push(1.1,.8,.55);}
-   else{pos.push(Math.cos(a)*r+(rand()-.5)*radius*.13,(rand()-.5)*2,Math.sin(a)*r+(rand()-.5)*radius*.13);cols.push(.45+rand()*.35,.55+rand()*.3,1.15);}
-   sizes.push(.5+rand()*1.6);
-  }
+  const radius=12+rand()*17,data=galaxyShape(radius,1100,rand,GALAXY_TYPES[i%GALAXY_TYPES.length]);
+  const {positions:pos,colors:cols,sizes}=data;
   const mesh=points(pos,cols,sizes);const angle=rand()*Math.PI*2,r=70+Math.sqrt(rand())*420;
   mesh.userData.home=new THREE.Vector3(Math.cos(angle)*r,(rand()-.5)*410,Math.sin(angle)*r*.75);
   mesh.position.copy(mesh.userData.home);mesh.rotation.set(.3+rand()*2.3,rand()*6,rand());islands.add(mesh);galaxies.push(mesh);
@@ -37,7 +35,7 @@ try{
  const burst=new THREE.Mesh(new THREE.SphereGeometry(8,64,32),new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{fade:{value:0}},vertexShader:'varying vec3 n,v;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'varying vec3 n,v;uniform float fade;void main(){float d=max(0.,dot(normalize(n),normalize(v)));gl_FragColor=vec4(mix(vec3(.8,.12,.04),vec3(4.,2.8,1.6),pow(d,3.)),pow(d,2.)*fade);}'}));scene.add(burst);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(1,.018,8,180),new THREE.MeshBasicMaterial({color:0xb8b2ff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));scene.add(ring);
  function resize(){renderer.setPixelRatio(Math.min(devicePixelRatio,1.3));renderer.setSize(innerWidth,innerHeight);const size=renderer.getDrawingBufferSize(new THREE.Vector2());post.resize(size.x,size.y);camera.aspect=innerWidth/innerHeight;camera.position.z=innerWidth<700?1050:650;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
- function render(now){requestAnimationFrame(render);const dt=Math.min(.05,(now-last)/1000);last=now;if(document.hidden)return;if(!paused&&!$('#science').open)progress=clamp(progress+dt/32);if(progress===1)paused=true;updateText();const t=progress;
+ function render(now){requestAnimationFrame(render);const dt=Math.min(.05,(now-last)/1000);last=now;if(document.hidden)return;if(!paused&&!$('#science').open)progress=clamp(progress+dt*Number($('#playback-speed').value)/32);if(progress===1)paused=true;updateText();const t=progress;
  web.visible=chapter!==2;islands.visible=chapter===2;burst.visible=ring.visible=chapter===0;
  web.rotation.set(.1+t*.15,t*.38,0);web.position.x=innerWidth<700?0:70;
  if(chapter===0){const contraction=clamp(t/.65),rebirth=smooth((t-.68)/.32),scale=t<.65?Math.max(.006,1-Math.pow(contraction,3)):.006+rebirth*1.25;web.scale.setScalar(scale);webStars.material.uniforms.fade.value=1;lines.material.opacity=.12;const flare=Math.exp(-Math.pow((t-.66)/.065,2));burst.position.copy(web.position);burst.scale.setScalar(.5+flare*7+rebirth*3);burst.material.uniforms.fade.value=flare*.85;ring.position.copy(web.position);ring.scale.setScalar(1+rebirth*450);ring.material.opacity=(1-rebirth)*smooth((t-.67)/.04)*.6;}

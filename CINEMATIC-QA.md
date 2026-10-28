@@ -153,3 +153,10 @@ QA:
 - Galactic longitude now smoothly controls cloud width and brightness; anticentre is 32% of the centre width and 10% of its diffuse brightness.
 - Background star band follows the same taper.
 - Desktop visual checks: initial centre-facing view and rotated opposite sky; no browser errors. JavaScript syntax and diff checks passed.
+
+
+## Galaxy variety and futures playback — 28 October 2026
+- Shared seven-shape stellar generator: spiral, barred, elliptical, lenticular, irregular, ring, and merging pairs. No sprite halos.
+- Galaxy explorer and all three futures chapters use the varied distributions.
+- Futures speeds: 0.5×, 1×, 2×, 4×. Desktop checks covered selection, chapter retention, accelerated completion, and timeline scrubbing; no console errors.
+- Existing five automated tests pass; JavaScript syntax and diff checks pass.
